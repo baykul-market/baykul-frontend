@@ -15,9 +15,13 @@ export default function Layout() {
   const { data: cart } = useQuery({
     queryKey: ['cart'],
     queryFn: cartApi.getCart,
+    retry: (failureCount, error: any) => {
+      if (error?.response?.status === 404) return false;
+      return failureCount < 3;
+    },
   });
 
-  const cartItemCount = cart?.items?.length ?? 0;
+  const cartItemCount = cart?.cartProducts?.length ?? 0;
 
   const handleLogout = () => {
     logout();

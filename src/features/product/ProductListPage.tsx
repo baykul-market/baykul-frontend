@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { productApi, Detail } from '../../api/product';
+import { productApi, Part } from '../../api/product';
 import { cartApi } from '../../api/cart';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, ShoppingCart, Loader2, Package, Tag, Weight, Box } from 'lucide-react';
@@ -16,13 +16,14 @@ export default function ProductListPage() {
   });
 
   const addToCartMutation = useMutation({
-    mutationFn: (product: Detail) => cartApi.addToCart(product, 1),
+    mutationFn: (product: Part) => cartApi.addToCart(product.id),
     onSuccess: () => {
       toast.success('Added to cart');
       queryClient.invalidateQueries({ queryKey: ['cart'] });
     },
-    onError: () => {
-      toast.error('Failed to add to cart');
+    onError: (error: any) => {
+      const message = error?.response?.data?.error || 'Failed to add to cart';
+      toast.error(message);
     }
   });
 
@@ -80,7 +81,7 @@ export default function ProductListPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {products?.map((product) => (
               <ProductCard
-                key={product.articleId}
+                key={product.id}
                 product={product}
                 onAddToCart={() => addToCartMutation.mutate(product)}
                 isAdding={addToCartMutation.isPending}
@@ -121,11 +122,11 @@ function ProductCard({
   onAddToCart,
   isAdding,
 }: {
-  product: Detail;
+  product: Part;
   onAddToCart: () => void;
   isAdding: boolean;
 }) {
-  const inStock = product.countOnStorage > 0;
+  const inStock = (product.storageCount ?? 0) > 0;
 
   return (
     <div className="card-hover group flex flex-col overflow-hidden">
@@ -164,7 +165,7 @@ function ProductCard({
               <Box className="h-3 w-3" />
               Article
             </span>
-            <span className="font-mono text-xs bg-muted px-2 py-0.5 rounded-md">{product.articleId}</span>
+            <span className="font-mono text-xs bg-muted px-2 py-0.5 rounded-md">{product.article}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="flex items-center gap-1.5">
@@ -172,21 +173,26 @@ function ProductCard({
               Stock
             </span>
             <span className={inStock ? 'text-success font-medium' : 'text-destructive font-medium'}>
-              {inStock ? `${product.countOnStorage} units` : 'Unavailable'}
+              {inStock ? `${product.storageCount} units` : 'Unavailable'}
             </span>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="flex items-center gap-1.5">
-              <Weight className="h-3 w-3" />
-              Weight
-            </span>
-            <span>{product.weight} kg</span>
-          </div>
+          {product.weight != null && (
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-1.5">
+                <Weight className="h-3 w-3" />
+                Weight
+              </span>
+              <span>{product.weight} kg</span>
+            </div>
+          )}
         </div>
 
         {/* Footer */}
         <div className="flex items-center justify-between pt-4 border-t">
-          <span className="text-xl font-bold">${product.price.toFixed(2)}</span>
+          <span className="text-xl font-bold">
+            {product.currency === 'EUR' ? '\u20AC' : product.currency === 'USD' ? '$' : product.currency}
+            {product.price.toFixed(2)}
+          </span>
           <button
             onClick={onAddToCart}
             disabled={!inStock || isAdding}

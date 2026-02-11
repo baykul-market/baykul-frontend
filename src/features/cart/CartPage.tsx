@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { cartApi } from '../../api/cart';
+import { orderApi } from '../../api/order';
 import { Trash2, Loader2, ArrowRight, ShoppingCart, ArrowLeft, Package, Tag } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
@@ -8,13 +9,18 @@ export default function CartPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const { data: cart, isLoading } = useQuery({
+  const { data: cart, isLoading, error } = useQuery({
     queryKey: ['cart'],
     queryFn: cartApi.getCart,
+    retry: (failureCount, error: any) => {
+      // Don't retry on 404 (no cart yet)
+      if (error?.response?.status === 404) return false;
+      return failureCount < 3;
+    },
   });
 
   const removeMutation = useMutation({
-    mutationFn: (articleId: string) => cartApi.removeFromCart(articleId),
+    mutationFn: (cartProductId: string) => cartApi.removeFromCart(cartProductId),
     onSuccess: () => {
       toast.success('Item removed');
       queryClient.invalidateQueries({ queryKey: ['cart'] });
@@ -25,14 +31,22 @@ export default function CartPage() {
   });
 
   const checkoutMutation = useMutation({
-    mutationFn: cartApi.checkout,
-    onSuccess: () => {
-      toast.success('Order placed successfully!');
-      queryClient.setQueryData(['cart'], { items: [], totalPrice: 0 });
-      navigate('/orders');
+    mutationFn: orderApi.createOrder,
+    onSuccess: (data) => {
+      if (data.create_order === 'true') {
+        toast.success('Order placed successfully!');
+        queryClient.invalidateQueries({ queryKey: ['cart'] });
+        queryClient.invalidateQueries({ queryKey: ['orders'] });
+        navigate('/orders');
+      } else {
+        // Handle unavailable products (409 case)
+        const msg = data.error || 'Some products are unavailable';
+        toast.error(msg);
+      }
     },
-    onError: () => {
-      toast.error('Checkout failed');
+    onError: (error: any) => {
+      const message = error?.response?.data?.error || 'Checkout failed';
+      toast.error(message);
     },
   });
 
@@ -45,7 +59,11 @@ export default function CartPage() {
     );
   }
 
-  if (!cart || cart.items.length === 0) {
+  // Handle 404 (no cart) or empty cart
+  const cartProducts = cart?.cartProducts ?? [];
+  const isCartEmpty = !cart || cartProducts.length === 0 || (error as any)?.response?.status === 404;
+
+  if (isCartEmpty) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-5 text-center animate-fade-in">
         <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted">
@@ -65,7 +83,13 @@ export default function CartPage() {
     );
   }
 
-  const itemCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+  const totalPrice = cartProducts.reduce(
+    (sum, cp) => sum + cp.part.price * cp.partsCount,
+    0
+  );
+  const itemCount = cartProducts.reduce((sum, cp) => sum + cp.partsCount, 0);
+  const currency = cartProducts[0]?.part.currency ?? 'EUR';
+  const currencySymbol = currency === 'EUR' ? '\u20AC' : currency === 'USD' ? '$' : currency;
 
   return (
     <div className="max-w-5xl mx-auto animate-fade-in">
@@ -86,9 +110,9 @@ export default function CartPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Cart Items */}
         <div className="lg:col-span-2 space-y-3">
-          {cart.items.map((item) => (
+          {cartProducts.map((item) => (
             <div
-              key={item.detail.articleId}
+              key={item.id}
               className="card p-4 sm:p-5 flex items-start sm:items-center gap-4"
             >
               {/* Product Icon */}
@@ -98,25 +122,27 @@ export default function CartPage() {
 
               {/* Product Info */}
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-sm sm:text-base leading-snug">{item.detail.name}</h3>
+                <h3 className="font-semibold text-sm sm:text-base leading-snug">{item.part.name}</h3>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
                   <Tag className="h-3 w-3" />
-                  <span>{item.detail.brand}</span>
+                  <span>{item.part.brand}</span>
                   <span className="text-border">|</span>
-                  <span className="font-mono">{item.detail.articleId}</span>
+                  <span className="font-mono">{item.part.article}</span>
                 </div>
                 <div className="flex items-center gap-4 mt-2.5">
                   <span className="text-sm text-muted-foreground">
-                    ${item.detail.price.toFixed(2)} x {item.quantity}
+                    {currencySymbol}{item.part.price.toFixed(2)} x {item.partsCount}
                   </span>
                 </div>
               </div>
 
               {/* Price & Actions */}
               <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                <span className="font-bold text-base">${(item.detail.price * item.quantity).toFixed(2)}</span>
+                <span className="font-bold text-base">
+                  {currencySymbol}{(item.part.price * item.partsCount).toFixed(2)}
+                </span>
                 <button
-                  onClick={() => removeMutation.mutate(item.detail.articleId)}
+                  onClick={() => removeMutation.mutate(item.id)}
                   disabled={removeMutation.isPending}
                   className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-destructive transition-colors rounded-md px-2 py-1 hover:bg-destructive/5"
                   aria-label="Remove item"
@@ -137,7 +163,7 @@ export default function CartPage() {
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Subtotal ({itemCount} items)</span>
-                <span className="font-medium">${cart.totalPrice.toFixed(2)}</span>
+                <span className="font-medium">{currencySymbol}{totalPrice.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Shipping</span>
@@ -149,7 +175,7 @@ export default function CartPage() {
 
             <div className="flex justify-between items-baseline mb-6">
               <span className="text-base font-semibold">Total</span>
-              <span className="text-2xl font-bold">${cart.totalPrice.toFixed(2)}</span>
+              <span className="text-2xl font-bold">{currencySymbol}{totalPrice.toFixed(2)}</span>
             </div>
 
             <button

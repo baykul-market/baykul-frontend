@@ -1,73 +1,48 @@
-import { Detail } from './product';
+import { api } from './client';
+import type { Part } from './product';
 
-export interface CartItem {
-  boxId: string; // Unique ID for the box in cart
-  detail: Detail;
-  quantity: number;
+export interface CartProduct {
+  id: string;
+  part: Part;
+  partsCount: number;
 }
 
 export interface Cart {
-  items: CartItem[];
-  totalPrice: number;
+  id: string;
+  createdTs: string;
+  updatedTs: string;
+  user: { id: string; login: string };
+  cartProducts: CartProduct[];
 }
-
-// Mock In-Memory Cart Storage (resets on refresh if not persisted)
-// In a real app with backend, this would be on server.
-let mockCart: Cart = {
-  items: [],
-  totalPrice: 0
-};
 
 export const cartApi = {
   getCart: async (): Promise<Cart> => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return { ...mockCart };
+    const response = await api.get<Cart>('/cart/user');
+    return response.data;
   },
 
-  addToCart: async (detail: Detail, quantity: number = 1): Promise<Cart> => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    // Check if item exists (in this simple model, we just add boxes)
-    // But usually we group by articleId. 
-    // The requirement mentions "Boxes". 
-    // "Cart "1" o-- "*" Box : contains (temporary) >"
-    
-    // For simplicity, we'll treat items as grouped by article for UI, but backend creates boxes.
-    // We'll simulate creating boxes.
-    
-    const existingItem = mockCart.items.find(i => i.detail.articleId === detail.articleId);
-    if (existingItem) {
-      existingItem.quantity += quantity;
-    } else {
-      mockCart.items.push({
-        boxId: Math.random().toString(36).substr(2, 9),
-        detail,
-        quantity
-      });
-    }
-    
-    mockCart.totalPrice = mockCart.items.reduce((sum, item) => sum + (item.detail.price * item.quantity), 0);
-    return { ...mockCart };
+  createCart: async (): Promise<{ create_cart: string; id: string }> => {
+    const response = await api.post('/cart/user');
+    return response.data;
   },
 
-  removeFromCart: async (articleId: string): Promise<Cart> => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    mockCart.items = mockCart.items.filter(i => i.detail.articleId !== articleId);
-    mockCart.totalPrice = mockCart.items.reduce((sum, item) => sum + (item.detail.price * item.quantity), 0);
-    return { ...mockCart };
+  addToCart: async (partId: string): Promise<{ add_cart: string; id?: string }> => {
+    const response = await api.post(`/cart/user/add/${partId}`);
+    return response.data;
   },
-  
-  clearCart: async (): Promise<Cart> => {
-     await new Promise(resolve => setTimeout(resolve, 300));
-     mockCart = { items: [], totalPrice: 0 };
-     return { ...mockCart };
+
+  removeFromCart: async (cartProductId: string): Promise<{ delete_cart_product: string }> => {
+    const response = await api.delete(`/cart/user/product/${cartProductId}`);
+    return response.data;
   },
-  
-  checkout: async (): Promise<{ orderId: string }> => {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    const orderId = Math.random().toString(36).substr(2, 9);
-    mockCart = { items: [], totalPrice: 0 }; // Clear cart after checkout
-    return { orderId };
-  }
+
+  clearCart: async (): Promise<{ clear_cart: string }> => {
+    const response = await api.post('/cart/user/clear');
+    return response.data;
+  },
+
+  deleteCart: async (): Promise<{ delete_cart: string }> => {
+    const response = await api.delete('/cart/user');
+    return response.data;
+  },
 };

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { orderApi, OrderStatus } from '../../api/order';
+import { orderApi, Order, OrderStatus } from '../../api/order';
 import { Loader2, Package, Clock, CheckCircle2, XCircle, ArrowRight, RotateCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -52,10 +52,13 @@ export default function OrderHistoryPage() {
       <div className="space-y-4">
         {orders.map((order) => {
           const statusConfig = getStatusConfig(order.status);
+          const totalPrice = getOrderTotal(order);
+          const currency = order.orderProducts?.[0]?.part?.currency ?? 'EUR';
+          const currencySymbol = currency === 'EUR' ? '\u20AC' : currency === 'USD' ? '$' : currency;
 
           return (
             <div
-              key={order.orderId}
+              key={order.id}
               className="card-hover p-5 sm:p-6"
             >
               <div className="flex flex-col sm:flex-row justify-between gap-4">
@@ -68,20 +71,25 @@ export default function OrderHistoryPage() {
 
                   <div>
                     <h3 className="font-semibold text-sm sm:text-base">
-                      Order {order.orderId}
+                      Order #{order.number}
                     </h3>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      {new Date(order.createdDate).toLocaleDateString('en-US', {
+                      {new Date(order.createdTs).toLocaleDateString('en-US', {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric',
                       })}
                       {' at '}
-                      {new Date(order.createdDate).toLocaleTimeString('en-US', {
+                      {new Date(order.createdTs).toLocaleTimeString('en-US', {
                         hour: '2-digit',
                         minute: '2-digit',
                       })}
                     </p>
+                    {order.orderProducts && order.orderProducts.length > 0 && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {order.orderProducts.length} product{order.orderProducts.length !== 1 ? 's' : ''}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -90,28 +98,47 @@ export default function OrderHistoryPage() {
                   <span className={`badge ${statusConfig.badgeClass}`}>
                     {statusConfig.label}
                   </span>
-                  <span className="font-bold text-lg">${order.totalPrice.toFixed(2)}</span>
+                  <span className="font-bold text-lg">
+                    {currencySymbol}{totalPrice.toFixed(2)}
+                  </span>
                 </div>
               </div>
 
-              {/* Footer */}
-              <div className="border-t mt-4 pt-4 flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">
-                  Order details coming soon
-                </span>
-                <button
-                  className="btn-ghost text-xs px-3 py-1.5 text-primary"
-                  disabled
-                >
-                  View Details
-                  <ArrowRight className="h-3 w-3" />
-                </button>
-              </div>
+              {/* Products Preview */}
+              {order.orderProducts && order.orderProducts.length > 0 && (
+                <div className="border-t mt-4 pt-4">
+                  <div className="space-y-2">
+                    {order.orderProducts.slice(0, 3).map((op) => (
+                      <div key={op.id} className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground truncate max-w-[60%]">
+                          {op.part.name} <span className="font-mono text-xs">({op.part.article})</span>
+                        </span>
+                        <span className="text-muted-foreground">
+                          x{op.partsCount} &middot; {currencySymbol}{(op.part.price * op.partsCount).toFixed(2)}
+                        </span>
+                      </div>
+                    ))}
+                    {order.orderProducts.length > 3 && (
+                      <p className="text-xs text-muted-foreground">
+                        +{order.orderProducts.length - 3} more item{order.orderProducts.length - 3 !== 1 ? 's' : ''}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}
       </div>
     </div>
+  );
+}
+
+function getOrderTotal(order: Order): number {
+  if (!order.orderProducts) return 0;
+  return order.orderProducts.reduce(
+    (sum, op) => sum + op.part.price * op.partsCount,
+    0
   );
 }
 
@@ -141,17 +168,17 @@ function getStatusConfig(status: OrderStatus) {
         iconClass: 'text-destructive',
         badgeClass: 'bg-destructive/10 text-destructive border-destructive/20',
       };
-    case OrderStatus.PAID:
+    case OrderStatus.NEW:
       return {
-        label: 'Paid',
-        icon: CheckCircle2,
-        bgClass: 'bg-success/10',
-        iconClass: 'text-success',
-        badgeClass: 'bg-success/10 text-success border-success/20',
+        label: 'New',
+        icon: Clock,
+        bgClass: 'bg-muted',
+        iconClass: 'text-muted-foreground',
+        badgeClass: 'bg-muted text-muted-foreground border-border',
       };
     default:
       return {
-        label: 'Created',
+        label: status,
         icon: Clock,
         bgClass: 'bg-muted',
         iconClass: 'text-muted-foreground',
