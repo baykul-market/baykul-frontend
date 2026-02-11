@@ -1,4 +1,3 @@
-import { api } from './client';
 
 export interface Detail {
   articleId: string;

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { orderApi, OrderStatus } from '../../api/order';
-import { Loader2, Package } from 'lucide-react';
+import { Loader2, Package, Clock, CheckCircle2, XCircle, ArrowRight, RotateCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function OrderHistoryPage() {
@@ -11,65 +11,151 @@ export default function OrderHistoryPage() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center p-12">
+      <div className="flex flex-col items-center justify-center py-16 gap-3">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">Loading your orders...</p>
       </div>
     );
   }
 
   if (!orders || orders.length === 0) {
     return (
-      <div className="text-center py-16">
-        <h2 className="text-2xl font-bold mb-4">No orders found</h2>
-        <p className="text-muted-foreground">You haven't placed any orders yet.</p>
+      <div className="flex flex-col items-center justify-center py-20 gap-5 text-center animate-fade-in">
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted">
+          <Package className="h-10 w-10 text-muted-foreground" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight mb-2">No orders yet</h2>
+          <p className="text-muted-foreground max-w-sm">
+            When you place an order, it will appear here. Start shopping to find the parts you need.
+          </p>
+        </div>
+        <Link to="/" className="btn-primary mt-2">
+          Browse Products
+          <ArrowRight className="w-4 h-4" />
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8">Order History</h1>
+    <div className="max-w-4xl mx-auto animate-fade-in">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold tracking-tight">Order History</h1>
+        <p className="text-muted-foreground text-sm mt-1">
+          {orders.length} order{orders.length !== 1 ? 's' : ''} placed
+        </p>
+      </div>
+
+      {/* Order List */}
       <div className="space-y-4">
-        {orders.map((order) => (
-          <div key={order.orderId} className="bg-card border rounded-lg p-6 hover:shadow-md transition-shadow">
-            <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-4">
-              <div>
-                <h3 className="font-bold text-lg flex items-center gap-2">
-                  <Package className="w-5 h-5 text-primary" />
-                  {order.orderId}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {new Date(order.createdDate).toLocaleDateString()} at {new Date(order.createdDate).toLocaleTimeString()}
-                </p>
+        {orders.map((order) => {
+          const statusConfig = getStatusConfig(order.status);
+
+          return (
+            <div
+              key={order.orderId}
+              className="card-hover p-5 sm:p-6"
+            >
+              <div className="flex flex-col sm:flex-row justify-between gap-4">
+                {/* Left: Order Info */}
+                <div className="flex items-start gap-4">
+                  {/* Status Icon */}
+                  <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg ${statusConfig.bgClass}`}>
+                    <statusConfig.icon className={`h-5 w-5 ${statusConfig.iconClass}`} />
+                  </div>
+
+                  <div>
+                    <h3 className="font-semibold text-sm sm:text-base">
+                      Order {order.orderId}
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {new Date(order.createdDate).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
+                      {' at '}
+                      {new Date(order.createdDate).toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Right: Status & Price */}
+                <div className="flex items-center gap-4 sm:flex-col sm:items-end sm:gap-2">
+                  <span className={`badge ${statusConfig.badgeClass}`}>
+                    {statusConfig.label}
+                  </span>
+                  <span className="font-bold text-lg">${order.totalPrice.toFixed(2)}</span>
+                </div>
               </div>
-              <div className="flex items-center gap-4">
-                <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(order.status)}`}>
-                  {order.status}
+
+              {/* Footer */}
+              <div className="border-t mt-4 pt-4 flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">
+                  Order details coming soon
                 </span>
-                <span className="font-bold text-lg">${order.totalPrice.toFixed(2)}</span>
+                <button
+                  className="btn-ghost text-xs px-3 py-1.5 text-primary"
+                  disabled
+                >
+                  View Details
+                  <ArrowRight className="h-3 w-3" />
+                </button>
               </div>
             </div>
-            
-            <div className="border-t pt-4">
-               {/* Link to details would go here */}
-               <span className="text-sm text-muted-foreground">Details view coming soon</span>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
 }
 
-function getStatusColor(status: OrderStatus) {
+function getStatusConfig(status: OrderStatus) {
   switch (status) {
     case OrderStatus.COMPLETED:
-      return 'bg-green-50 text-green-700 border-green-200';
+      return {
+        label: 'Completed',
+        icon: CheckCircle2,
+        bgClass: 'bg-success/10',
+        iconClass: 'text-success',
+        badgeClass: 'bg-success/10 text-success border-success/20',
+      };
     case OrderStatus.PROCESSING:
-      return 'bg-blue-50 text-blue-700 border-blue-200';
+      return {
+        label: 'Processing',
+        icon: RotateCw,
+        bgClass: 'bg-primary/10',
+        iconClass: 'text-primary',
+        badgeClass: 'bg-primary/10 text-primary border-primary/20',
+      };
     case OrderStatus.CANCELLED:
-      return 'bg-red-50 text-red-700 border-red-200';
+      return {
+        label: 'Cancelled',
+        icon: XCircle,
+        bgClass: 'bg-destructive/10',
+        iconClass: 'text-destructive',
+        badgeClass: 'bg-destructive/10 text-destructive border-destructive/20',
+      };
+    case OrderStatus.PAID:
+      return {
+        label: 'Paid',
+        icon: CheckCircle2,
+        bgClass: 'bg-success/10',
+        iconClass: 'text-success',
+        badgeClass: 'bg-success/10 text-success border-success/20',
+      };
     default:
-      return 'bg-gray-50 text-gray-700 border-gray-200';
+      return {
+        label: 'Created',
+        icon: Clock,
+        bgClass: 'bg-muted',
+        iconClass: 'text-muted-foreground',
+        badgeClass: 'bg-muted text-muted-foreground border-border',
+      };
   }
 }

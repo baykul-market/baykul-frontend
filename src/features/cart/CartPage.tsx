@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { cartApi } from '../../api/cart';
-import { Trash2, Loader2, ArrowRight } from 'lucide-react';
+import { Trash2, Loader2, ArrowRight, ShoppingCart, ArrowLeft, Package, Tag } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -21,97 +21,158 @@ export default function CartPage() {
     },
     onError: () => {
       toast.error('Failed to remove item');
-    }
+    },
   });
 
   const checkoutMutation = useMutation({
     mutationFn: cartApi.checkout,
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast.success('Order placed successfully!');
       queryClient.setQueryData(['cart'], { items: [], totalPrice: 0 });
-      // navigate(`/orders/${data.orderId}`); // Would go to order details in real app
-      navigate('/orders'); // Go to order history for now
+      navigate('/orders');
     },
     onError: () => {
       toast.error('Checkout failed');
-    }
+    },
   });
 
   if (isLoading) {
     return (
-      <div className="flex justify-center p-12">
+      <div className="flex flex-col items-center justify-center py-16 gap-3">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">Loading your cart...</p>
       </div>
     );
   }
 
   if (!cart || cart.items.length === 0) {
     return (
-      <div className="text-center py-16">
-        <h2 className="text-2xl font-bold mb-4">Your cart is empty</h2>
-        <p className="text-muted-foreground mb-8">Looks like you haven't added any parts yet.</p>
-        <Link to="/" className="bg-primary text-primary-foreground px-6 py-3 rounded-md hover:bg-primary/90 inline-flex items-center gap-2">
-          Start Shopping <ArrowRight className="w-4 h-4" />
+      <div className="flex flex-col items-center justify-center py-20 gap-5 text-center animate-fade-in">
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted">
+          <ShoppingCart className="h-10 w-10 text-muted-foreground" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight mb-2">Your cart is empty</h2>
+          <p className="text-muted-foreground max-w-sm">
+            Looks like you haven't added any parts yet. Browse our catalog to find what you need.
+          </p>
+        </div>
+        <Link to="/" className="btn-primary mt-2">
+          Start Shopping
+          <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
     );
   }
 
+  const itemCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+
   return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8">Shopping Cart</h1>
-      
+    <div className="max-w-5xl mx-auto animate-fade-in">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Shopping Cart</h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            {itemCount} item{itemCount !== 1 ? 's' : ''} in your cart
+          </p>
+        </div>
+        <Link to="/" className="btn-ghost text-sm text-muted-foreground">
+          <ArrowLeft className="w-4 h-4" />
+          Continue Shopping
+        </Link>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-4">
+        {/* Cart Items */}
+        <div className="lg:col-span-2 space-y-3">
           {cart.items.map((item) => (
-            <div key={item.detail.articleId} className="bg-card border rounded-lg p-4 flex items-center justify-between">
-              <div className="flex-1">
-                <h3 className="font-semibold">{item.detail.name}</h3>
-                <p className="text-sm text-muted-foreground">{item.detail.brand} - {item.detail.articleId}</p>
-                <div className="flex items-center gap-2 mt-2">
-                   <span className="text-sm text-muted-foreground">Qty: {item.quantity}</span>
+            <div
+              key={item.detail.articleId}
+              className="card p-4 sm:p-5 flex items-start sm:items-center gap-4"
+            >
+              {/* Product Icon */}
+              <div className="hidden sm:flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-lg bg-secondary">
+                <Package className="h-7 w-7 text-muted-foreground/50" />
+              </div>
+
+              {/* Product Info */}
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-sm sm:text-base leading-snug">{item.detail.name}</h3>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                  <Tag className="h-3 w-3" />
+                  <span>{item.detail.brand}</span>
+                  <span className="text-border">|</span>
+                  <span className="font-mono">{item.detail.articleId}</span>
+                </div>
+                <div className="flex items-center gap-4 mt-2.5">
+                  <span className="text-sm text-muted-foreground">
+                    ${item.detail.price.toFixed(2)} x {item.quantity}
+                  </span>
                 </div>
               </div>
-              <div className="flex flex-col items-end gap-2">
-                <span className="font-bold">${(item.detail.price * item.quantity).toFixed(2)}</span>
+
+              {/* Price & Actions */}
+              <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                <span className="font-bold text-base">${(item.detail.price * item.quantity).toFixed(2)}</span>
                 <button
                   onClick={() => removeMutation.mutate(item.detail.articleId)}
                   disabled={removeMutation.isPending}
-                  className="text-destructive hover:bg-destructive/10 p-2 rounded-full transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-destructive transition-colors rounded-md px-2 py-1 hover:bg-destructive/5"
                   aria-label="Remove item"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Remove</span>
                 </button>
               </div>
             </div>
           ))}
         </div>
 
+        {/* Order Summary */}
         <div className="lg:col-span-1">
-          <div className="bg-card border rounded-lg p-6 sticky top-24">
-            <h3 className="text-lg font-semibold mb-4">Order Summary</h3>
-            <div className="space-y-2 mb-6 text-sm">
+          <div className="card p-6 sticky top-24">
+            <h3 className="text-lg font-semibold mb-5">Order Summary</h3>
+
+            <div className="space-y-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Subtotal</span>
-                <span>${cart.totalPrice.toFixed(2)}</span>
+                <span className="text-muted-foreground">Subtotal ({itemCount} items)</span>
+                <span className="font-medium">${cart.totalPrice.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Shipping</span>
-                <span>Calculated at checkout</span>
-              </div>
-              <div className="border-t pt-4 mt-4 flex justify-between font-bold text-lg">
-                <span>Total</span>
-                <span>${cart.totalPrice.toFixed(2)}</span>
+                <span className="text-muted-foreground text-xs">Calculated at checkout</span>
               </div>
             </div>
-            
+
+            <div className="border-t my-5" />
+
+            <div className="flex justify-between items-baseline mb-6">
+              <span className="text-base font-semibold">Total</span>
+              <span className="text-2xl font-bold">${cart.totalPrice.toFixed(2)}</span>
+            </div>
+
             <button
               onClick={() => checkoutMutation.mutate()}
               disabled={checkoutMutation.isPending}
-              className="w-full bg-primary text-primary-foreground py-3 rounded-md hover:bg-primary/90 font-medium disabled:opacity-50 transition-colors"
+              className="btn-primary w-full py-3"
             >
-              {checkoutMutation.isPending ? 'Processing...' : 'Proceed to Checkout'}
+              {checkoutMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  Proceed to Checkout
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
             </button>
+
+            <p className="text-xs text-muted-foreground text-center mt-3">
+              Secure checkout powered by Baykul
+            </p>
           </div>
         </div>
       </div>
