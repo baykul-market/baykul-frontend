@@ -1,0 +1,151 @@
+import { api } from './client';
+
+// === Interfaces ===
+
+export interface UserProfile {
+  id: string;
+  surname: string;
+  name: string;
+  patronymic: string | null;
+}
+
+export interface UserBalance {
+  id: string;
+  account: number;
+}
+
+export interface RefreshTokenInfo {
+  id: string;
+  name: string;
+  userAgent: string;
+  ipAddress: string;
+}
+
+export interface UserFull {
+  id: string;
+  createdTs: string;
+  updatedTs: string;
+  login: string;
+  email: string | null;
+  phoneNumber: string | null;
+  role: 'USER' | 'ADMIN' | 'MANAGER';
+  blocked: boolean;
+  refreshTokens?: RefreshTokenInfo[];
+  profile: UserProfile | null;
+  balance: UserBalance | null;
+  cart?: { id: string } | null;
+}
+
+export interface UserBasic {
+  id: string;
+  createdTs: string;
+  updatedTs: string;
+  login: string;
+  email: string | null;
+  phoneNumber: string | null;
+  role: 'USER' | 'ADMIN' | 'MANAGER';
+  blocked: boolean;
+  profile: UserProfile | null;
+}
+
+export interface ProfileUpdateInput {
+  login?: string;
+  email?: string;
+  phoneNumber?: string;
+  password?: string;
+  blocked?: boolean;
+}
+
+export interface BalanceHistory {
+  id: string;
+  amount: number;
+  operationType: 'REPLENISHMENT' | 'WRITE_OFF';
+  resultAccount: number;
+}
+
+export interface BalanceFull {
+  id: string;
+  createdTs: string;
+  updatedTs: string;
+  account: number;
+  user: {
+    id: string;
+    login: string;
+    email: string;
+    profile: UserProfile | null;
+  };
+  balanceHistoryList: BalanceHistory[];
+}
+
+// === Authenticated User's Profile API ===
+
+export const userProfileApi = {
+  /** GET /users/profile — get current user's full profile */
+  getProfile: async (): Promise<UserFull> => {
+    const response = await api.get<UserFull>('/users/profile');
+    return response.data;
+  },
+
+  /** PUT /users/profile — update current user's profile */
+  updateProfile: async (data: ProfileUpdateInput): Promise<void> => {
+    await api.put('/users/profile', data);
+  },
+
+  /** GET /users/profile/balance — get current user's balance */
+  getBalance: async (): Promise<BalanceFull> => {
+    const response = await api.get<BalanceFull>('/users/profile/balance');
+    return response.data;
+  },
+
+  /** GET /users/profile/refresh-token — get current user's refresh tokens */
+  getRefreshTokens: async (): Promise<RefreshTokenInfo[]> => {
+    const response = await api.get<RefreshTokenInfo[]>('/users/profile/refresh-token');
+    return response.data;
+  },
+};
+
+// === User Search API (requires users:write — ADMIN only) ===
+
+export const userSearchApi = {
+  /** Search users by login, email, or phone number */
+  search: async (text: string): Promise<UserBasic[]> => {
+    const response = await api.get<UserBasic[]>(`/users/search/search/${encodeURIComponent(text)}`);
+    return response.data;
+  },
+
+  /** Search users by login */
+  searchByLogin: async (login: string): Promise<UserBasic[]> => {
+    const response = await api.get<UserBasic[]>(`/users/search/search/login/${encodeURIComponent(login)}`);
+    return response.data;
+  },
+
+  /** Search users by email */
+  searchByEmail: async (email: string): Promise<UserBasic[]> => {
+    const response = await api.get<UserBasic[]>(`/users/search/search/email/${encodeURIComponent(email)}`);
+    return response.data;
+  },
+
+  /** Search users by phone number */
+  searchByPhoneNumber: async (phone: string): Promise<UserBasic[]> => {
+    const response = await api.get<UserBasic[]>(`/users/search/search/phoneNumber/${encodeURIComponent(phone)}`);
+    return response.data;
+  },
+
+  /** Get user by exact login */
+  getByLogin: async (login: string): Promise<UserBasic> => {
+    const response = await api.get<UserBasic>(`/users/search/exact/login/${encodeURIComponent(login)}`);
+    return response.data;
+  },
+
+  /** Get user by exact email */
+  getByEmail: async (email: string): Promise<UserBasic> => {
+    const response = await api.get<UserBasic>(`/users/search/exact/email/${encodeURIComponent(email)}`);
+    return response.data;
+  },
+
+  /** Get user by exact phone number */
+  getByPhoneNumber: async (phone: string): Promise<UserBasic> => {
+    const response = await api.get<UserBasic>(`/users/search/exact/phoneNumber/${encodeURIComponent(phone)}`);
+    return response.data;
+  },
+};

@@ -1,20 +1,16 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-
-interface User {
-  id: string;
-  email: string;
-  role: 'USER' | 'ADMIN' | 'MANAGER';
-}
+import type { UserFull } from '../api/user';
 
 interface AuthState {
-  user: User | null;
+  user: UserFull | null;
   accessToken: string | null;
   refreshToken: string | null;
   isAuthenticated: boolean;
-  login: (user: User, accessToken: string, refreshToken: string) => void;
+  login: (user: UserFull, accessToken: string, refreshToken: string) => void;
   logout: () => void;
   setTokens: (accessToken: string, refreshToken: string) => void;
+  setUser: (user: UserFull) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -30,6 +26,8 @@ export const useAuthStore = create<AuthState>()(
         set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false }),
       setTokens: (accessToken, refreshToken) => 
         set({ accessToken, refreshToken }),
+      setUser: (user) =>
+        set({ user }),
     }),
     {
       name: 'auth-storage',

@@ -3,6 +3,8 @@ import type { Part } from './product';
 
 export interface CartProduct {
   id: string;
+  createdTs?: string;
+  updatedTs?: string;
   part: Part;
   partsCount: number;
 }
@@ -21,13 +23,18 @@ export const cartApi = {
     return response.data;
   },
 
-  createCart: async (): Promise<{ create_cart: string; id: string }> => {
+  createCart: async (): Promise<{ create_cart: string; id: string; warn?: string }> => {
     const response = await api.post('/cart/user');
     return response.data;
   },
 
-  addToCart: async (partId: string): Promise<{ add_cart: string; id?: string }> => {
+  addToCart: async (partId: string): Promise<{ add_cart: string; id?: string; storage_empty?: string; error?: string }> => {
     const response = await api.post(`/cart/user/add/${partId}`);
+    return response.data;
+  },
+
+  updateCartProduct: async (cartProductId: string, partsCount: number): Promise<{ update_cart: string }> => {
+    const response = await api.put(`/cart/user/update/${cartProductId}`, { partsCount });
     return response.data;
   },
 

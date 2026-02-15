@@ -5,15 +5,7 @@ import { useMutation } from '@tanstack/react-query';
 import { authApi, loginSchema, type LoginInput } from '../../api/auth';
 import { useAuthStore } from '../../store/useAuthStore';
 import toast from 'react-hot-toast';
-import { jwtDecode } from 'jwt-decode';
-import { Loader2, Mail, Lock, Wrench } from 'lucide-react';
-
-interface JwtPayload {
-  sub: string;
-  id: string;
-  role: string;
-  exp: number;
-}
+import { Loader2, User, Lock, Wrench } from 'lucide-react';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -28,14 +20,11 @@ export default function LoginPage() {
       const response = await authApi.login(data);
       const { accessToken, refreshToken } = response;
 
-      const decoded = jwtDecode<JwtPayload>(accessToken);
-      const userId = decoded.id;
+      // Store tokens immediately so the interceptor can attach them to subsequent requests
+      useAuthStore.getState().setTokens(accessToken, refreshToken);
 
-      if (!userId) {
-        throw new Error('User ID not found in token');
-      }
-
-      const userProfile = await authApi.getProfile(userId);
+      // Fetch full user profile using the authenticated /users/profile endpoint
+      const userProfile = await authApi.getProfile();
 
       return {
         user: userProfile,
@@ -74,20 +63,20 @@ export default function LoginPage() {
         <div className="card p-6 sm:p-8">
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium mb-1.5">Email</label>
+              <label className="block text-sm font-medium mb-1.5">Login</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <User className="h-4 w-4 text-muted-foreground" />
                 </div>
                 <input
-                  type="email"
-                  {...form.register('email')}
+                  type="text"
+                  {...form.register('login')}
                   className="input-base pl-10"
-                  placeholder="you@example.com"
+                  placeholder="Enter your login"
                 />
               </div>
-              {form.formState.errors.email && (
-                <p className="text-destructive text-sm mt-1.5">{form.formState.errors.email.message}</p>
+              {form.formState.errors.login && (
+                <p className="text-destructive text-sm mt-1.5">{form.formState.errors.login.message}</p>
               )}
             </div>
 

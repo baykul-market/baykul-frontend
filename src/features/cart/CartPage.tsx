@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { cartApi } from '../../api/cart';
 import { orderApi } from '../../api/order';
-import { Trash2, Loader2, ArrowRight, ShoppingCart, ArrowLeft, Package, Tag } from 'lucide-react';
+import { Trash2, Loader2, ArrowRight, ShoppingCart, ArrowLeft, Package, Tag, Plus, Minus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -16,6 +16,17 @@ export default function CartPage() {
       // Don't retry on 404 (no cart yet)
       if (error?.response?.status === 404) return false;
       return failureCount < 3;
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ cartProductId, partsCount }: { cartProductId: string; partsCount: number }) =>
+      cartApi.updateCartProduct(cartProductId, partsCount),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cart'] });
+    },
+    onError: () => {
+      toast.error('Failed to update quantity');
     },
   });
 
@@ -129,10 +140,33 @@ export default function CartPage() {
                   <span className="text-border">|</span>
                   <span className="font-mono">{item.part.article}</span>
                 </div>
-                <div className="flex items-center gap-4 mt-2.5">
+                <div className="flex items-center gap-3 mt-2.5">
                   <span className="text-sm text-muted-foreground">
-                    {currencySymbol}{item.part.price.toFixed(2)} x {item.partsCount}
+                    {currencySymbol}{item.part.price.toFixed(2)}
                   </span>
+                  <div className="inline-flex items-center gap-1.5 rounded-md border px-1">
+                    <button
+                      onClick={() =>
+                        item.partsCount > 1
+                          ? updateMutation.mutate({ cartProductId: item.id, partsCount: item.partsCount - 1 })
+                          : removeMutation.mutate(item.id)
+                      }
+                      disabled={updateMutation.isPending}
+                      className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+                      aria-label="Decrease quantity"
+                    >
+                      <Minus className="w-3 h-3" />
+                    </button>
+                    <span className="text-sm font-medium min-w-[1.25rem] text-center">{item.partsCount}</span>
+                    <button
+                      onClick={() => updateMutation.mutate({ cartProductId: item.id, partsCount: item.partsCount + 1 })}
+                      disabled={updateMutation.isPending}
+                      className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+                      aria-label="Increase quantity"
+                    >
+                      <Plus className="w-3 h-3" />
+                    </button>
+                  </div>
                 </div>
               </div>
 

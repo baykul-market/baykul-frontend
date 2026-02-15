@@ -1,8 +1,9 @@
 import { api } from './client';
 import { z } from 'zod';
+import type { UserFull } from './user';
 
 export const loginSchema = z.object({
-  email: z.string(), // Login can be email or username
+  login: z.string().min(1, 'Login is required'),
   password: z.string().min(6),
 });
 
@@ -23,32 +24,26 @@ export type RegisterInput = z.infer<typeof registerSchema>;
 
 export const authApi = {
   login: async (data: LoginInput) => {
-    // Backend expects 'login' field, but our form has 'email'
-    const response = await api.post('/auth/login', {
-      login: data.email, 
-      password: data.password
-    });
+    const response = await api.post('/auth/login', data);
     return response.data;
   },
   register: async (data: RegisterInput) => {
-    // Backend likely expects specific structure for registration
-    // Looking at UserRegistrationRestController
     const response = await api.post('/users/registration', {
       ...data,
-      login: data.email // Use email as login for now
+      login: data.email,
     });
     return response.data;
   },
-  logout: async () => {
-    const response = await api.post('/auth/logout');
-    return response.data;
+  logout: async (refreshToken: string) => {
+    await api.post('/auth/logout', { refreshToken });
   },
   refresh: async (refreshToken: string) => {
     const response = await api.post('/auth/refresh', { refreshToken });
     return response.data;
   },
-  getProfile: async (id: string) => {
-    const response = await api.get(`/users/${id}`);
+  /** Get authenticated user's full profile via /users/profile */
+  getProfile: async (): Promise<UserFull> => {
+    const response = await api.get<UserFull>('/users/profile');
     return response.data;
-  }
+  },
 };

@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import { ShoppingCart, User, LogOut, Package, Wrench, Menu, X, Shield } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Package, Wrench, Menu, X, Shield, Users } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { cartApi } from '../../api/cart';
+import { authApi } from '../../api/auth';
 import { cn } from '../../lib/utils';
 
 export default function Layout() {
@@ -23,8 +24,20 @@ export default function Layout() {
 
   const cartItemCount = cart?.cartProducts?.length ?? 0;
 
-  const handleLogout = () => {
+  const queryClient = useQueryClient();
+
+  const { refreshToken } = useAuthStore();
+
+  const handleLogout = async () => {
+    try {
+      if (refreshToken) {
+        await authApi.logout(refreshToken);
+      }
+    } catch {
+      // Still clear local state even if the API call fails
+    }
     logout();
+    queryClient.clear();
     setMobileMenuOpen(false);
     navigate('/');
   };
@@ -38,6 +51,11 @@ export default function Layout() {
         ? 'text-primary after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary after:rounded-full'
         : 'text-muted-foreground hover:text-foreground'
     );
+
+  /** Display name: profile name or login */
+  const displayName = user?.profile
+    ? `${user.profile.name} ${user.profile.surname}`
+    : user?.login ?? '';
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -72,13 +90,21 @@ export default function Layout() {
                 </Link>
               )}
 
-              {user && (user.role === 'ADMIN' || user.role === 'MANAGER') && (
-                <Link to="/admin" className={navLinkClass('/admin')}>
-                  <span className="flex items-center gap-1.5">
-                    <Shield className="w-3.5 h-3.5" />
-                    Admin
-                  </span>
-                </Link>
+              {user && user.role === 'ADMIN' && (
+                <>
+                  <Link to="/admin" className={navLinkClass('/admin')}>
+                    <span className="flex items-center gap-1.5">
+                      <Shield className="w-3.5 h-3.5" />
+                      Admin
+                    </span>
+                  </Link>
+                  <Link to="/admin/users" className={navLinkClass('/admin/users')}>
+                    <span className="flex items-center gap-1.5">
+                      <Users className="w-3.5 h-3.5" />
+                      Users
+                    </span>
+                  </Link>
+                </>
               )}
             </nav>
 
@@ -104,17 +130,24 @@ export default function Layout() {
               <div className="hidden md:flex items-center gap-2 ml-2 pl-4 border-l">
                 {user ? (
                   <>
-                    <div className="text-right mr-2">
-                      <p className="text-sm font-medium leading-tight">{user.email}</p>
-                      <p className="text-xs text-muted-foreground capitalize">{user.role?.toLowerCase()}</p>
-                    </div>
+                    <Link
+                      to="/profile"
+                      className="flex items-center gap-2 rounded-lg px-3 py-2 transition-colors hover:bg-secondary"
+                    >
+                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary">
+                        <User className="h-3.5 w-3.5" />
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium leading-tight">{displayName}</p>
+                        <p className="text-xs text-muted-foreground capitalize">{user.role?.toLowerCase()}</p>
+                      </div>
+                    </Link>
                     <button
                       onClick={handleLogout}
                       className="btn-ghost px-3 py-2 text-muted-foreground hover:text-destructive"
                       title="Logout"
                     >
                       <LogOut className="h-4 w-4" />
-                      <span className="text-sm">Logout</span>
                     </button>
                   </>
                 ) : (
@@ -157,38 +190,65 @@ export default function Layout() {
               </Link>
 
               {user && (
-                <Link
-                  to="/orders"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={cn(
-                    'flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                    isActive('/orders') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary'
-                  )}
-                >
-                  <Package className="w-4 h-4" />
-                  Orders
-                </Link>
+                <>
+                  <Link
+                    to="/profile"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={cn(
+                      'flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                      isActive('/profile') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary'
+                    )}
+                  >
+                    <User className="w-4 h-4" />
+                    My Profile
+                  </Link>
+
+                  <Link
+                    to="/orders"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={cn(
+                      'flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                      isActive('/orders') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary'
+                    )}
+                  >
+                    <Package className="w-4 h-4" />
+                    Orders
+                  </Link>
+                </>
               )}
 
-              {user && (user.role === 'ADMIN' || user.role === 'MANAGER') && (
-                <Link
-                  to="/admin"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={cn(
-                    'flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                    isActive('/admin') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary'
-                  )}
-                >
-                  <Shield className="w-4 h-4" />
-                  Admin
-                </Link>
+              {user && user.role === 'ADMIN' && (
+                <>
+                  <Link
+                    to="/admin"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={cn(
+                      'flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                      isActive('/admin') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary'
+                    )}
+                  >
+                    <Shield className="w-4 h-4" />
+                    Admin
+                  </Link>
+                  <Link
+                    to="/admin/users"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={cn(
+                      'flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                      isActive('/admin/users') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary'
+                    )}
+                  >
+                    <Users className="w-4 h-4" />
+                    User Search
+                  </Link>
+                </>
               )}
 
               <div className="border-t pt-3 mt-3">
                 {user ? (
                   <div className="space-y-2">
                     <div className="px-3 py-1">
-                      <p className="text-sm font-medium">{user.email}</p>
+                      <p className="text-sm font-medium">{displayName}</p>
                       <p className="text-xs text-muted-foreground capitalize">{user.role?.toLowerCase()}</p>
                     </div>
                     <button
@@ -249,6 +309,8 @@ export default function Layout() {
                 <>
                   <span className="text-border">|</span>
                   <Link to="/orders" className="hover:text-foreground transition-colors">Orders</Link>
+                  <span className="text-border">|</span>
+                  <Link to="/profile" className="hover:text-foreground transition-colors">Profile</Link>
                 </>
               )}
             </nav>
