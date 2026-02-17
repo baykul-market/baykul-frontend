@@ -58,7 +58,7 @@ export default function PartsUploadPage() {
       toast.error(t('admin.partsUpload.invalidFileType'));
       return false;
     }
-    if (f.size > 10 * 1024 * 1024) {
+    if (f.size > 100 * 1024 * 1024) {
       toast.error(t('admin.partsUpload.fileTooLarge'));
       return false;
     }

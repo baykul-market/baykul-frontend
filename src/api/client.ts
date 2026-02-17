@@ -25,15 +25,13 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
-        const refreshToken = useAuthStore.getState().refreshToken;
-        if (!refreshToken) throw new Error('No refresh token');
+        const currentRefreshToken = useAuthStore.getState().refreshToken;
+        if (!currentRefreshToken) throw new Error('No refresh token');
         
-        // Call refresh endpoint
-        // Adjust endpoint based on backend implementation
-        const response = await axios.post(`${baseURL}/auth/refresh`, { refreshToken });
+        const response = await axios.post(`${baseURL}/auth/refresh`, { refreshToken: currentRefreshToken });
         
-        const { accessToken } = response.data;
-        useAuthStore.getState().setTokens(accessToken, refreshToken);
+        const { accessToken, refreshToken: newRefreshToken } = response.data;
+        useAuthStore.getState().setTokens(accessToken, newRefreshToken);
         
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);
