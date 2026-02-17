@@ -1,34 +1,36 @@
 import { useAuthStore } from '../../store/useAuthStore';
 import { Navigate } from 'react-router-dom';
 import { Shield, FileText, Box, Users, ArrowRight } from 'lucide-react';
-
-const UPCOMING_FEATURES = [
-  {
-    title: 'Bill Management',
-    description: 'Create and manage delivery bills, scan incoming boxes, and track shipments.',
-    icon: FileText,
-    status: 'Coming Soon',
-  },
-  {
-    title: 'Box Tracking',
-    description: 'View and update box statuses from arrival to warehouse placement.',
-    icon: Box,
-    status: 'Coming Soon',
-  },
-  {
-    title: 'User Management',
-    description: 'Manage user accounts, roles, and access permissions.',
-    icon: Users,
-    status: 'Planned',
-  },
-];
+import { useTranslation } from 'react-i18next';
 
 export default function AdminPage() {
+  const { t } = useTranslation();
   const user = useAuthStore((state) => state.user);
 
   if (!user || user.role === 'USER') {
     return <Navigate to="/" />;
   }
+
+  const UPCOMING_FEATURES = [
+    {
+      title: t('admin.dashboard.billManagement'),
+      description: t('admin.dashboard.billDescription'),
+      icon: FileText,
+      status: t('admin.dashboard.comingSoon'),
+    },
+    {
+      title: t('admin.dashboard.boxTracking'),
+      description: t('admin.dashboard.boxDescription'),
+      icon: Box,
+      status: t('admin.dashboard.comingSoon'),
+    },
+    {
+      title: t('admin.dashboard.userManagement'),
+      description: t('admin.dashboard.userDescription'),
+      icon: Users,
+      status: t('admin.dashboard.planned'),
+    },
+  ];
 
   return (
     <div className="max-w-4xl mx-auto animate-fade-in">
@@ -38,9 +40,9 @@ export default function AdminPage() {
           <Shield className="h-6 w-6" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('admin.dashboard.title')}</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            Manage your warehouse, logistics, and team. Logged in as{' '}
+            {t('admin.dashboard.subtitle')}{' '}
             <span className="font-medium text-foreground capitalize">{user.role?.toLowerCase()}</span>.
           </p>
         </div>
@@ -64,7 +66,7 @@ export default function AdminPage() {
               disabled
               className="btn-ghost text-sm text-muted-foreground mt-4 justify-start px-0 opacity-50"
             >
-              Open
+              {t('admin.dashboard.open')}
               <ArrowRight className="h-3.5 w-3.5" />
             </button>
           </div>
@@ -74,7 +76,7 @@ export default function AdminPage() {
       {/* Stats Placeholder */}
       <div className="mt-8 rounded-xl border border-dashed border-border p-8 text-center">
         <p className="text-sm text-muted-foreground">
-          Dashboard analytics and quick stats will appear here once features are implemented.
+          {t('admin.dashboard.statsPlaceholder')}
         </p>
       </div>
     </div>

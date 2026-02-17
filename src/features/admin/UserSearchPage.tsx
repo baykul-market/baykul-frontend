@@ -9,24 +9,18 @@ import {
   User,
   Mail,
   Phone,
-  Shield,
   Filter,
   Users,
   Ban,
   CheckCircle,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { useTranslation } from 'react-i18next';
 
 type SearchField = 'all' | 'login' | 'email' | 'phoneNumber';
 
-const searchFieldOptions: { value: SearchField; label: string; icon: React.ReactNode }[] = [
-  { value: 'all', label: 'All Fields', icon: <Search className="w-3.5 h-3.5" /> },
-  { value: 'login', label: 'Login', icon: <User className="w-3.5 h-3.5" /> },
-  { value: 'email', label: 'Email', icon: <Mail className="w-3.5 h-3.5" /> },
-  { value: 'phoneNumber', label: 'Phone', icon: <Phone className="w-3.5 h-3.5" /> },
-];
-
 export default function UserSearchPage() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
@@ -38,6 +32,13 @@ export default function UserSearchPage() {
     navigate('/');
     return null;
   }
+
+  const searchFieldOptions: { value: SearchField; label: string; icon: React.ReactNode }[] = [
+    { value: 'all', label: t('admin.userSearch.allFields'), icon: <Search className="w-3.5 h-3.5" /> },
+    { value: 'login', label: t('admin.userSearch.login'), icon: <User className="w-3.5 h-3.5" /> },
+    { value: 'email', label: t('admin.userSearch.email'), icon: <Mail className="w-3.5 h-3.5" /> },
+    { value: 'phoneNumber', label: t('admin.userSearch.phone'), icon: <Phone className="w-3.5 h-3.5" /> },
+  ];
 
   const getSearchFn = () => {
     if (!debouncedTerm.trim()) return () => Promise.resolve([] as UserBasic[]);
@@ -80,6 +81,12 @@ export default function UserSearchPage() {
     }
   };
 
+  const getPlaceholder = () => {
+    if (searchField === 'all') return t('admin.userSearch.searchPlaceholderAll');
+    const fieldName = searchField === 'phoneNumber' ? t('admin.userSearch.phoneNumber') : searchField;
+    return t('admin.userSearch.searchPlaceholderField', { field: fieldName });
+  };
+
   return (
     <div className="max-w-5xl mx-auto space-y-6 animate-slide-up">
       {/* Header */}
@@ -88,10 +95,10 @@ export default function UserSearchPage() {
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <Users className="h-5 w-5" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight">User Search</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t('admin.userSearch.title')}</h1>
         </div>
         <p className="text-muted-foreground text-sm">
-          Search users by login, email, or phone number. Results will match partially.
+          {t('admin.userSearch.subtitle')}
         </p>
       </div>
 
@@ -125,11 +132,7 @@ export default function UserSearchPage() {
             <input
               type="search"
               className="input-base pl-11 pr-4 py-2.5"
-              placeholder={
-                searchField === 'all'
-                  ? 'Search by login, email, or phone...'
-                  : `Search by ${searchField === 'phoneNumber' ? 'phone number' : searchField}...`
-              }
+              placeholder={getPlaceholder()}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -137,7 +140,7 @@ export default function UserSearchPage() {
           </div>
           <button onClick={handleSearch} className="btn-primary px-6" disabled={!searchTerm.trim()}>
             <Search className="w-4 h-4" />
-            <span className="hidden sm:inline">Search</span>
+            <span className="hidden sm:inline">{t('admin.userSearch.search')}</span>
           </button>
         </div>
       </div>
@@ -146,7 +149,7 @@ export default function UserSearchPage() {
       {isLoading || isFetching ? (
         <div className="flex flex-col items-center justify-center py-16 gap-3">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Searching users...</p>
+          <p className="text-sm text-muted-foreground">{t('admin.userSearch.searchingUsers')}</p>
         </div>
       ) : debouncedTerm && users ? (
         <>
@@ -154,10 +157,10 @@ export default function UserSearchPage() {
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
               {users.length === 0
-                ? 'No users found'
-                : `Found ${users.length} user${users.length !== 1 ? 's' : ''}`}
-              {' for "'}
-              <span className="font-medium text-foreground">{debouncedTerm}</span>"
+                ? t('admin.userSearch.noUsersFound')
+                : t('admin.userSearch.foundUsers', { count: users.length })}
+              {' '}
+              {t('admin.userSearch.forQuery', { query: debouncedTerm })}
             </p>
           </div>
 
@@ -174,9 +177,9 @@ export default function UserSearchPage() {
                 <Users className="h-8 w-8 text-muted-foreground" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold mb-1">No users found</h3>
+                <h3 className="text-lg font-semibold mb-1">{t('admin.userSearch.noUsersFound')}</h3>
                 <p className="text-muted-foreground text-sm max-w-sm">
-                  Try adjusting your search term or changing the search field.
+                  {t('admin.userSearch.noUsersSubtitle')}
                 </p>
               </div>
             </div>
@@ -189,9 +192,9 @@ export default function UserSearchPage() {
               <Filter className="h-8 w-8 text-muted-foreground" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold mb-1">Start Searching</h3>
+              <h3 className="text-lg font-semibold mb-1">{t('admin.userSearch.startSearchingTitle')}</h3>
               <p className="text-muted-foreground text-sm max-w-sm">
-                Enter a search term and press Enter or click Search to find users.
+                {t('admin.userSearch.startSearchingSubtitle')}
               </p>
             </div>
           </div>
@@ -208,6 +211,8 @@ function UserCard({
   user: UserBasic;
   roleColor: (role: string) => string;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className="card-hover p-5">
       <div className="flex items-start gap-4">
@@ -230,12 +235,12 @@ function UserCard({
             {user.blocked ? (
               <span className="badge text-[10px] bg-destructive/10 text-destructive border-destructive/20">
                 <Ban className="w-3 h-3 mr-0.5" />
-                Blocked
+                {t('admin.userSearch.blocked')}
               </span>
             ) : (
               <span className="badge text-[10px] bg-success/10 text-success border-success/20">
                 <CheckCircle className="w-3 h-3 mr-0.5" />
-                Active
+                {t('admin.userSearch.active')}
               </span>
             )}
           </div>
@@ -247,17 +252,17 @@ function UserCard({
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
               <Mail className="h-3.5 w-3.5 shrink-0" />
-              <span className="truncate">{user.email || 'No email'}</span>
+              <span className="truncate">{user.email || t('common.noEmail')}</span>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
               <Phone className="h-3.5 w-3.5 shrink-0" />
-              <span className="truncate">{user.phoneNumber || 'No phone'}</span>
+              <span className="truncate">{user.phoneNumber || t('common.noPhone')}</span>
             </div>
           </div>
 
           {user.profile?.patronymic && (
             <p className="text-xs text-muted-foreground mt-2">
-              Patronymic: {user.profile.patronymic}
+              {t('admin.userSearch.patronymic', { value: user.profile.patronymic })}
             </p>
           )}
         </div>

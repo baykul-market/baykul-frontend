@@ -6,8 +6,10 @@ import { authApi, loginSchema, type LoginInput } from '../../api/auth';
 import { useAuthStore } from '../../store/useAuthStore';
 import toast from 'react-hot-toast';
 import { Loader2, User, Lock, Wrench } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function LoginPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
 
@@ -34,11 +36,11 @@ export default function LoginPage() {
     },
     onSuccess: (data) => {
       login(data.user, data.accessToken, data.refreshToken);
-      toast.success('Logged in successfully');
+      toast.success(t('auth.login.success'));
       navigate('/');
     },
     onError: (error) => {
-      toast.error('Login failed. Please check your credentials.');
+      toast.error(t('auth.login.error'));
       console.error(error);
     },
   });
@@ -55,15 +57,15 @@ export default function LoginPage() {
           <div className="inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-primary/10 text-primary mb-4">
             <Wrench className="h-7 w-7" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight mb-1">Welcome back</h1>
-          <p className="text-muted-foreground text-sm">Sign in to your Baykul account</p>
+          <h1 className="text-2xl font-bold tracking-tight mb-1">{t('auth.login.title')}</h1>
+          <p className="text-muted-foreground text-sm">{t('auth.login.subtitle')}</p>
         </div>
 
         {/* Form Card */}
         <div className="card p-6 sm:p-8">
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium mb-1.5">Login</label>
+              <label className="block text-sm font-medium mb-1.5">{t('auth.login.loginLabel')}</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                   <User className="h-4 w-4 text-muted-foreground" />
@@ -72,7 +74,7 @@ export default function LoginPage() {
                   type="text"
                   {...form.register('login')}
                   className="input-base pl-10"
-                  placeholder="Enter your login"
+                  placeholder={t('auth.login.loginPlaceholder')}
                 />
               </div>
               {form.formState.errors.login && (
@@ -81,7 +83,7 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1.5">Password</label>
+              <label className="block text-sm font-medium mb-1.5">{t('auth.login.passwordLabel')}</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                   <Lock className="h-4 w-4 text-muted-foreground" />
@@ -90,7 +92,7 @@ export default function LoginPage() {
                   type="password"
                   {...form.register('password')}
                   className="input-base pl-10"
-                  placeholder="Enter your password"
+                  placeholder={t('auth.login.passwordPlaceholder')}
                 />
               </div>
               {form.formState.errors.password && (
@@ -106,10 +108,10 @@ export default function LoginPage() {
               {mutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Signing in...
+                  {t('auth.login.signingIn')}
                 </>
               ) : (
-                'Sign In'
+                t('auth.login.signIn')
               )}
             </button>
           </form>
@@ -117,9 +119,9 @@ export default function LoginPage() {
 
         {/* Footer Link */}
         <p className="text-center text-sm text-muted-foreground mt-6">
-          Don't have an account?{' '}
+          {t('auth.login.noAccount')}{' '}
           <Link to="/register" className="text-primary font-medium hover:underline">
-            Create one
+            {t('auth.login.createOne')}
           </Link>
         </p>
       </div>

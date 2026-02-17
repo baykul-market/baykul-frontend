@@ -2,8 +2,11 @@ import { useQuery } from '@tanstack/react-query';
 import { orderApi, Order, OrderStatus } from '../../api/order';
 import { Loader2, Package, Clock, CheckCircle2, XCircle, ArrowRight, RotateCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../i18n/i18n';
 
 export default function OrderHistoryPage() {
+  const { t } = useTranslation();
   const { data: orders, isLoading } = useQuery({
     queryKey: ['orders'],
     queryFn: orderApi.getOrders,
@@ -13,7 +16,7 @@ export default function OrderHistoryPage() {
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-3">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <p className="text-sm text-muted-foreground">Loading your orders...</p>
+        <p className="text-sm text-muted-foreground">{t('orders.loadingOrders')}</p>
       </div>
     );
   }
@@ -25,33 +28,35 @@ export default function OrderHistoryPage() {
           <Package className="h-10 w-10 text-muted-foreground" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold tracking-tight mb-2">No orders yet</h2>
+          <h2 className="text-2xl font-bold tracking-tight mb-2">{t('orders.emptyTitle')}</h2>
           <p className="text-muted-foreground max-w-sm">
-            When you place an order, it will appear here. Start shopping to find the parts you need.
+            {t('orders.emptySubtitle')}
           </p>
         </div>
         <Link to="/" className="btn-primary mt-2">
-          Browse Products
+          {t('orders.browseProducts')}
           <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
     );
   }
 
+  const dateLocale = i18n.language === 'ru' ? 'ru-RU' : 'en-US';
+
   return (
     <div className="max-w-4xl mx-auto animate-fade-in">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Order History</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('orders.title')}</h1>
         <p className="text-muted-foreground text-sm mt-1">
-          {orders.length} order{orders.length !== 1 ? 's' : ''} placed
+          {t('orders.orderCount', { count: orders.length })}
         </p>
       </div>
 
       {/* Order List */}
       <div className="space-y-4">
         {orders.map((order) => {
-          const statusConfig = getStatusConfig(order.status);
+          const statusConfig = getStatusConfig(order.status, t);
           const totalPrice = getOrderTotal(order);
           const currency = order.orderProducts?.[0]?.part?.currency ?? 'EUR';
           const currencySymbol = currency === 'EUR' ? '\u20AC' : currency === 'USD' ? '$' : currency;
@@ -71,23 +76,23 @@ export default function OrderHistoryPage() {
 
                   <div>
                     <h3 className="font-semibold text-sm sm:text-base">
-                      Order #{order.number}
+                      {t('orders.orderNumber', { number: order.number })}
                     </h3>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      {new Date(order.createdTs).toLocaleDateString('en-US', {
+                      {new Date(order.createdTs).toLocaleDateString(dateLocale, {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric',
                       })}
-                      {' at '}
-                      {new Date(order.createdTs).toLocaleTimeString('en-US', {
+                      {' ' + t('orders.at') + ' '}
+                      {new Date(order.createdTs).toLocaleTimeString(dateLocale, {
                         hour: '2-digit',
                         minute: '2-digit',
                       })}
                     </p>
                     {order.orderProducts && order.orderProducts.length > 0 && (
                       <p className="text-xs text-muted-foreground mt-1">
-                        {order.orderProducts.length} product{order.orderProducts.length !== 1 ? 's' : ''}
+                        {t('orders.productCount', { count: order.orderProducts.length })}
                       </p>
                     )}
                   </div>
@@ -120,7 +125,7 @@ export default function OrderHistoryPage() {
                     ))}
                     {order.orderProducts.length > 3 && (
                       <p className="text-xs text-muted-foreground">
-                        +{order.orderProducts.length - 3} more item{order.orderProducts.length - 3 !== 1 ? 's' : ''}
+                        {t('orders.moreItems', { count: order.orderProducts.length - 3 })}
                       </p>
                     )}
                   </div>
@@ -142,11 +147,11 @@ function getOrderTotal(order: Order): number {
   );
 }
 
-function getStatusConfig(status: OrderStatus) {
+function getStatusConfig(status: OrderStatus, t: (key: string) => string) {
   switch (status) {
     case OrderStatus.COMPLETED:
       return {
-        label: 'Completed',
+        label: t('orders.statusCompleted'),
         icon: CheckCircle2,
         bgClass: 'bg-success/10',
         iconClass: 'text-success',
@@ -154,7 +159,7 @@ function getStatusConfig(status: OrderStatus) {
       };
     case OrderStatus.PROCESSING:
       return {
-        label: 'Processing',
+        label: t('orders.statusProcessing'),
         icon: RotateCw,
         bgClass: 'bg-primary/10',
         iconClass: 'text-primary',
@@ -162,7 +167,7 @@ function getStatusConfig(status: OrderStatus) {
       };
     case OrderStatus.CANCELLED:
       return {
-        label: 'Cancelled',
+        label: t('orders.statusCancelled'),
         icon: XCircle,
         bgClass: 'bg-destructive/10',
         iconClass: 'text-destructive',
@@ -170,7 +175,7 @@ function getStatusConfig(status: OrderStatus) {
       };
     case OrderStatus.NEW:
       return {
-        label: 'New',
+        label: t('orders.statusNew'),
         icon: Clock,
         bgClass: 'bg-muted',
         iconClass: 'text-muted-foreground',

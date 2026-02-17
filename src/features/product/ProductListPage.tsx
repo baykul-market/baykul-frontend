@@ -5,8 +5,10 @@ import { cartApi } from '../../api/cart';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, ShoppingCart, Loader2, Package, Tag, Weight, Box } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 export default function ProductListPage() {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const queryClient = useQueryClient();
 
@@ -18,11 +20,11 @@ export default function ProductListPage() {
   const addToCartMutation = useMutation({
     mutationFn: (product: Part) => cartApi.addToCart(product.id),
     onSuccess: () => {
-      toast.success('Added to cart');
+      toast.success(t('products.addedToCart'));
       queryClient.invalidateQueries({ queryKey: ['cart'] });
     },
     onError: (error: any) => {
-      const message = error?.response?.data?.error || 'Failed to add to cart';
+      const message = error?.response?.data?.error || t('products.failedToAdd');
       toast.error(message);
     }
   });
@@ -33,10 +35,10 @@ export default function ProductListPage() {
       <div className="rounded-2xl bg-gradient-to-br from-primary/5 via-primary/10 to-accent/5 border border-primary/10 p-6 md:p-10">
         <div className="max-w-2xl">
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
-            Find the Right Parts
+            {t('products.heroTitle')}
           </h1>
           <p className="text-muted-foreground text-base md:text-lg mb-6">
-            Browse our catalog of quality auto parts. Search by name, brand, or article number.
+            {t('products.heroSubtitle')}
           </p>
 
           {/* Search Bar */}
@@ -47,7 +49,7 @@ export default function ProductListPage() {
             <input
               type="search"
               className="input-base pl-11 pr-4 py-3 text-base shadow-sm"
-              placeholder="Search by name, brand, or article..."
+              placeholder={t('products.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -60,10 +62,10 @@ export default function ProductListPage() {
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
             {products.length === 0
-              ? 'No results found'
-              : `Showing ${products.length} product${products.length !== 1 ? 's' : ''}`}
+              ? t('products.noResults')
+              : t('products.showingProducts', { count: products.length })}
             {searchTerm && (
-              <span> for "<span className="font-medium text-foreground">{searchTerm}</span>"</span>
+              <span> {t('products.forQuery', { query: searchTerm })}</span>
             )}
           </p>
         </div>
@@ -73,7 +75,7 @@ export default function ProductListPage() {
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-16 gap-3">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading products...</p>
+          <p className="text-sm text-muted-foreground">{t('products.loadingProducts')}</p>
         </div>
       ) : (
         <>
@@ -96,9 +98,9 @@ export default function ProductListPage() {
                 <Box className="h-8 w-8 text-muted-foreground" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold mb-1">No products found</h3>
+                <h3 className="text-lg font-semibold mb-1">{t('products.noProductsTitle')}</h3>
                 <p className="text-muted-foreground text-sm max-w-sm">
-                  Try adjusting your search term or browse our full catalog.
+                  {t('products.noProductsSubtitle')}
                 </p>
               </div>
               {searchTerm && (
@@ -106,7 +108,7 @@ export default function ProductListPage() {
                   onClick={() => setSearchTerm('')}
                   className="btn-secondary text-sm"
                 >
-                  Clear search
+                  {t('products.clearSearch')}
                 </button>
               )}
             </div>
@@ -126,6 +128,7 @@ function ProductCard({
   onAddToCart: () => void;
   isAdding: boolean;
 }) {
+  const { t } = useTranslation();
   const inStock = (product.storageCount ?? 0) > 0;
 
   return (
@@ -141,7 +144,7 @@ function ProductCard({
               : 'bg-destructive/10 text-destructive border-destructive/20'
           }`}
         >
-          {inStock ? 'In Stock' : 'Out of Stock'}
+          {inStock ? t('products.inStock') : t('products.outOfStock')}
         </span>
       </div>
 
@@ -163,24 +166,24 @@ function ProductCard({
           <div className="flex items-center justify-between">
             <span className="flex items-center gap-1.5">
               <Box className="h-3 w-3" />
-              Article
+              {t('products.article')}
             </span>
             <span className="font-mono text-xs bg-muted px-2 py-0.5 rounded-md">{product.article}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="flex items-center gap-1.5">
               <Package className="h-3 w-3" />
-              Stock
+              {t('products.stock')}
             </span>
             <span className={inStock ? 'text-success font-medium' : 'text-destructive font-medium'}>
-              {inStock ? `${product.storageCount} units` : 'Unavailable'}
+              {inStock ? t('products.units', { count: product.storageCount ?? 0 }) : t('products.unavailable')}
             </span>
           </div>
           {product.weight != null && (
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-1.5">
                 <Weight className="h-3 w-3" />
-                Weight
+                {t('products.weight')}
               </span>
               <span>{product.weight} kg</span>
             </div>
@@ -203,7 +206,7 @@ function ProductCard({
             ) : (
               <ShoppingCart className="w-4 h-4" />
             )}
-            <span>{inStock ? 'Add' : 'Sold Out'}</span>
+            <span>{inStock ? t('products.add') : t('products.soldOut')}</span>
           </button>
         </div>
       </div>

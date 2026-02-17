@@ -5,8 +5,10 @@ import { useMutation } from '@tanstack/react-query';
 import { authApi, registerSchema, type RegisterInput } from '../../api/auth';
 import toast from 'react-hot-toast';
 import { Loader2, Mail, Lock, UserPlus, User } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function RegisterPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const form = useForm<RegisterInput>({
@@ -16,11 +18,11 @@ export default function RegisterPage() {
   const mutation = useMutation({
     mutationFn: authApi.register,
     onSuccess: () => {
-      toast.success('Registration successful! Please login.');
+      toast.success(t('auth.register.success'));
       navigate('/login');
     },
     onError: (error) => {
-      toast.error('Registration failed.');
+      toast.error(t('auth.register.error'));
       console.error(error);
     },
   });
@@ -37,8 +39,8 @@ export default function RegisterPage() {
           <div className="inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-primary/10 text-primary mb-4">
             <UserPlus className="h-7 w-7" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight mb-1">Create an account</h1>
-          <p className="text-muted-foreground text-sm">Join Baykul Auto Parts marketplace</p>
+          <h1 className="text-2xl font-bold tracking-tight mb-1">{t('auth.register.title')}</h1>
+          <p className="text-muted-foreground text-sm">{t('auth.register.subtitle')}</p>
         </div>
 
         {/* Form Card */}
@@ -46,7 +48,7 @@ export default function RegisterPage() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1.5">First Name</label>
+                <label className="block text-sm font-medium mb-1.5">{t('auth.register.firstName')}</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <User className="h-4 w-4 text-muted-foreground" />
@@ -54,7 +56,7 @@ export default function RegisterPage() {
                   <input
                     {...form.register('firstName')}
                     className="input-base pl-10"
-                    placeholder="John"
+                    placeholder={t('auth.register.firstNamePlaceholder')}
                   />
                 </div>
                 {form.formState.errors.firstName && (
@@ -62,7 +64,7 @@ export default function RegisterPage() {
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1.5">Last Name</label>
+                <label className="block text-sm font-medium mb-1.5">{t('auth.register.lastName')}</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <User className="h-4 w-4 text-muted-foreground" />
@@ -70,7 +72,7 @@ export default function RegisterPage() {
                   <input
                     {...form.register('lastName')}
                     className="input-base pl-10"
-                    placeholder="Doe"
+                    placeholder={t('auth.register.lastNamePlaceholder')}
                   />
                 </div>
                 {form.formState.errors.lastName && (
@@ -80,7 +82,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1.5">Email</label>
+              <label className="block text-sm font-medium mb-1.5">{t('auth.register.email')}</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                   <Mail className="h-4 w-4 text-muted-foreground" />
@@ -89,7 +91,7 @@ export default function RegisterPage() {
                   type="email"
                   {...form.register('email')}
                   className="input-base pl-10"
-                  placeholder="you@example.com"
+                  placeholder={t('auth.register.emailPlaceholder')}
                 />
               </div>
               {form.formState.errors.email && (
@@ -98,7 +100,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1.5">Password</label>
+              <label className="block text-sm font-medium mb-1.5">{t('auth.register.password')}</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                   <Lock className="h-4 w-4 text-muted-foreground" />
@@ -107,7 +109,7 @@ export default function RegisterPage() {
                   type="password"
                   {...form.register('password')}
                   className="input-base pl-10"
-                  placeholder="Create a password"
+                  placeholder={t('auth.register.passwordPlaceholder')}
                 />
               </div>
               {form.formState.errors.password && (
@@ -116,7 +118,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1.5">Confirm Password</label>
+              <label className="block text-sm font-medium mb-1.5">{t('auth.register.confirmPassword')}</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                   <Lock className="h-4 w-4 text-muted-foreground" />
@@ -125,7 +127,7 @@ export default function RegisterPage() {
                   type="password"
                   {...form.register('confirmPassword')}
                   className="input-base pl-10"
-                  placeholder="Confirm your password"
+                  placeholder={t('auth.register.confirmPasswordPlaceholder')}
                 />
               </div>
               {form.formState.errors.confirmPassword && (
@@ -141,10 +143,10 @@ export default function RegisterPage() {
               {mutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Creating account...
+                  {t('auth.register.creatingAccount')}
                 </>
               ) : (
-                'Create Account'
+                t('auth.register.createAccount')
               )}
             </button>
           </form>
@@ -152,9 +154,9 @@ export default function RegisterPage() {
 
         {/* Footer Link */}
         <p className="text-center text-sm text-muted-foreground mt-6">
-          Already have an account?{' '}
+          {t('auth.register.haveAccount')}{' '}
           <Link to="/login" className="text-primary font-medium hover:underline">
-            Sign in
+            {t('auth.register.signIn')}
           </Link>
         </p>
       </div>

@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import { ShoppingCart, User, LogOut, Package, Wrench, Menu, X, Shield, Users } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Package, Wrench, Menu, X, Shield, Users, Globe } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { cartApi } from '../../api/cart';
 import { authApi } from '../../api/auth';
 import { cn } from '../../lib/utils';
+import { useTranslation } from 'react-i18next';
 
 export default function Layout() {
+  const { t, i18n } = useTranslation();
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
@@ -42,6 +44,11 @@ export default function Layout() {
     navigate('/');
   };
 
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'ru' ? 'en' : 'ru';
+    i18n.changeLanguage(newLang);
+  };
+
   const isActive = (path: string) => location.pathname === path;
 
   const navLinkClass = (path: string) =>
@@ -71,21 +78,21 @@ export default function Layout() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                 <Wrench className="h-4 w-4" />
               </div>
-              <span className="hidden sm:inline">Baykul Auto Parts</span>
-              <span className="sm:hidden">Baykul</span>
+              <span className="hidden sm:inline">{t('nav.brandFull')}</span>
+              <span className="sm:hidden">{t('nav.brandShort')}</span>
             </Link>
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-6">
               <Link to="/" className={navLinkClass('/')}>
-                Products
+                {t('nav.products')}
               </Link>
 
               {user && (
                 <Link to="/orders" className={navLinkClass('/orders')}>
                   <span className="flex items-center gap-1.5">
                     <Package className="w-3.5 h-3.5" />
-                    Orders
+                    {t('nav.orders')}
                   </span>
                 </Link>
               )}
@@ -95,13 +102,13 @@ export default function Layout() {
                   <Link to="/admin" className={navLinkClass('/admin')}>
                     <span className="flex items-center gap-1.5">
                       <Shield className="w-3.5 h-3.5" />
-                      Admin
+                      {t('nav.admin')}
                     </span>
                   </Link>
                   <Link to="/admin/users" className={navLinkClass('/admin/users')}>
                     <span className="flex items-center gap-1.5">
                       <Users className="w-3.5 h-3.5" />
-                      Users
+                      {t('nav.users')}
                     </span>
                   </Link>
                 </>
@@ -110,6 +117,16 @@ export default function Layout() {
 
             {/* Right Section */}
             <div className="flex items-center gap-2">
+              {/* Language Toggle */}
+              <button
+                onClick={toggleLanguage}
+                className="inline-flex items-center justify-center gap-1.5 rounded-lg px-2.5 py-2 text-xs font-medium text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+                title={i18n.language === 'ru' ? 'Switch to English' : 'Переключить на русский'}
+              >
+                <Globe className="h-4 w-4" />
+                <span className="uppercase">{i18n.language === 'ru' ? 'EN' : 'RU'}</span>
+              </button>
+
               {/* Cart Button */}
               <Link
                 to="/cart"
@@ -145,7 +162,7 @@ export default function Layout() {
                     <button
                       onClick={handleLogout}
                       className="btn-ghost px-3 py-2 text-muted-foreground hover:text-destructive"
-                      title="Logout"
+                      title={t('nav.logout')}
                     >
                       <LogOut className="h-4 w-4" />
                     </button>
@@ -154,10 +171,10 @@ export default function Layout() {
                   <>
                     <Link to="/login" className="btn-ghost px-3 py-2 text-sm">
                       <User className="h-4 w-4" />
-                      Login
+                      {t('nav.login')}
                     </Link>
                     <Link to="/register" className="btn-primary px-4 py-2 text-sm">
-                      Register
+                      {t('nav.register')}
                     </Link>
                   </>
                 )}
@@ -186,7 +203,7 @@ export default function Layout() {
                   isActive('/') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary'
                 )}
               >
-                Products
+                {t('nav.products')}
               </Link>
 
               {user && (
@@ -200,7 +217,7 @@ export default function Layout() {
                     )}
                   >
                     <User className="w-4 h-4" />
-                    My Profile
+                    {t('nav.myProfile')}
                   </Link>
 
                   <Link
@@ -212,7 +229,7 @@ export default function Layout() {
                     )}
                   >
                     <Package className="w-4 h-4" />
-                    Orders
+                    {t('nav.orders')}
                   </Link>
                 </>
               )}
@@ -228,7 +245,7 @@ export default function Layout() {
                     )}
                   >
                     <Shield className="w-4 h-4" />
-                    Admin
+                    {t('nav.admin')}
                   </Link>
                   <Link
                     to="/admin/users"
@@ -239,10 +256,19 @@ export default function Layout() {
                     )}
                   >
                     <Users className="w-4 h-4" />
-                    User Search
+                    {t('nav.userSearch')}
                   </Link>
                 </>
               )}
+
+              {/* Mobile Language Toggle */}
+              <button
+                onClick={toggleLanguage}
+                className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-secondary transition-colors w-full"
+              >
+                <Globe className="w-4 h-4" />
+                {i18n.language === 'ru' ? t('language.en') : t('language.ru')}
+              </button>
 
               <div className="border-t pt-3 mt-3">
                 {user ? (
@@ -256,7 +282,7 @@ export default function Layout() {
                       className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
                     >
                       <LogOut className="h-4 w-4" />
-                      Logout
+                      {t('nav.logout')}
                     </button>
                   </div>
                 ) : (
@@ -267,14 +293,14 @@ export default function Layout() {
                       className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-secondary transition-colors"
                     >
                       <User className="h-4 w-4" />
-                      Login
+                      {t('nav.login')}
                     </Link>
                     <Link
                       to="/register"
                       onClick={() => setMobileMenuOpen(false)}
                       className="block text-center btn-primary w-full"
                     >
-                      Register
+                      {t('nav.register')}
                     </Link>
                   </div>
                 )}
@@ -299,18 +325,18 @@ export default function Layout() {
               <div className="flex h-6 w-6 items-center justify-center rounded bg-primary/10 text-primary">
                 <Wrench className="h-3 w-3" />
               </div>
-              <span>&copy; {new Date().getFullYear()} Baykul Auto Parts</span>
+              <span>{t('nav.copyright', { year: new Date().getFullYear() })}</span>
             </div>
             <nav className="flex items-center gap-4 text-sm text-muted-foreground">
-              <Link to="/" className="hover:text-foreground transition-colors">Products</Link>
+              <Link to="/" className="hover:text-foreground transition-colors">{t('nav.products')}</Link>
               <span className="text-border">|</span>
-              <Link to="/cart" className="hover:text-foreground transition-colors">Cart</Link>
+              <Link to="/cart" className="hover:text-foreground transition-colors">{t('common.cart')}</Link>
               {user && (
                 <>
                   <span className="text-border">|</span>
-                  <Link to="/orders" className="hover:text-foreground transition-colors">Orders</Link>
+                  <Link to="/orders" className="hover:text-foreground transition-colors">{t('nav.orders')}</Link>
                   <span className="text-border">|</span>
-                  <Link to="/profile" className="hover:text-foreground transition-colors">Profile</Link>
+                  <Link to="/profile" className="hover:text-foreground transition-colors">{t('common.profile')}</Link>
                 </>
               )}
             </nav>
