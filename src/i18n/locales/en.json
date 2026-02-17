@@ -27,6 +27,7 @@
     "logout": "Logout",
     "myProfile": "My Profile",
     "userSearch": "User Search",
+    "partsUpload": "Parts Upload",
     "copyright": "© {{year}} Baykul Auto Parts"
   },
   "auth": {
@@ -233,6 +234,30 @@
       "blocked": "Blocked",
       "active": "Active",
       "patronymic": "Patronymic: {{value}}"
+    },
+    "partsUpload": {
+      "title": "Parts Upload",
+      "subtitle": "Upload spare parts from a CSV file to add them to the catalog in bulk.",
+      "formatTitle": "CSV File Format",
+      "formatUtf8": "File must be UTF-8 encoded",
+      "formatSemicolon": "Use semicolon (;) as column separator",
+      "formatMaxSize": "Maximum file size: 10 MB",
+      "headerLabel": "Header:",
+      "exampleLabel": "Example row:",
+      "downloadTemplate": "Download template",
+      "dropzone": "Drop your CSV file here, or click to browse",
+      "dropzoneHint": "Only .csv files up to 10 MB",
+      "uploadButton": "Upload Parts",
+      "uploading": "Uploading...",
+      "uploadSuccess": "Parts uploaded successfully!",
+      "uploadError": "Failed to upload parts. Please try again.",
+      "validationError": "CSV file has validation errors",
+      "forbidden": "You don't have permission to upload parts",
+      "invalidFileType": "Please select a .csv file",
+      "fileTooLarge": "File size must be less than 10 MB",
+      "successTitle": "Upload Successful",
+      "successDescription": "All parts from the CSV file have been parsed and added to the catalog.",
+      "errorsTitle": "Upload Failed"
     }
   },
   "language": {

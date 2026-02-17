@@ -35,4 +35,13 @@ export const productApi = {
     const response = await api.get<Part>(`/product/${id}`);
     return response.data;
   },
+
+  uploadCsv: async (file: File): Promise<{ parsed: string }> => {
+    const formData = new FormData();
+    formData.append('csvFile', file);
+    const response = await api.post<{ parsed: string }>('/product/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  },
 };

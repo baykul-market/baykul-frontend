@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import { ShoppingCart, User, LogOut, Package, Wrench, Menu, X, Shield, Users, Globe } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Package, Wrench, Menu, X, Shield, Users, Globe, Upload } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { cartApi } from '../../api/cart';
@@ -110,6 +110,12 @@ export default function Layout() {
                     <span className="flex items-center gap-1.5">
                       <Users className="w-3.5 h-3.5" />
                       {t('nav.users')}
+                    </span>
+                  </Link>
+                  <Link to="/admin/parts-upload" className={navLinkClass('/admin/parts-upload')}>
+                    <span className="flex items-center gap-1.5">
+                      <Upload className="w-3.5 h-3.5" />
+                      {t('nav.partsUpload')}
                     </span>
                   </Link>
                 </>
@@ -258,6 +264,17 @@ export default function Layout() {
                   >
                     <Users className="w-4 h-4" />
                     {t('nav.userSearch')}
+                  </Link>
+                  <Link
+                    to="/admin/parts-upload"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={cn(
+                      'flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                      isActive('/admin/parts-upload') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary'
+                    )}
+                  >
+                    <Upload className="w-4 h-4" />
+                    {t('nav.partsUpload')}
                   </Link>
                 </>
               )}
