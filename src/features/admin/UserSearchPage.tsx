@@ -29,7 +29,7 @@ export default function UserSearchPage() {
 
   // Only ADMIN role has users:write permission
   if (!user || user.role !== 'ADMIN') {
-    navigate('/');
+    navigate('/products');
     return null;
   }
 

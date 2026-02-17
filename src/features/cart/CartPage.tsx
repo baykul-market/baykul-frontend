@@ -88,7 +88,7 @@ export default function CartPage() {
             {t('cart.emptySubtitle')}
           </p>
         </div>
-        <Link to="/" className="btn-primary mt-2">
+        <Link to="/products" className="btn-primary mt-2">
           {t('cart.startShopping')}
           <ArrowRight className="w-4 h-4" />
         </Link>
@@ -114,7 +114,7 @@ export default function CartPage() {
             {t('cart.itemCount', { count: itemCount })}
           </p>
         </div>
-        <Link to="/" className="btn-ghost text-sm text-muted-foreground">
+        <Link to="/products" className="btn-ghost text-sm text-muted-foreground">
           <ArrowLeft className="w-4 h-4" />
           {t('cart.continueShopping')}
         </Link>

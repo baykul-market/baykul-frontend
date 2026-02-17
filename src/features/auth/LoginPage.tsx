@@ -37,7 +37,7 @@ export default function LoginPage() {
     onSuccess: (data) => {
       login(data.user, data.accessToken, data.refreshToken);
       toast.success(t('auth.login.success'));
-      navigate('/');
+      navigate('/products');
     },
     onError: (error) => {
       toast.error(t('auth.login.error'));

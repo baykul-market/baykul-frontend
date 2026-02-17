@@ -8,7 +8,7 @@ export default function AdminPage() {
   const user = useAuthStore((state) => state.user);
 
   if (!user || user.role === 'USER') {
-    return <Navigate to="/" />;
+    return <Navigate to="/products" />;
   }
 
   const UPCOMING_FEATURES = [

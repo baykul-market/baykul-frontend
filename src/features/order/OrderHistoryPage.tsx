@@ -33,7 +33,7 @@ export default function OrderHistoryPage() {
             {t('orders.emptySubtitle')}
           </p>
         </div>
-        <Link to="/" className="btn-primary mt-2">
+        <Link to="/products" className="btn-primary mt-2">
           {t('orders.browseProducts')}
           <ArrowRight className="w-4 h-4" />
         </Link>

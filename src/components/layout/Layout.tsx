@@ -18,6 +18,7 @@ export default function Layout() {
   const { data: cart } = useQuery({
     queryKey: ['cart'],
     queryFn: cartApi.getCart,
+    enabled: !!user,
     retry: (failureCount, error: any) => {
       if (error?.response?.status === 404) return false;
       return failureCount < 3;
@@ -41,7 +42,7 @@ export default function Layout() {
     logout();
     queryClient.clear();
     setMobileMenuOpen(false);
-    navigate('/');
+    navigate('/login');
   };
 
   const toggleLanguage = () => {
@@ -49,7 +50,7 @@ export default function Layout() {
     i18n.changeLanguage(newLang);
   };
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) => location.pathname === path || (path === '/products' && location.pathname === '/');
 
   const navLinkClass = (path: string) =>
     cn(
@@ -72,7 +73,7 @@ export default function Layout() {
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
             <Link
-              to="/"
+              to="/products"
               className="flex items-center gap-2.5 text-lg font-bold text-foreground transition-colors hover:text-primary"
             >
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
@@ -84,7 +85,7 @@ export default function Layout() {
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-6">
-              <Link to="/" className={navLinkClass('/')}>
+              <Link to="/products" className={navLinkClass('/products')}>
                 {t('nav.products')}
               </Link>
 
@@ -196,11 +197,11 @@ export default function Layout() {
           <div className="md:hidden border-t bg-background animate-fade-in">
             <div className="container mx-auto max-w-7xl px-4 py-4 space-y-1">
               <Link
-                to="/"
+                to="/products"
                 onClick={() => setMobileMenuOpen(false)}
                 className={cn(
                   'block rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                  isActive('/') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary'
+                  isActive('/products') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary'
                 )}
               >
                 {t('nav.products')}
@@ -328,7 +329,7 @@ export default function Layout() {
               <span>{t('nav.copyright', { year: new Date().getFullYear() })}</span>
             </div>
             <nav className="flex items-center gap-4 text-sm text-muted-foreground">
-              <Link to="/" className="hover:text-foreground transition-colors">{t('nav.products')}</Link>
+              <Link to="/products" className="hover:text-foreground transition-colors">{t('nav.products')}</Link>
               <span className="text-border">|</span>
               <Link to="/cart" className="hover:text-foreground transition-colors">{t('common.cart')}</Link>
               {user && (

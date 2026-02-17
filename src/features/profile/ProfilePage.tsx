@@ -45,7 +45,7 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<TabId>('overview');
 
   if (!isAuthenticated || !user) {
-    navigate('/login');
+    navigate('/login', { replace: true });
     return null;
   }
 
