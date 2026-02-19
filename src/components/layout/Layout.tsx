@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import { ShoppingCart, User, LogOut, Package, Wrench, Menu, X, Shield, Users, Globe, Upload, UserCog } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Package, Wrench, Menu, X, Shield, Globe } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { cartApi } from '../../api/cart';
@@ -98,33 +98,13 @@ export default function Layout() {
                 </Link>
               )}
 
-              {user && user.role === 'ADMIN' && (
-                <>
-                  <Link to="/admin" className={navLinkClass('/admin')}>
-                    <span className="flex items-center gap-1.5">
-                      <Shield className="w-3.5 h-3.5" />
-                      {t('nav.admin')}
-                    </span>
-                  </Link>
-                  <Link to="/admin/users" className={navLinkClass('/admin/users')}>
-                    <span className="flex items-center gap-1.5">
-                      <Users className="w-3.5 h-3.5" />
-                      {t('nav.users')}
-                    </span>
-                  </Link>
-                  <Link to="/admin/users/manage" className={navLinkClass('/admin/users/manage')}>
-                    <span className="flex items-center gap-1.5">
-                      <UserCog className="w-3.5 h-3.5" />
-                      {t('nav.userManagement')}
-                    </span>
-                  </Link>
-                  <Link to="/admin/parts-upload" className={navLinkClass('/admin/parts-upload')}>
-                    <span className="flex items-center gap-1.5">
-                      <Upload className="w-3.5 h-3.5" />
-                      {t('nav.partsUpload')}
-                    </span>
-                  </Link>
-                </>
+              {user && user.role !== 'USER' && (
+                <Link to="/dashboard" className={navLinkClass('/dashboard')}>
+                  <span className="flex items-center gap-1.5">
+                    <Shield className="w-3.5 h-3.5" />
+                    {t('nav.dashboard')}
+                  </span>
+                </Link>
               )}
             </nav>
 
@@ -247,53 +227,18 @@ export default function Layout() {
                 </>
               )}
 
-              {user && user.role === 'ADMIN' && (
-                <>
-                  <Link
-                    to="/admin"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={cn(
-                      'flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                      isActive('/admin') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary'
-                    )}
-                  >
-                    <Shield className="w-4 h-4" />
-                    {t('nav.admin')}
-                  </Link>
-                  <Link
-                    to="/admin/users"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={cn(
-                      'flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                      isActive('/admin/users') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary'
-                    )}
-                  >
-                    <Users className="w-4 h-4" />
-                    {t('nav.userSearch')}
-                  </Link>
-                  <Link
-                    to="/admin/users/manage"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={cn(
-                      'flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                      isActive('/admin/users/manage') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary'
-                    )}
-                  >
-                    <UserCog className="w-4 h-4" />
-                    {t('nav.userManagement')}
-                  </Link>
-                  <Link
-                    to="/admin/parts-upload"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={cn(
-                      'flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                      isActive('/admin/parts-upload') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary'
-                    )}
-                  >
-                    <Upload className="w-4 h-4" />
-                    {t('nav.partsUpload')}
-                  </Link>
-                </>
+              {user && user.role !== 'USER' && (
+                <Link
+                  to="/dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={cn(
+                    'flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                    isActive('/dashboard') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary'
+                  )}
+                >
+                  <Shield className="w-4 h-4" />
+                  {t('nav.dashboard')}
+                </Link>
               )}
 
               {/* Mobile Language Toggle */}

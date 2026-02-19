@@ -6,11 +6,10 @@ import RegisterPage from './features/auth/RegisterPage';
 import ProductListPage from './features/product/ProductListPage';
 import CartPage from './features/cart/CartPage';
 import OrderHistoryPage from './features/order/OrderHistoryPage';
-import AdminPage from './features/admin/AdminPage';
+import DashboardPage from './features/dashboard/DashboardPage';
 import ProfilePage from './features/profile/ProfilePage';
-import UserSearchPage from './features/admin/UserSearchPage';
-import UserManagementPage from './features/admin/UserManagementPage';
-import PartsUploadPage from './features/admin/PartsUploadPage';
+import UserManagementPage from './features/dashboard/UserManagementPage';
+import PartsUploadPage from './features/dashboard/PartsUploadPage';
 import { useAuthStore } from './store/useAuthStore';
 
 function RootRedirect() {
@@ -30,10 +29,9 @@ function App() {
           <Route path="cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>} />
           <Route path="orders" element={<ProtectedRoute><OrderHistoryPage /></ProtectedRoute>} />
           <Route path="profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-          <Route path="admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
-          <Route path="admin/users" element={<ProtectedRoute><UserSearchPage /></ProtectedRoute>} />
-          <Route path="admin/users/manage" element={<ProtectedRoute><UserManagementPage /></ProtectedRoute>} />
-          <Route path="admin/parts-upload" element={<ProtectedRoute><PartsUploadPage /></ProtectedRoute>} />
+          <Route path="dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+          <Route path="dashboard/users" element={<ProtectedRoute><UserManagementPage /></ProtectedRoute>} />
+          <Route path="dashboard/parts-upload" element={<ProtectedRoute><PartsUploadPage /></ProtectedRoute>} />
         </Route>
       </Routes>
     </BrowserRouter>

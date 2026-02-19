@@ -21,7 +21,7 @@ export default function PartsUploadPage() {
   const uploadMutation = useMutation({
     mutationFn: (csvFile: File) => productApi.uploadCsv(csvFile),
     onSuccess: () => {
-      toast.success(t('admin.partsUpload.uploadSuccess'));
+      toast.success(t('dashboard.partsUpload.uploadSuccess'));
       setFile(null);
       setErrors(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -30,16 +30,16 @@ export default function PartsUploadPage() {
       const data = error?.response?.data;
       if (error?.response?.status === 400 && data) {
         setErrors(data);
-        toast.error(t('admin.partsUpload.validationError'));
+        toast.error(t('dashboard.partsUpload.validationError'));
       } else if (error?.response?.status === 403) {
-        toast.error(t('admin.partsUpload.forbidden'));
+        toast.error(t('dashboard.partsUpload.forbidden'));
       } else {
-        toast.error(t('admin.partsUpload.uploadError'));
+        toast.error(t('dashboard.partsUpload.uploadError'));
       }
     },
   });
 
-  if (!user || user.role === 'USER') {
+  if (!user || user.role !== 'ADMIN') {
     return <Navigate to="/products" />;
   }
 
@@ -55,11 +55,11 @@ export default function PartsUploadPage() {
 
   const validateFile = (f: File): boolean => {
     if (!f.name.endsWith('.csv')) {
-      toast.error(t('admin.partsUpload.invalidFileType'));
+      toast.error(t('dashboard.partsUpload.invalidFileType'));
       return false;
     }
     if (f.size > 100 * 1024 * 1024) {
-      toast.error(t('admin.partsUpload.fileTooLarge'));
+      toast.error(t('dashboard.partsUpload.fileTooLarge'));
       return false;
     }
     return true;
@@ -122,9 +122,9 @@ export default function PartsUploadPage() {
           <Upload className="h-6 w-6" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t('admin.partsUpload.title')}</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('dashboard.partsUpload.title')}</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            {t('admin.partsUpload.subtitle')}
+            {t('dashboard.partsUpload.subtitle')}
           </p>
         </div>
       </div>
@@ -134,16 +134,16 @@ export default function PartsUploadPage() {
         <div className="flex items-start gap-3">
           <Info className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-sm mb-2">{t('admin.partsUpload.formatTitle')}</h3>
+            <h3 className="font-semibold text-sm mb-2">{t('dashboard.partsUpload.formatTitle')}</h3>
             <ul className="text-sm text-muted-foreground space-y-1 mb-3">
-              <li>{t('admin.partsUpload.formatUtf8')}</li>
-              <li>{t('admin.partsUpload.formatSemicolon')}</li>
-              <li>{t('admin.partsUpload.formatMaxSize')}</li>
+              <li>{t('dashboard.partsUpload.formatUtf8')}</li>
+              <li>{t('dashboard.partsUpload.formatSemicolon')}</li>
+              <li>{t('dashboard.partsUpload.formatMaxSize')}</li>
             </ul>
             <div className="rounded-lg bg-secondary/50 p-3 overflow-x-auto">
-              <p className="text-xs font-medium text-muted-foreground mb-1">{t('admin.partsUpload.headerLabel')}</p>
+              <p className="text-xs font-medium text-muted-foreground mb-1">{t('dashboard.partsUpload.headerLabel')}</p>
               <code className="text-xs text-foreground break-all">{CSV_HEADERS}</code>
-              <p className="text-xs font-medium text-muted-foreground mt-2 mb-1">{t('admin.partsUpload.exampleLabel')}</p>
+              <p className="text-xs font-medium text-muted-foreground mt-2 mb-1">{t('dashboard.partsUpload.exampleLabel')}</p>
               <code className="text-xs text-foreground break-all">{CSV_EXAMPLE}</code>
             </div>
             <button
@@ -151,7 +151,7 @@ export default function PartsUploadPage() {
               className="btn-ghost text-sm mt-3 text-primary hover:text-primary/80"
             >
               <Download className="h-4 w-4" />
-              {t('admin.partsUpload.downloadTemplate')}
+              {t('dashboard.partsUpload.downloadTemplate')}
             </button>
           </div>
         </div>
@@ -178,7 +178,7 @@ export default function PartsUploadPage() {
           accept=".csv"
           onChange={handleFileChange}
           className="hidden"
-          aria-label={t('admin.partsUpload.dropzone')}
+          aria-label={t('dashboard.partsUpload.dropzone')}
         />
 
         {!file ? (
@@ -190,10 +190,10 @@ export default function PartsUploadPage() {
             </div>
             <div>
               <p className="text-sm font-medium">
-                {t('admin.partsUpload.dropzone')}
+                {t('dashboard.partsUpload.dropzone')}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                {t('admin.partsUpload.dropzoneHint')}
+                {t('dashboard.partsUpload.dropzoneHint')}
               </p>
             </div>
           </div>
@@ -233,12 +233,12 @@ export default function PartsUploadPage() {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
-              {t('admin.partsUpload.uploading')}
+              {t('dashboard.partsUpload.uploading')}
             </>
           ) : (
             <>
               <Upload className="h-4 w-4" />
-              {t('admin.partsUpload.uploadButton')}
+              {t('dashboard.partsUpload.uploadButton')}
             </>
           )}
         </button>
@@ -250,10 +250,10 @@ export default function PartsUploadPage() {
           <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-medium text-green-800 dark:text-green-200">
-              {t('admin.partsUpload.successTitle')}
+              {t('dashboard.partsUpload.successTitle')}
             </p>
             <p className="text-xs text-green-600 dark:text-green-400 mt-0.5">
-              {t('admin.partsUpload.successDescription')}
+              {t('dashboard.partsUpload.successDescription')}
             </p>
           </div>
         </div>
@@ -265,7 +265,7 @@ export default function PartsUploadPage() {
           <div className="flex items-start gap-3 mb-3">
             <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
             <p className="text-sm font-medium text-red-800 dark:text-red-200">
-              {errors.error || t('admin.partsUpload.errorsTitle')}
+              {errors.error || t('dashboard.partsUpload.errorsTitle')}
             </p>
           </div>
           <div className="ml-8 space-y-1">

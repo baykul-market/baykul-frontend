@@ -20,15 +20,12 @@
     "brandShort": "Baykul",
     "products": "Products",
     "orders": "Orders",
-    "admin": "Admin",
+    "dashboard": "Dashboard",
     "users": "Users",
     "login": "Login",
     "register": "Register",
     "logout": "Logout",
     "myProfile": "My Profile",
-    "userSearch": "User Search",
-    "userManagement": "Management",
-    "partsUpload": "Parts Upload",
     "copyright": "© {{year}} Baykul Auto Parts"
   },
   "auth": {
@@ -198,10 +195,14 @@
       "unknownBrowser": "Unknown Browser"
     }
   },
-  "admin": {
-    "dashboard": {
-      "title": "Admin Dashboard",
+  "dashboard": {
+    "main": {
+      "title": "Dashboard",
       "subtitle": "Manage your warehouse, logistics, and team. Logged in as",
+      "userSearch": "Users",
+      "userSearchDescription": "Search and view user accounts by login, email, or phone number.",
+      "partsUpload": "Parts Upload",
+      "partsUploadDescription": "Upload spare parts from a CSV file to add them to the catalog in bulk.",
       "billManagement": "Bill Management",
       "billDescription": "Create and manage delivery bills, scan incoming boxes, and track shipments.",
       "boxTracking": "Box Tracking",
@@ -214,32 +215,11 @@
       "open": "Open",
       "statsPlaceholder": "Dashboard analytics and quick stats will appear here once features are implemented."
     },
-    "userSearch": {
-      "title": "User Search",
-      "subtitle": "Search users by login, email, or phone number. Results will match partially.",
-      "allFields": "All Fields",
-      "login": "Login",
-      "email": "Email",
-      "phone": "Phone",
-      "searchPlaceholderAll": "Search by login, email, or phone...",
-      "searchPlaceholderField": "Search by {{field}}...",
-      "phoneNumber": "phone number",
-      "search": "Search",
-      "searchingUsers": "Searching users...",
-      "noUsersFound": "No users found",
-      "foundUsers": "Found {{count}} user",
-      "foundUsers_other": "Found {{count}} users",
-      "forQuery": "for \"{{query}}\"",
-      "noUsersSubtitle": "Try adjusting your search term or changing the search field.",
-      "startSearchingTitle": "Start Searching",
-      "startSearchingSubtitle": "Enter a search term and press Enter or click Search to find users.",
-      "blocked": "Blocked",
-      "active": "Active",
-      "patronymic": "Patronymic: {{value}}"
-    },
     "userManagement": {
       "title": "User Management",
       "subtitle": "View, create, edit, and manage all user accounts, roles, and access.",
+      "titleView": "Users",
+      "subtitleView": "Search and view user accounts.",
       "loadingUsers": "Loading users...",
       "createUser": "Create User",
       "editUser": "Edit User",
@@ -278,6 +258,12 @@
       "updateError": "Failed to update user",
       "deleteSuccess": "User deleted successfully",
       "deleteError": "Failed to delete user",
+      "searchAll": "All Fields",
+      "searchPlaceholder": "Search by login, email, or phone...",
+      "noUsersFound": "No users found",
+      "noUsersFoundSubtitle": "Try adjusting your search term or changing the search field.",
+      "foundUsers": "Found {{count}} user",
+      "foundUsers_other": "Found {{count}} users",
       "deleteConfirmTitle": "Delete User?",
       "deleteConfirmMessage": "Are you sure you want to delete user \"{{name}}\"? This action cannot be undone."
     },

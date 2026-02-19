@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
 import {
   userAdminApi,
+  userSearchApi,
   type UserBasic,
   type UserCreateInput,
   type UserUpdateInput,
@@ -28,6 +29,7 @@ import {
   Eye,
   EyeOff,
   AlertTriangle,
+  Search,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useTranslation } from 'react-i18next';
@@ -35,6 +37,8 @@ import toast from 'react-hot-toast';
 import PhoneInput, { validatePhone } from '../../components/PhoneInput';
 
 const PAGE_SIZE = 20;
+
+type SearchField = 'all' | 'login' | 'email' | 'phoneNumber';
 
 function roleColor(role: string) {
   switch (role) {
@@ -58,24 +62,77 @@ export default function UserManagementPage() {
   const [editUser, setEditUser] = useState<UserBasic | null>(null);
   const [deleteUser, setDeleteUser] = useState<UserBasic | null>(null);
 
-  if (!user || user.role !== 'ADMIN') {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchField, setSearchField] = useState<SearchField>('all');
+  const [activeSearch, setActiveSearch] = useState('');
+
+  if (!user || user.role === 'USER') {
     navigate('/products');
     return null;
   }
 
-  const { data: users, isLoading } = useQuery({
+  const isAdmin = user.role === 'ADMIN';
+  const isSearching = activeSearch.trim().length > 0;
+
+  const getSearchFn = () => {
+    if (!activeSearch.trim()) return () => Promise.resolve([] as UserBasic[]);
+    switch (searchField) {
+      case 'login':
+        return () => userSearchApi.searchByLogin(activeSearch);
+      case 'email':
+        return () => userSearchApi.searchByEmail(activeSearch);
+      case 'phoneNumber':
+        return () => userSearchApi.searchByPhoneNumber(activeSearch);
+      default:
+        return () => userSearchApi.search(activeSearch);
+    }
+  };
+
+  const { data: pagedUsers, isLoading: isLoadingPaged } = useQuery({
     queryKey: ['admin-users', page],
     queryFn: () => userAdminApi.getAll(page, PAGE_SIZE),
+    enabled: !isSearching,
   });
+
+  const { data: searchResults, isLoading: isLoadingSearch, isFetching: isFetchingSearch } = useQuery({
+    queryKey: ['admin-users-search', searchField, activeSearch],
+    queryFn: getSearchFn(),
+    enabled: isSearching,
+  });
+
+  const users = isSearching ? searchResults : pagedUsers;
+  const isLoading = isSearching ? (isLoadingSearch || isFetchingSearch) : isLoadingPaged;
+
+  const handleSearch = () => {
+    setActiveSearch(searchTerm.trim());
+    setPage(0);
+  };
+
+  const handleClearSearch = () => {
+    setSearchTerm('');
+    setActiveSearch('');
+    setPage(0);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') handleSearch();
+  };
+
+  const searchFieldOptions: { value: SearchField; label: string; icon: React.ReactNode }[] = [
+    { value: 'all', label: t('dashboard.userManagement.searchAll'), icon: <Search className="w-3.5 h-3.5" /> },
+    { value: 'login', label: t('common.login'), icon: <User className="w-3.5 h-3.5" /> },
+    { value: 'email', label: t('common.email'), icon: <Mail className="w-3.5 h-3.5" /> },
+    { value: 'phoneNumber', label: t('common.phone'), icon: <Phone className="w-3.5 h-3.5" /> },
+  ];
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => userAdminApi.delete(id),
     onSuccess: () => {
-      toast.success(t('admin.userManagement.deleteSuccess'));
+      toast.success(t('dashboard.userManagement.deleteSuccess'));
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       setDeleteUser(null);
     },
-    onError: () => toast.error(t('admin.userManagement.deleteError')),
+    onError: () => toast.error(t('dashboard.userManagement.deleteError')),
   });
 
   const toggleBlockMutation = useMutation({
@@ -83,9 +140,9 @@ export default function UserManagementPage() {
       userAdminApi.update(id, { blocked }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
-      toast.success(t('admin.userManagement.updateSuccess'));
+      toast.success(t('dashboard.userManagement.updateSuccess'));
     },
-    onError: () => toast.error(t('admin.userManagement.updateError')),
+    onError: () => toast.error(t('dashboard.userManagement.updateError')),
   });
 
   const roleIcon = (role: string) => {
@@ -99,7 +156,7 @@ export default function UserManagementPage() {
     }
   };
 
-  const hasMore = (users?.length ?? 0) === PAGE_SIZE;
+  const hasMore = !isSearching && (pagedUsers?.length ?? 0) === PAGE_SIZE;
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 animate-slide-up">
@@ -111,28 +168,84 @@ export default function UserManagementPage() {
               <Users className="h-5 w-5" />
             </div>
             <h1 className="text-2xl font-bold tracking-tight">
-              {t('admin.userManagement.title')}
+              {isAdmin ? t('dashboard.userManagement.title') : t('dashboard.userManagement.titleView')}
             </h1>
           </div>
           <p className="text-muted-foreground text-sm">
-            {t('admin.userManagement.subtitle')}
+            {isAdmin ? t('dashboard.userManagement.subtitle') : t('dashboard.userManagement.subtitleView')}
           </p>
         </div>
-        <button
-          onClick={() => setCreateModalOpen(true)}
-          className="btn-primary self-start"
-        >
-          <Plus className="w-4 h-4" />
-          {t('admin.userManagement.createUser')}
-        </button>
+        {isAdmin && (
+          <button
+            onClick={() => setCreateModalOpen(true)}
+            className="btn-primary self-start"
+          >
+            <Plus className="w-4 h-4" />
+            {t('dashboard.userManagement.createUser')}
+          </button>
+        )}
       </div>
+
+      {/* Search */}
+      <div className="card p-5">
+        <div className="flex gap-1 p-1 bg-secondary/50 rounded-lg mb-4">
+          {searchFieldOptions.map((option) => (
+            <button
+              key={option.value}
+              onClick={() => setSearchField(option.value)}
+              className={cn(
+                'flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-all flex-1 justify-center',
+                searchField === option.value
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              {option.icon}
+              <span className="hidden sm:inline">{option.label}</span>
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-3">
+          <div className="relative flex-1">
+            <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+              <Search className="w-4 h-4 text-muted-foreground" />
+            </div>
+            <input
+              type="search"
+              className="input-base pl-11 pr-4 py-2.5"
+              placeholder={t('dashboard.userManagement.searchPlaceholder')}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+          </div>
+          {isSearching && (
+            <button onClick={handleClearSearch} className="btn-secondary px-4" title={t('common.cancel')}>
+              <X className="w-4 h-4" />
+            </button>
+          )}
+          <button onClick={handleSearch} className="btn-primary px-6" disabled={!searchTerm.trim()}>
+            <Search className="w-4 h-4" />
+            <span className="hidden sm:inline">{t('common.search')}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Search results count */}
+      {isSearching && !isLoading && users && (
+        <p className="text-sm text-muted-foreground">
+          {users.length === 0
+            ? t('dashboard.userManagement.noUsersFound')
+            : t('dashboard.userManagement.foundUsers', { count: users.length })}
+        </p>
+      )}
 
       {/* User List */}
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-16 gap-3">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
           <p className="text-sm text-muted-foreground">
-            {t('admin.userManagement.loadingUsers')}
+            {t('dashboard.userManagement.loadingUsers')}
           </p>
         </div>
       ) : users && users.length > 0 ? (
@@ -144,20 +257,22 @@ export default function UserManagementPage() {
                 <thead>
                   <tr className="border-b bg-secondary/30">
                     <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                      {t('admin.userManagement.user')}
+                      {t('dashboard.userManagement.user')}
                     </th>
                     <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                      {t('admin.userManagement.contact')}
+                      {t('dashboard.userManagement.contact')}
                     </th>
                     <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                      {t('admin.userManagement.role')}
+                      {t('dashboard.userManagement.role')}
                     </th>
                     <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                      {t('admin.userManagement.status')}
+                      {t('dashboard.userManagement.status')}
                     </th>
-                    <th className="px-5 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                      {t('admin.userManagement.actions')}
-                    </th>
+                    {isAdmin && (
+                      <th className="px-5 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                        {t('dashboard.userManagement.actions')}
+                      </th>
+                    )}
                   </tr>
                 </thead>
                 <tbody className="divide-y">
@@ -214,58 +329,60 @@ export default function UserManagementPage() {
                         {u.blocked ? (
                           <span className="badge text-[10px] bg-destructive/10 text-destructive border-destructive/20">
                             <Ban className="w-3 h-3 mr-0.5" />
-                            {t('admin.userManagement.blocked')}
+                            {t('dashboard.userManagement.blocked')}
                           </span>
                         ) : (
                           <span className="badge text-[10px] bg-success/10 text-success border-success/20">
                             <CheckCircle className="w-3 h-3 mr-0.5" />
-                            {t('admin.userManagement.active')}
+                            {t('dashboard.userManagement.active')}
                           </span>
                         )}
                       </td>
-                      <td className="px-5 py-4">
-                        <div className="flex items-center justify-end gap-1">
-                          <button
-                            onClick={() =>
-                              toggleBlockMutation.mutate({
-                                id: u.id,
-                                blocked: !u.blocked,
-                              })
-                            }
-                            className={cn(
-                              'p-2 rounded-lg transition-colors',
-                              u.blocked
-                                ? 'text-success hover:bg-success/10'
-                                : 'text-warning hover:bg-warning/10'
-                            )}
-                            title={
-                              u.blocked
-                                ? t('admin.userManagement.unblock')
-                                : t('admin.userManagement.block')
-                            }
-                          >
-                            {u.blocked ? (
-                              <CheckCircle className="w-4 h-4" />
-                            ) : (
-                              <Ban className="w-4 h-4" />
-                            )}
-                          </button>
-                          <button
-                            onClick={() => setEditUser(u)}
-                            className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-                            title={t('admin.userManagement.edit')}
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => setDeleteUser(u)}
-                            className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-                            title={t('admin.userManagement.delete')}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
+                      {isAdmin && (
+                        <td className="px-5 py-4">
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              onClick={() =>
+                                toggleBlockMutation.mutate({
+                                  id: u.id,
+                                  blocked: !u.blocked,
+                                })
+                              }
+                              className={cn(
+                                'p-2 rounded-lg transition-colors',
+                                u.blocked
+                                  ? 'text-success hover:bg-success/10'
+                                  : 'text-warning hover:bg-warning/10'
+                              )}
+                              title={
+                                u.blocked
+                                  ? t('dashboard.userManagement.unblock')
+                                  : t('dashboard.userManagement.block')
+                              }
+                            >
+                              {u.blocked ? (
+                                <CheckCircle className="w-4 h-4" />
+                              ) : (
+                                <Ban className="w-4 h-4" />
+                              )}
+                            </button>
+                            <button
+                              onClick={() => setEditUser(u)}
+                              className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                              title={t('dashboard.userManagement.edit')}
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => setDeleteUser(u)}
+                              className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                              title={t('dashboard.userManagement.delete')}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
@@ -281,6 +398,7 @@ export default function UserManagementPage() {
                 user={u}
                 roleColor={roleColor}
                 roleIcon={roleIcon}
+                showActions={isAdmin}
                 onEdit={() => setEditUser(u)}
                 onDelete={() => setDeleteUser(u)}
                 onToggleBlock={() =>
@@ -294,30 +412,32 @@ export default function UserManagementPage() {
             ))}
           </div>
 
-          {/* Pagination */}
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
-              {t('admin.userManagement.page', { page: page + 1 })}
-            </p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setPage((p) => Math.max(0, p - 1))}
-                disabled={page === 0}
-                className="btn-secondary px-3 py-2"
-              >
-                <ChevronLeft className="w-4 h-4" />
-                {t('admin.userManagement.prev')}
-              </button>
-              <button
-                onClick={() => setPage((p) => p + 1)}
-                disabled={!hasMore}
-                className="btn-secondary px-3 py-2"
-              >
-                {t('admin.userManagement.next')}
-                <ChevronRight className="w-4 h-4" />
-              </button>
+          {/* Pagination (only when not searching) */}
+          {!isSearching && (
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                {t('dashboard.userManagement.page', { page: page + 1 })}
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  disabled={page === 0}
+                  className="btn-secondary px-3 py-2"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  {t('dashboard.userManagement.prev')}
+                </button>
+                <button
+                  onClick={() => setPage((p) => p + 1)}
+                  disabled={!hasMore}
+                  className="btn-secondary px-3 py-2"
+                >
+                  {t('dashboard.userManagement.next')}
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </>
       ) : (
         <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
@@ -326,56 +446,61 @@ export default function UserManagementPage() {
           </div>
           <div>
             <h3 className="text-lg font-semibold mb-1">
-              {t('admin.userManagement.noUsers')}
+              {isSearching
+                ? t('dashboard.userManagement.noUsersFound')
+                : t('dashboard.userManagement.noUsers')}
             </h3>
             <p className="text-muted-foreground text-sm max-w-sm">
-              {t('admin.userManagement.noUsersSubtitle')}
+              {isSearching
+                ? t('dashboard.userManagement.noUsersFoundSubtitle')
+                : t('dashboard.userManagement.noUsersSubtitle')}
             </p>
           </div>
-          <button
-            onClick={() => setCreateModalOpen(true)}
-            className="btn-primary"
-          >
-            <Plus className="w-4 h-4" />
-            {t('admin.userManagement.createUser')}
-          </button>
+          {!isSearching && isAdmin && (
+            <button
+              onClick={() => setCreateModalOpen(true)}
+              className="btn-primary"
+            >
+              <Plus className="w-4 h-4" />
+              {t('dashboard.userManagement.createUser')}
+            </button>
+          )}
         </div>
       )}
 
-      {/* Create Modal */}
-      {createModalOpen && (
-        <UserFormModal
-          onClose={() => setCreateModalOpen(false)}
-          onSuccess={() => {
-            setCreateModalOpen(false);
-            queryClient.invalidateQueries({ queryKey: ['admin-users'] });
-          }}
-          t={t}
-        />
-      )}
-
-      {/* Edit Modal */}
-      {editUser && (
-        <UserFormModal
-          user={editUser}
-          onClose={() => setEditUser(null)}
-          onSuccess={() => {
-            setEditUser(null);
-            queryClient.invalidateQueries({ queryKey: ['admin-users'] });
-          }}
-          t={t}
-        />
-      )}
-
-      {/* Delete Confirmation */}
-      {deleteUser && (
-        <DeleteConfirmModal
-          user={deleteUser}
-          isDeleting={deleteMutation.isPending}
-          onConfirm={() => deleteMutation.mutate(deleteUser.id)}
-          onCancel={() => setDeleteUser(null)}
-          t={t}
-        />
+      {isAdmin && (
+        <>
+          {createModalOpen && (
+            <UserFormModal
+              onClose={() => setCreateModalOpen(false)}
+              onSuccess={() => {
+                setCreateModalOpen(false);
+                queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+              }}
+              t={t}
+            />
+          )}
+          {editUser && (
+            <UserFormModal
+              user={editUser}
+              onClose={() => setEditUser(null)}
+              onSuccess={() => {
+                setEditUser(null);
+                queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+              }}
+              t={t}
+            />
+          )}
+          {deleteUser && (
+            <DeleteConfirmModal
+              user={deleteUser}
+              isDeleting={deleteMutation.isPending}
+              onConfirm={() => deleteMutation.mutate(deleteUser.id)}
+              onCancel={() => setDeleteUser(null)}
+              t={t}
+            />
+          )}
+        </>
       )}
     </div>
   );
@@ -387,6 +512,7 @@ function MobileUserCard({
   user,
   roleColor,
   roleIcon,
+  showActions,
   onEdit,
   onDelete,
   onToggleBlock,
@@ -395,6 +521,7 @@ function MobileUserCard({
   user: UserBasic;
   roleColor: (role: string) => string;
   roleIcon: (role: string) => React.ReactNode;
+  showActions: boolean;
   onEdit: () => void;
   onDelete: () => void;
   onToggleBlock: () => void;
@@ -420,12 +547,12 @@ function MobileUserCard({
             {user.blocked ? (
               <span className="badge text-[10px] bg-destructive/10 text-destructive border-destructive/20">
                 <Ban className="w-3 h-3 mr-0.5" />
-                {t('admin.userManagement.blocked')}
+                {t('dashboard.userManagement.blocked')}
               </span>
             ) : (
               <span className="badge text-[10px] bg-success/10 text-success border-success/20">
                 <CheckCircle className="w-3 h-3 mr-0.5" />
-                {t('admin.userManagement.active')}
+                {t('dashboard.userManagement.active')}
               </span>
             )}
           </div>
@@ -443,38 +570,40 @@ function MobileUserCard({
               <span>{user.phoneNumber || t('common.noPhone')}</span>
             </div>
           </div>
-          <div className="flex gap-2">
-            <button
-              onClick={onToggleBlock}
-              className={cn(
-                'btn-ghost px-3 py-1.5 text-xs',
-                user.blocked ? 'text-success' : 'text-warning'
-              )}
-            >
-              {user.blocked ? (
-                <CheckCircle className="w-3.5 h-3.5" />
-              ) : (
-                <Ban className="w-3.5 h-3.5" />
-              )}
-              {user.blocked
-                ? t('admin.userManagement.unblock')
-                : t('admin.userManagement.block')}
-            </button>
-            <button
-              onClick={onEdit}
-              className="btn-ghost px-3 py-1.5 text-xs text-primary"
-            >
-              <Pencil className="w-3.5 h-3.5" />
-              {t('admin.userManagement.edit')}
-            </button>
-            <button
-              onClick={onDelete}
-              className="btn-ghost px-3 py-1.5 text-xs text-destructive"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-              {t('admin.userManagement.delete')}
-            </button>
-          </div>
+          {showActions && (
+            <div className="flex gap-2">
+              <button
+                onClick={onToggleBlock}
+                className={cn(
+                  'btn-ghost px-3 py-1.5 text-xs',
+                  user.blocked ? 'text-success' : 'text-warning'
+                )}
+              >
+                {user.blocked ? (
+                  <CheckCircle className="w-3.5 h-3.5" />
+                ) : (
+                  <Ban className="w-3.5 h-3.5" />
+                )}
+                {user.blocked
+                  ? t('dashboard.userManagement.unblock')
+                  : t('dashboard.userManagement.block')}
+              </button>
+              <button
+                onClick={onEdit}
+                className="btn-ghost px-3 py-1.5 text-xs text-primary"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                {t('dashboard.userManagement.edit')}
+              </button>
+              <button
+                onClick={onDelete}
+                className="btn-ghost px-3 py-1.5 text-xs text-destructive"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                {t('dashboard.userManagement.delete')}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -507,28 +636,28 @@ function UserFormModal({
   const createMutation = useMutation({
     mutationFn: (data: UserCreateInput) => userAdminApi.create(data),
     onSuccess: () => {
-      toast.success(t('admin.userManagement.createSuccess'));
+      toast.success(t('dashboard.userManagement.createSuccess'));
       onSuccess();
     },
     onError: (error: any) => {
       if (error.response?.status === 409 || error.response?.status === 400) {
         setErrors(error.response.data ?? {});
       }
-      toast.error(t('admin.userManagement.createError'));
+      toast.error(t('dashboard.userManagement.createError'));
     },
   });
 
   const updateMutation = useMutation({
     mutationFn: (data: UserUpdateInput) => userAdminApi.update(user!.id, data),
     onSuccess: () => {
-      toast.success(t('admin.userManagement.updateSuccess'));
+      toast.success(t('dashboard.userManagement.updateSuccess'));
       onSuccess();
     },
     onError: (error: any) => {
       if (error.response?.status === 409 || error.response?.status === 400) {
         setErrors(error.response.data ?? {});
       }
-      toast.error(t('admin.userManagement.updateError'));
+      toast.error(t('dashboard.userManagement.updateError'));
     },
   });
 
@@ -578,8 +707,8 @@ function UserFormModal({
         <div className="flex items-center justify-between px-6 py-4 border-b">
           <h2 className="text-lg font-semibold">
             {isEdit
-              ? t('admin.userManagement.editUser')
-              : t('admin.userManagement.createUser')}
+              ? t('dashboard.userManagement.editUser')
+              : t('dashboard.userManagement.createUser')}
           </h2>
           <button
             onClick={onClose}
@@ -595,14 +724,14 @@ function UserFormModal({
           {/* Login */}
           <div>
             <label className="block text-sm font-medium mb-1.5">
-              {t('admin.userManagement.loginLabel')} *
+              {t('dashboard.userManagement.loginLabel')} *
             </label>
             <input
               type="text"
               className={cn('input-base', errors.error_login && 'border-destructive')}
               value={login}
               onChange={(e) => setLogin(e.target.value)}
-              placeholder={t('admin.userManagement.loginPlaceholder')}
+              placeholder={t('dashboard.userManagement.loginPlaceholder')}
               required
               minLength={3}
               maxLength={50}
@@ -615,14 +744,14 @@ function UserFormModal({
           {/* Email */}
           <div>
             <label className="block text-sm font-medium mb-1.5">
-              {t('admin.userManagement.emailLabel')}
+              {t('dashboard.userManagement.emailLabel')}
             </label>
             <input
               type="email"
               className={cn('input-base', errors.error_email && 'border-destructive')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder={t('admin.userManagement.emailPlaceholder')}
+              placeholder={t('dashboard.userManagement.emailPlaceholder')}
             />
             {errors.error_email && (
               <p className="text-xs text-destructive mt-1">{errors.error_email}</p>
@@ -632,7 +761,7 @@ function UserFormModal({
           {/* Phone */}
           <div>
             <label className="block text-sm font-medium mb-1.5">
-              {t('admin.userManagement.phoneLabel')}
+              {t('dashboard.userManagement.phoneLabel')}
             </label>
             <PhoneInput
               value={phoneNumber}
@@ -650,8 +779,8 @@ function UserFormModal({
           <div>
             <label className="block text-sm font-medium mb-1.5">
               {isEdit
-                ? t('admin.userManagement.newPasswordLabel')
-                : t('admin.userManagement.passwordLabel')}{' '}
+                ? t('dashboard.userManagement.newPasswordLabel')
+                : t('dashboard.userManagement.passwordLabel')}{' '}
               {!isEdit && '*'}
             </label>
             <div className="relative">
@@ -665,8 +794,8 @@ function UserFormModal({
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder={
                   isEdit
-                    ? t('admin.userManagement.passwordPlaceholderEdit')
-                    : t('admin.userManagement.passwordPlaceholderCreate')
+                    ? t('dashboard.userManagement.passwordPlaceholderEdit')
+                    : t('dashboard.userManagement.passwordPlaceholderCreate')
                 }
                 required={!isEdit}
               />
@@ -687,11 +816,11 @@ function UserFormModal({
             )}
           </div>
 
-          {/* Role (only on create, or could be extended for edit) */}
+          {/* Role (only on create) */}
           {!isEdit && (
             <div>
               <label className="block text-sm font-medium mb-1.5">
-                {t('admin.userManagement.roleLabel')}
+                {t('dashboard.userManagement.roleLabel')}
               </label>
               <div className="flex gap-2">
                 {(['USER', 'MANAGER', 'ADMIN'] as const).map((r) => (
@@ -717,16 +846,16 @@ function UserFormModal({
           <div className="flex items-center justify-between py-2">
             <div>
               <p className="text-sm font-medium">
-                {t('admin.userManagement.blockedLabel')}
+                {t('dashboard.userManagement.blockedLabel')}
               </p>
               <p className="text-xs text-muted-foreground">
-                {t('admin.userManagement.blockedHint')}
+                {t('dashboard.userManagement.blockedHint')}
               </p>
             </div>
             <button
               type="button"
               onClick={() => setBlocked(!blocked)}
-              title={t('admin.userManagement.blockedLabel')}
+              title={t('dashboard.userManagement.blockedLabel')}
               className={cn(
                 'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out',
                 blocked ? 'bg-destructive' : 'bg-input'
@@ -754,8 +883,8 @@ function UserFormModal({
             <button type="submit" className="btn-primary flex-1" disabled={isPending}>
               {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
               {isEdit
-                ? t('admin.userManagement.saveChanges')
-                : t('admin.userManagement.createUser')}
+                ? t('dashboard.userManagement.saveChanges')
+                : t('dashboard.userManagement.createUser')}
             </button>
           </div>
         </form>
@@ -790,10 +919,10 @@ function DeleteConfirmModal({
           <AlertTriangle className="h-6 w-6 text-destructive" />
         </div>
         <h3 className="text-lg font-semibold mb-2">
-          {t('admin.userManagement.deleteConfirmTitle')}
+          {t('dashboard.userManagement.deleteConfirmTitle')}
         </h3>
         <p className="text-sm text-muted-foreground mb-6">
-          {t('admin.userManagement.deleteConfirmMessage', {
+          {t('dashboard.userManagement.deleteConfirmMessage', {
             name: user.login,
           })}
         </p>
@@ -811,7 +940,7 @@ function DeleteConfirmModal({
             disabled={isDeleting}
           >
             {isDeleting && <Loader2 className="w-4 h-4 animate-spin" />}
-            {t('admin.userManagement.delete')}
+            {t('dashboard.userManagement.delete')}
           </button>
         </div>
       </div>

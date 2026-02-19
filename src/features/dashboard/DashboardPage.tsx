@@ -1,9 +1,17 @@
 import { useAuthStore } from '../../store/useAuthStore';
 import { Navigate, Link } from 'react-router-dom';
-import { Shield, FileText, Box, Users, ArrowRight } from 'lucide-react';
+import { Shield, FileText, Box, Users, ArrowRight, Upload, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-export default function AdminPage() {
+interface FeatureCard {
+  title: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+  status: string;
+  link: string | null;
+}
+
+export default function DashboardPage() {
   const { t } = useTranslation();
   const user = useAuthStore((state) => state.user);
 
@@ -11,49 +19,68 @@ export default function AdminPage() {
     return <Navigate to="/products" />;
   }
 
-  const UPCOMING_FEATURES = [
+  const isAdmin = user.role === 'ADMIN';
+
+  const features: FeatureCard[] = [
+    isAdmin
+      ? {
+          title: t('dashboard.main.userManagement'),
+          description: t('dashboard.main.userDescription'),
+          icon: Users,
+          status: t('dashboard.main.available'),
+          link: '/dashboard/users',
+        }
+      : {
+          title: t('dashboard.main.userSearch'),
+          description: t('dashboard.main.userSearchDescription'),
+          icon: Search,
+          status: t('dashboard.main.available'),
+          link: '/dashboard/users',
+        },
+    ...(isAdmin
+      ? [
+          {
+            title: t('dashboard.main.partsUpload'),
+            description: t('dashboard.main.partsUploadDescription'),
+            icon: Upload,
+            status: t('dashboard.main.available'),
+            link: '/dashboard/parts-upload',
+          },
+        ]
+      : []),
     {
-      title: t('admin.dashboard.billManagement'),
-      description: t('admin.dashboard.billDescription'),
+      title: t('dashboard.main.billManagement'),
+      description: t('dashboard.main.billDescription'),
       icon: FileText,
-      status: t('admin.dashboard.comingSoon'),
+      status: t('dashboard.main.comingSoon'),
       link: null,
     },
     {
-      title: t('admin.dashboard.boxTracking'),
-      description: t('admin.dashboard.boxDescription'),
+      title: t('dashboard.main.boxTracking'),
+      description: t('dashboard.main.boxDescription'),
       icon: Box,
-      status: t('admin.dashboard.comingSoon'),
+      status: t('dashboard.main.comingSoon'),
       link: null,
-    },
-    {
-      title: t('admin.dashboard.userManagement'),
-      description: t('admin.dashboard.userDescription'),
-      icon: Users,
-      status: t('admin.dashboard.available'),
-      link: '/admin/users/manage',
     },
   ];
 
   return (
     <div className="max-w-4xl mx-auto animate-fade-in">
-      {/* Header */}
       <div className="flex items-start gap-4 mb-8">
         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary flex-shrink-0">
           <Shield className="h-6 w-6" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t('admin.dashboard.title')}</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('dashboard.main.title')}</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            {t('admin.dashboard.subtitle')}{' '}
+            {t('dashboard.main.subtitle')}{' '}
             <span className="font-medium text-foreground capitalize">{user.role?.toLowerCase()}</span>.
           </p>
         </div>
       </div>
 
-      {/* Feature Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {UPCOMING_FEATURES.map((feature) => (
+        {features.map((feature) => (
           <div key={feature.title} className="card p-6 flex flex-col">
             <div className="flex items-center justify-between mb-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary">
@@ -74,7 +101,7 @@ export default function AdminPage() {
                 to={feature.link}
                 className="btn-ghost text-sm text-primary mt-4 justify-start px-0 hover:text-primary/80"
               >
-                {t('admin.dashboard.open')}
+                {t('dashboard.main.open')}
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             ) : (
@@ -82,7 +109,7 @@ export default function AdminPage() {
                 disabled
                 className="btn-ghost text-sm text-muted-foreground mt-4 justify-start px-0 opacity-50"
               >
-                {t('admin.dashboard.open')}
+                {t('dashboard.main.open')}
                 <ArrowRight className="h-3.5 w-3.5" />
               </button>
             )}
@@ -90,10 +117,9 @@ export default function AdminPage() {
         ))}
       </div>
 
-      {/* Stats Placeholder */}
       <div className="mt-8 rounded-xl border border-dashed border-border p-8 text-center">
         <p className="text-sm text-muted-foreground">
-          {t('admin.dashboard.statsPlaceholder')}
+          {t('dashboard.main.statsPlaceholder')}
         </p>
       </div>
     </div>
