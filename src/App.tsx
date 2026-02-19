@@ -9,6 +9,7 @@ import OrderHistoryPage from './features/order/OrderHistoryPage';
 import AdminPage from './features/admin/AdminPage';
 import ProfilePage from './features/profile/ProfilePage';
 import UserSearchPage from './features/admin/UserSearchPage';
+import UserManagementPage from './features/admin/UserManagementPage';
 import PartsUploadPage from './features/admin/PartsUploadPage';
 import { useAuthStore } from './store/useAuthStore';
 
@@ -31,6 +32,7 @@ function App() {
           <Route path="profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
           <Route path="admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
           <Route path="admin/users" element={<ProtectedRoute><UserSearchPage /></ProtectedRoute>} />
+          <Route path="admin/users/manage" element={<ProtectedRoute><UserManagementPage /></ProtectedRoute>} />
           <Route path="admin/parts-upload" element={<ProtectedRoute><PartsUploadPage /></ProtectedRoute>} />
         </Route>
       </Routes>

@@ -50,7 +50,9 @@ export const orderApi = {
   },
 
   getOrder: async (id: string): Promise<Order> => {
-    const response = await api.get<Order>(`/order/user/${id}`);
+    const response = await api.get<Order>('/order/user/id', {
+      params: { id },
+    });
     return response.data;
   },
 

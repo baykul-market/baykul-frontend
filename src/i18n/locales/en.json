@@ -27,6 +27,7 @@
     "logout": "Logout",
     "myProfile": "My Profile",
     "userSearch": "User Search",
+    "userManagement": "Management",
     "partsUpload": "Parts Upload",
     "copyright": "© {{year}} Baykul Auto Parts"
   },
@@ -209,6 +210,7 @@
       "userDescription": "Manage user accounts, roles, and access permissions.",
       "comingSoon": "Coming Soon",
       "planned": "Planned",
+      "available": "Available",
       "open": "Open",
       "statsPlaceholder": "Dashboard analytics and quick stats will appear here once features are implemented."
     },
@@ -235,6 +237,50 @@
       "active": "Active",
       "patronymic": "Patronymic: {{value}}"
     },
+    "userManagement": {
+      "title": "User Management",
+      "subtitle": "View, create, edit, and manage all user accounts, roles, and access.",
+      "loadingUsers": "Loading users...",
+      "createUser": "Create User",
+      "editUser": "Edit User",
+      "user": "User",
+      "contact": "Contact",
+      "role": "Role",
+      "status": "Status",
+      "actions": "Actions",
+      "blocked": "Blocked",
+      "active": "Active",
+      "block": "Block",
+      "unblock": "Unblock",
+      "edit": "Edit",
+      "delete": "Delete",
+      "page": "Page {{page}}",
+      "prev": "Previous",
+      "next": "Next",
+      "noUsers": "No Users Found",
+      "noUsersSubtitle": "There are no users in the system yet. Create the first user to get started.",
+      "loginLabel": "Login",
+      "loginPlaceholder": "Enter login (3-50 chars)",
+      "emailLabel": "Email",
+      "emailPlaceholder": "user@example.com",
+      "phoneLabel": "Phone Number",
+      "passwordLabel": "Password",
+      "newPasswordLabel": "New Password",
+      "passwordPlaceholderCreate": "Enter a secure password",
+      "passwordPlaceholderEdit": "Leave blank to keep current",
+      "roleLabel": "Role",
+      "blockedLabel": "Block User",
+      "blockedHint": "Blocked users cannot log in to the system",
+      "saveChanges": "Save Changes",
+      "createSuccess": "User created successfully",
+      "createError": "Failed to create user",
+      "updateSuccess": "User updated successfully",
+      "updateError": "Failed to update user",
+      "deleteSuccess": "User deleted successfully",
+      "deleteError": "Failed to delete user",
+      "deleteConfirmTitle": "Delete User?",
+      "deleteConfirmMessage": "Are you sure you want to delete user \"{{name}}\"? This action cannot be undone."
+    },
     "partsUpload": {
       "title": "Parts Upload",
       "subtitle": "Upload spare parts from a CSV file to add them to the catalog in bulk.",
@@ -258,6 +304,13 @@
       "successTitle": "Upload Successful",
       "successDescription": "All parts from the CSV file have been parsed and added to the catalog.",
       "errorsTitle": "Upload Failed"
+    }
+  },
+  "phone": {
+    "validation": {
+      "tooShort": "Phone number is too short (minimum 7 digits)",
+      "tooLong": "Phone number is too long (maximum 15 digits)",
+      "invalid": "Invalid phone number format"
     }
   },
   "language": {

@@ -26,11 +26,15 @@ import {
 import { cn } from '../../lib/utils';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../i18n/i18n';
+import PhoneInput, { validatePhone } from '../../components/PhoneInput';
 
 const profileUpdateSchema = z.object({
   login: z.string().min(3, 'Login must be at least 3 characters').max(50).optional().or(z.literal('')),
   email: z.string().email('Invalid email address').optional().or(z.literal('')),
-  phoneNumber: z.string().min(7).max(15).optional().or(z.literal('')),
+  phoneNumber: z.string().optional().or(z.literal('')).refine(
+    (val) => !val || validatePhone(val) === null,
+    { message: 'phone.validation.invalid' }
+  ),
   password: z.string().min(6, 'Password must be at least 6 characters').optional().or(z.literal('')),
 });
 
@@ -305,19 +309,14 @@ function EditTab({ onSuccess }: { onSuccess: () => void }) {
 
         <div>
           <label className="block text-sm font-medium mb-1.5">{t('profile.edit.phoneNumber')}</label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <Phone className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <input
-              {...form.register('phoneNumber')}
-              className="input-base pl-10"
-              placeholder={t('profile.edit.phonePlaceholder')}
-            />
-          </div>
+          <PhoneInput
+            value={form.watch('phoneNumber') ?? ''}
+            onChange={(val) => form.setValue('phoneNumber', val, { shouldValidate: true })}
+            hasError={!!form.formState.errors.phoneNumber}
+          />
           {form.formState.errors.phoneNumber && (
             <p className="text-destructive text-sm mt-1.5">
-              {form.formState.errors.phoneNumber.message}
+              {t(form.formState.errors.phoneNumber.message ?? 'phone.validation.invalid')}
             </p>
           )}
         </div>

@@ -1,5 +1,5 @@
 import { useAuthStore } from '../../store/useAuthStore';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Link } from 'react-router-dom';
 import { Shield, FileText, Box, Users, ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -17,18 +17,21 @@ export default function AdminPage() {
       description: t('admin.dashboard.billDescription'),
       icon: FileText,
       status: t('admin.dashboard.comingSoon'),
+      link: null,
     },
     {
       title: t('admin.dashboard.boxTracking'),
       description: t('admin.dashboard.boxDescription'),
       icon: Box,
       status: t('admin.dashboard.comingSoon'),
+      link: null,
     },
     {
       title: t('admin.dashboard.userManagement'),
       description: t('admin.dashboard.userDescription'),
       icon: Users,
-      status: t('admin.dashboard.planned'),
+      status: t('admin.dashboard.available'),
+      link: '/admin/users/manage',
     },
   ];
 
@@ -56,19 +59,33 @@ export default function AdminPage() {
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary">
                 <feature.icon className="h-5 w-5 text-muted-foreground" />
               </div>
-              <span className="badge bg-accent/10 text-accent border-accent/20 text-[10px]">
+              <span className={
+                feature.link
+                  ? 'badge bg-success/10 text-success border-success/20 text-[10px]'
+                  : 'badge bg-accent/10 text-accent border-accent/20 text-[10px]'
+              }>
                 {feature.status}
               </span>
             </div>
             <h3 className="font-semibold mb-1.5">{feature.title}</h3>
             <p className="text-sm text-muted-foreground flex-1">{feature.description}</p>
-            <button
-              disabled
-              className="btn-ghost text-sm text-muted-foreground mt-4 justify-start px-0 opacity-50"
-            >
-              {t('admin.dashboard.open')}
-              <ArrowRight className="h-3.5 w-3.5" />
-            </button>
+            {feature.link ? (
+              <Link
+                to={feature.link}
+                className="btn-ghost text-sm text-primary mt-4 justify-start px-0 hover:text-primary/80"
+              >
+                {t('admin.dashboard.open')}
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            ) : (
+              <button
+                disabled
+                className="btn-ghost text-sm text-muted-foreground mt-4 justify-start px-0 opacity-50"
+              >
+                {t('admin.dashboard.open')}
+                <ArrowRight className="h-3.5 w-3.5" />
+              </button>
+            )}
           </div>
         ))}
       </div>

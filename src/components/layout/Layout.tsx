@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import { ShoppingCart, User, LogOut, Package, Wrench, Menu, X, Shield, Users, Globe, Upload } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Package, Wrench, Menu, X, Shield, Users, Globe, Upload, UserCog } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { cartApi } from '../../api/cart';
@@ -110,6 +110,12 @@ export default function Layout() {
                     <span className="flex items-center gap-1.5">
                       <Users className="w-3.5 h-3.5" />
                       {t('nav.users')}
+                    </span>
+                  </Link>
+                  <Link to="/admin/users/manage" className={navLinkClass('/admin/users/manage')}>
+                    <span className="flex items-center gap-1.5">
+                      <UserCog className="w-3.5 h-3.5" />
+                      {t('nav.userManagement')}
                     </span>
                   </Link>
                   <Link to="/admin/parts-upload" className={navLinkClass('/admin/parts-upload')}>
@@ -264,6 +270,17 @@ export default function Layout() {
                   >
                     <Users className="w-4 h-4" />
                     {t('nav.userSearch')}
+                  </Link>
+                  <Link
+                    to="/admin/users/manage"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={cn(
+                      'flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                      isActive('/admin/users/manage') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary'
+                    )}
+                  >
+                    <UserCog className="w-4 h-4" />
+                    {t('nav.userManagement')}
                   </Link>
                   <Link
                     to="/admin/parts-upload"

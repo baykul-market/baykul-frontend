@@ -29,17 +29,23 @@ export const cartApi = {
   },
 
   addToCart: async (partId: string): Promise<{ add_cart: string; id?: string; storage_empty?: string; error?: string }> => {
-    const response = await api.post(`/cart/user/add/${partId}`);
+    const response = await api.post('/cart/user/add', null, {
+      params: { partId },
+    });
     return response.data;
   },
 
   updateCartProduct: async (cartProductId: string, partsCount: number): Promise<{ update_cart: string }> => {
-    const response = await api.put(`/cart/user/update/${cartProductId}`, { partsCount });
+    const response = await api.put('/cart/user/update', { partsCount }, {
+      params: { id: cartProductId },
+    });
     return response.data;
   },
 
   removeFromCart: async (cartProductId: string): Promise<{ delete_cart_product: string }> => {
-    const response = await api.delete(`/cart/user/product/${cartProductId}`);
+    const response = await api.delete('/cart/user/product', {
+      params: { id: cartProductId },
+    });
     return response.data;
   },
 

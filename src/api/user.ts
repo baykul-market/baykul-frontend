@@ -104,48 +104,126 @@ export const userProfileApi = {
   },
 };
 
+// === Interfaces for Admin CRUD ===
+
+export interface UserCreateInput {
+  login: string;
+  password: string;
+  email?: string;
+  phoneNumber?: string;
+  role?: 'USER' | 'MANAGER' | 'ADMIN';
+  blocked?: boolean;
+}
+
+export interface UserUpdateInput {
+  login?: string;
+  email?: string;
+  phoneNumber?: string;
+  password?: string;
+  blocked?: boolean;
+}
+
+export interface UserCreateResponse {
+  create_user: string;
+  id: string;
+}
+
+// === Admin User CRUD API (requires users:write — ADMIN only) ===
+
+export const userAdminApi = {
+  /** GET /users — list all users (paginated) */
+  getAll: async (page = 0, size = 20, sort = 'createdTs,desc'): Promise<UserBasic[]> => {
+    const response = await api.get<UserBasic[]>('/users', {
+      params: { page, size, sort },
+    });
+    return response.data;
+  },
+
+  /** GET /users/id — get user by ID */
+  getById: async (id: string): Promise<UserFull> => {
+    const response = await api.get<UserFull>('/users/id', {
+      params: { id },
+    });
+    return response.data;
+  },
+
+  /** POST /users — create new user */
+  create: async (data: UserCreateInput): Promise<UserCreateResponse> => {
+    const response = await api.post<UserCreateResponse>('/users', data);
+    return response.data;
+  },
+
+  /** PUT /users/id — update user */
+  update: async (id: string, data: UserUpdateInput): Promise<void> => {
+    await api.put('/users/id', data, {
+      params: { id },
+    });
+  },
+
+  /** DELETE /users/id — delete user */
+  delete: async (id: string): Promise<void> => {
+    await api.delete('/users/id', {
+      params: { id },
+    });
+  },
+};
+
 // === User Search API (requires users:write — ADMIN only) ===
 
 export const userSearchApi = {
   /** Search users by login, email, or phone number */
   search: async (text: string): Promise<UserBasic[]> => {
-    const response = await api.get<UserBasic[]>(`/users/search/search/${encodeURIComponent(text)}`);
+    const response = await api.get<UserBasic[]>('/users/search', {
+      params: { text },
+    });
     return response.data;
   },
 
   /** Search users by login */
   searchByLogin: async (login: string): Promise<UserBasic[]> => {
-    const response = await api.get<UserBasic[]>(`/users/search/search/login/${encodeURIComponent(login)}`);
+    const response = await api.get<UserBasic[]>('/users/search/login', {
+      params: { login },
+    });
     return response.data;
   },
 
   /** Search users by email */
   searchByEmail: async (email: string): Promise<UserBasic[]> => {
-    const response = await api.get<UserBasic[]>(`/users/search/search/email/${encodeURIComponent(email)}`);
+    const response = await api.get<UserBasic[]>('/users/search/email', {
+      params: { email },
+    });
     return response.data;
   },
 
   /** Search users by phone number */
   searchByPhoneNumber: async (phone: string): Promise<UserBasic[]> => {
-    const response = await api.get<UserBasic[]>(`/users/search/search/phoneNumber/${encodeURIComponent(phone)}`);
+    const response = await api.get<UserBasic[]>('/users/search/phoneNumber', {
+      params: { phoneNumber: phone },
+    });
     return response.data;
   },
 
   /** Get user by exact login */
   getByLogin: async (login: string): Promise<UserBasic> => {
-    const response = await api.get<UserBasic>(`/users/search/exact/login/${encodeURIComponent(login)}`);
+    const response = await api.get<UserBasic>('/users/search/exact/login', {
+      params: { login },
+    });
     return response.data;
   },
 
   /** Get user by exact email */
   getByEmail: async (email: string): Promise<UserBasic> => {
-    const response = await api.get<UserBasic>(`/users/search/exact/email/${encodeURIComponent(email)}`);
+    const response = await api.get<UserBasic>('/users/search/exact/email', {
+      params: { email },
+    });
     return response.data;
   },
 
   /** Get user by exact phone number */
   getByPhoneNumber: async (phone: string): Promise<UserBasic> => {
-    const response = await api.get<UserBasic>(`/users/search/exact/phoneNumber/${encodeURIComponent(phone)}`);
+    const response = await api.get<UserBasic>('/users/search/exact/phoneNumber', {
+      params: { phoneNumber: phone },
+    });
     return response.data;
   },
 };

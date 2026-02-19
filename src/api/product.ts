@@ -17,22 +17,23 @@ export interface Part {
 
 export const productApi = {
   search: async (text: string): Promise<Part[]> => {
-    if (!text) {
-      // Return all products when no search text (search with empty yields nothing on backend)
-      const response = await api.get<Part[]>('/product/search/ ');
-      return response.data;
-    }
-    const response = await api.get<Part[]>(`/product/search/${encodeURIComponent(text)}`);
+    const response = await api.get<Part[]>('/product/search', {
+      params: { text: text || '' },
+    });
     return response.data;
   },
 
   getByArticle: async (article: string): Promise<Part[]> => {
-    const response = await api.get<Part[]>(`/product/search/exact/article/${encodeURIComponent(article)}`);
+    const response = await api.get<Part[]>('/product/search/exact/article', {
+      params: { article },
+    });
     return response.data;
   },
 
   getById: async (id: string): Promise<Part> => {
-    const response = await api.get<Part>(`/product/${id}`);
+    const response = await api.get<Part>('/product/id', {
+      params: { id },
+    });
     return response.data;
   },
 
