@@ -157,6 +157,10 @@
     },
     "edit": {
       "title": "Edit Profile",
+      "accountSection": "Account Information",
+      "accountSectionHint": "Update your login, email, and phone number",
+      "securitySection": "Security",
+      "securitySectionHint": "Manage your password",
       "login": "Login",
       "loginPlaceholder": "Your login",
       "email": "Email",
@@ -164,12 +168,42 @@
       "phoneNumber": "Phone Number",
       "phonePlaceholder": "+375291234567",
       "newPassword": "New Password",
-      "passwordPlaceholder": "Leave blank to keep current password",
+      "passwordPlaceholder": "Enter a new password",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Re-enter your new password",
+      "changePassword": "Change Password",
+      "cancelPasswordChange": "Cancel password change",
+      "passwordUnchanged": "Your password will remain unchanged.",
       "saving": "Saving...",
       "saveChanges": "Save Changes",
       "cancel": "Cancel",
       "success": "Profile updated successfully",
-      "error": "Failed to update profile"
+      "error": "Failed to update profile",
+      "noChanges": "No changes to save",
+      "modified": "modified",
+      "currentValue": "Current",
+      "unsavedChanges": "You have {{count}} unsaved change(s)",
+      "resetAll": "Reset all",
+      "conflictGeneral": "Some values are already in use by another account",
+      "conflict": {
+        "login": "This login is already taken",
+        "email": "This email is already in use",
+        "phone": "This phone number is already in use"
+      },
+      "validation": {
+        "loginMin": "Login must be at least 3 characters",
+        "loginMax": "Login must be at most 50 characters",
+        "emailInvalid": "Invalid email address",
+        "passwordMin": "Password must be at least 6 characters",
+        "passwordMismatch": "Passwords do not match"
+      },
+      "strength": {
+        "weak": "Weak password",
+        "fair": "Fair password",
+        "good": "Good password",
+        "strong": "Strong password",
+        "veryStrong": "Very strong password"
+      }
     },
     "balance": {
       "loadingBalance": "Loading balance...",
