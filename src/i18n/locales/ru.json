@@ -26,7 +26,8 @@
     "register": "Регистрация",
     "logout": "Выйти",
     "myProfile": "Мой профиль",
-    "copyright": "© {{year}} Baykul Автозапчасти"
+    "copyright": "© {{year}} Baykul Автозапчасти",
+    "balance": "Баланс"
   },
   "auth": {
     "login": {
@@ -229,6 +230,7 @@
       "transactionHistory": "История транзакций",
       "replenishment": "Пополнение",
       "writeOff": "Списание",
+      "payment": "Оплата",
       "balanceAfter": "Баланс после: {{amount}}"
     },
     "sessions": {
@@ -249,7 +251,7 @@
       "title": "Панель управления",
       "subtitle": "Управляйте складом, логистикой и командой. Вы вошли как",
       "userSearch": "Пользователи",
-      "userSearchDescription": "Поиск и просмотр аккаунтов пользователей по логину, email или телефону.",
+      "userSearchDescription": "Поиск пользователей, просмотр аккаунтов и управление балансами.",
       "partsUpload": "Загрузка запчастей",
       "partsUploadDescription": "Загрузите запчасти из CSV-файла для массового добавления в каталог.",
       "billManagement": "Управление накладными",
@@ -257,12 +259,33 @@
       "boxTracking": "Отслеживание коробок",
       "boxDescription": "Просматривайте и обновляйте статусы коробок от прибытия до размещения на складе.",
       "userManagement": "Управление пользователями",
-      "userDescription": "Управляйте аккаунтами, ролями и правами доступа.",
+      "userDescription": "Управляйте аккаунтами, ролями, балансами и правами доступа.",
       "comingSoon": "Скоро",
       "planned": "Запланировано",
       "available": "Доступно",
       "open": "Открыть",
       "statsPlaceholder": "Аналитика и краткая статистика появятся здесь после реализации функций."
+    },
+    "balance": {
+      "loadingBalance": "Загрузка баланса...",
+      "currentBalance": "Текущий баланс",
+      "noBalance": "У этого пользователя ещё не настроен баланс.",
+      "performOperation": "Операция с балансом",
+      "replenishment": "Пополнение",
+      "withdrawal": "Списание",
+      "amountLabel": "Сумма",
+      "descriptionLabel": "Описание",
+      "descriptionPlaceholder": "Необязательное описание",
+      "confirm": "Подтвердить",
+      "operationSuccess": "Операция с балансом выполнена успешно",
+      "operationError": "Не удалось выполнить операцию с балансом",
+      "transactionHistory": "История транзакций",
+      "balanceAfter": "Баланс после: {{amount}}",
+      "opType": {
+        "REPLENISHMENT": "Пополнение",
+        "WITHDRAWAL": "Списание",
+        "PAYMENT": "Оплата"
+      }
     },
     "userManagement": {
       "title": "Управление пользователями",
@@ -316,6 +339,7 @@
       "foundUsers_few": "Найдено {{count}} пользователя",
       "foundUsers_many": "Найдено {{count}} пользователей",
       "foundUsers_other": "Найдено {{count}} пользователей",
+      "balance": "Баланс",
       "deleteConfirmTitle": "Удалить пользователя?",
       "deleteConfirmMessage": "Вы уверены, что хотите удалить пользователя «{{name}}»? Это действие нельзя отменить."
     },

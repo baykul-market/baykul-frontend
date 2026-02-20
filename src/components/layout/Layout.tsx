@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import { ShoppingCart, User, LogOut, Package, Wrench, Menu, X, Shield, Globe } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Package, Wrench, Menu, X, Shield, Globe, Wallet } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { cartApi } from '../../api/cart';
@@ -140,6 +140,21 @@ export default function Layout() {
               <div className="hidden md:flex items-center gap-2 ml-2 pl-4 border-l">
                 {user ? (
                   <>
+                    {user.balance != null && (
+                      <Link
+                        to="/profile?tab=balance"
+                        className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm transition-colors hover:bg-secondary"
+                        title={t('nav.balance')}
+                      >
+                        <Wallet className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span className={cn(
+                          'font-semibold tabular-nums',
+                          user.balance.account >= 0 ? 'text-success' : 'text-destructive'
+                        )}>
+                          {user.balance.account.toFixed(2)}
+                        </span>
+                      </Link>
+                    )}
                     <Link
                       to="/profile"
                       className="flex items-center gap-2 rounded-lg px-3 py-2 transition-colors hover:bg-secondary"
@@ -257,6 +272,22 @@ export default function Layout() {
                       <p className="text-sm font-medium">{displayName}</p>
                       <p className="text-xs text-muted-foreground capitalize">{user.role?.toLowerCase()}</p>
                     </div>
+                    {user.balance != null && (
+                      <Link
+                        to="/profile?tab=balance"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-secondary transition-colors"
+                      >
+                        <Wallet className="w-4 h-4" />
+                        <span>{t('nav.balance')}:</span>
+                        <span className={cn(
+                          'font-semibold tabular-nums',
+                          user.balance.account >= 0 ? 'text-success' : 'text-destructive'
+                        )}>
+                          {user.balance.account.toFixed(2)}
+                        </span>
+                      </Link>
+                    )}
                     <button
                       onClick={handleLogout}
                       className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"

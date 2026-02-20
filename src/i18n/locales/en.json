@@ -26,7 +26,8 @@
     "register": "Register",
     "logout": "Logout",
     "myProfile": "My Profile",
-    "copyright": "© {{year}} Baykul Auto Parts"
+    "copyright": "© {{year}} Baykul Auto Parts",
+    "balance": "Balance"
   },
   "auth": {
     "login": {
@@ -213,7 +214,8 @@
       "availableFunds": "Available Funds",
       "transactionHistory": "Transaction History",
       "replenishment": "Replenishment",
-      "writeOff": "Write-off",
+      "writeOff": "Withdrawal",
+      "payment": "Payment",
       "balanceAfter": "Balance after: {{amount}}"
     },
     "sessions": {
@@ -234,7 +236,7 @@
       "title": "Dashboard",
       "subtitle": "Manage your warehouse, logistics, and team. Logged in as",
       "userSearch": "Users",
-      "userSearchDescription": "Search and view user accounts by login, email, or phone number.",
+      "userSearchDescription": "Search users, view accounts, and manage balances.",
       "partsUpload": "Parts Upload",
       "partsUploadDescription": "Upload spare parts from a CSV file to add them to the catalog in bulk.",
       "billManagement": "Bill Management",
@@ -242,12 +244,33 @@
       "boxTracking": "Box Tracking",
       "boxDescription": "View and update box statuses from arrival to warehouse placement.",
       "userManagement": "User Management",
-      "userDescription": "Manage user accounts, roles, and access permissions.",
+      "userDescription": "Manage user accounts, roles, balances, and access permissions.",
       "comingSoon": "Coming Soon",
       "planned": "Planned",
       "available": "Available",
       "open": "Open",
       "statsPlaceholder": "Dashboard analytics and quick stats will appear here once features are implemented."
+    },
+    "balance": {
+      "loadingBalance": "Loading balance...",
+      "currentBalance": "Current Balance",
+      "noBalance": "This user doesn't have a balance set up yet.",
+      "performOperation": "Balance Operation",
+      "replenishment": "Replenishment",
+      "withdrawal": "Withdrawal",
+      "amountLabel": "Amount",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Optional description",
+      "confirm": "Confirm",
+      "operationSuccess": "Balance operation completed successfully",
+      "operationError": "Failed to perform balance operation",
+      "transactionHistory": "Transaction History",
+      "balanceAfter": "Balance after: {{amount}}",
+      "opType": {
+        "REPLENISHMENT": "Replenishment",
+        "WITHDRAWAL": "Withdrawal",
+        "PAYMENT": "Payment"
+      }
     },
     "userManagement": {
       "title": "User Management",
@@ -298,6 +321,7 @@
       "noUsersFoundSubtitle": "Try adjusting your search term or changing the search field.",
       "foundUsers": "Found {{count}} user",
       "foundUsers_other": "Found {{count}} users",
+      "balance": "Balance",
       "deleteConfirmTitle": "Delete User?",
       "deleteConfirmMessage": "Are you sure you want to delete user \"{{name}}\"? This action cannot be undone."
     },

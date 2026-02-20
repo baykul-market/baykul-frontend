@@ -713,7 +713,9 @@ function BalanceTab() {
                     <p className="text-sm font-medium">
                       {entry.operationType === 'REPLENISHMENT'
                         ? t('profile.balance.replenishment')
-                        : t('profile.balance.writeOff')}
+                        : entry.operationType === 'PAYMENT'
+                          ? t('profile.balance.payment')
+                          : t('profile.balance.writeOff')}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {t('profile.balance.balanceAfter', { amount: entry.resultAccount.toFixed(2) })}

@@ -59,8 +59,17 @@ export interface ProfileUpdateInput {
 export interface BalanceHistory {
   id: string;
   amount: number;
-  operationType: 'REPLENISHMENT' | 'WRITE_OFF';
+  operationType: 'REPLENISHMENT' | 'WITHDRAWAL' | 'PAYMENT';
   resultAccount: number;
+  description?: string;
+}
+
+export interface BalanceOperationDto {
+  userId?: string;
+  balanceId?: string;
+  amount: number;
+  operationType: 'REPLENISHMENT' | 'WITHDRAWAL' | 'PAYMENT';
+  description?: string;
 }
 
 export interface BalanceFull {
@@ -225,5 +234,38 @@ export const userSearchApi = {
       params: { phoneNumber: phone },
     });
     return response.data;
+  },
+};
+
+// === Balance Admin API (requires balances:write — ADMIN/MANAGER) ===
+
+export const balanceAdminApi = {
+  /** GET /balance — list all balances (paginated) */
+  getAll: async (page = 0, size = 50, sort = 'createdTs,desc'): Promise<BalanceFull[]> => {
+    const response = await api.get<BalanceFull[]>('/balance', {
+      params: { page, size, sort },
+    });
+    return response.data;
+  },
+
+  /** GET /balance/user?userId= — get balance by user ID */
+  getByUserId: async (userId: string): Promise<BalanceFull> => {
+    const response = await api.get<BalanceFull>('/balance/user', {
+      params: { userId },
+    });
+    return response.data;
+  },
+
+  /** GET /balance/id?id= — get balance by balance ID */
+  getById: async (id: string): Promise<BalanceFull> => {
+    const response = await api.get<BalanceFull>('/balance/id', {
+      params: { id },
+    });
+    return response.data;
+  },
+
+  /** POST /balance/operation — perform balance operation */
+  operation: async (data: BalanceOperationDto): Promise<void> => {
+    await api.post('/balance/operation', data);
   },
 };
