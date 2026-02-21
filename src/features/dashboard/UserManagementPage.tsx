@@ -668,6 +668,9 @@ function UserFormModal({
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<'USER' | 'MANAGER' | 'ADMIN'>(user?.role ?? 'USER');
   const [blocked, setBlocked] = useState(user?.blocked ?? false);
+  const [name, setName] = useState(user?.profile?.name ?? '');
+  const [surname, setSurname] = useState(user?.profile?.surname ?? '');
+  const [patronymic, setPatronymic] = useState(user?.profile?.patronymic ?? '');
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -713,14 +716,28 @@ function UserFormModal({
       }
     }
 
+    const profileData = {
+      name: name || undefined,
+      surname: surname || undefined,
+      patronymic: patronymic || null,
+    };
+
     if (isEdit) {
       const data: UserUpdateInput = {};
       if (login !== user.login) data.login = login;
       if (email !== (user.email ?? '')) data.email = email || undefined;
       if (phoneNumber !== (user.phoneNumber ?? ''))
         data.phoneNumber = phoneNumber || undefined;
-      if (password) data.password = password;
       if (blocked !== user.blocked) data.blocked = blocked;
+      
+      if (
+        name !== (user.profile?.name ?? '') ||
+        surname !== (user.profile?.surname ?? '') ||
+        patronymic !== (user.profile?.patronymic ?? '')
+      ) {
+        data.profile = profileData;
+      }
+
       updateMutation.mutate(data);
     } else {
       createMutation.mutate({
@@ -730,6 +747,7 @@ function UserFormModal({
         phoneNumber: phoneNumber || undefined,
         role,
         blocked,
+        profile: profileData,
       });
     }
   };
@@ -759,6 +777,46 @@ function UserFormModal({
 
         {/* Modal Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* Profile */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1.5">
+                {t('dashboard.userManagement.surnameLabel')}
+              </label>
+              <input
+                type="text"
+                className="input-base"
+                value={surname}
+                onChange={(e) => setSurname(e.target.value)}
+                placeholder={t('dashboard.userManagement.surnamePlaceholder')}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1.5">
+                {t('dashboard.userManagement.nameLabel')}
+              </label>
+              <input
+                type="text"
+                className="input-base"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder={t('dashboard.userManagement.namePlaceholder')}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1.5">
+                {t('dashboard.userManagement.patronymicLabel')}
+              </label>
+              <input
+                type="text"
+                className="input-base"
+                value={patronymic}
+                onChange={(e) => setPatronymic(e.target.value)}
+                placeholder={t('dashboard.userManagement.patronymicPlaceholder')}
+              />
+            </div>
+          </div>
+
           {/* Login */}
           <div>
             <label className="block text-sm font-medium mb-1.5">
@@ -813,46 +871,41 @@ function UserFormModal({
             )}
           </div>
 
-          {/* Password */}
-          <div>
-            <label className="block text-sm font-medium mb-1.5">
-              {isEdit
-                ? t('dashboard.userManagement.newPasswordLabel')
-                : t('dashboard.userManagement.passwordLabel')}{' '}
-              {!isEdit && '*'}
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                className={cn(
-                  'input-base pr-10',
-                  errors.error_password && 'border-destructive'
-                )}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder={
-                  isEdit
-                    ? t('dashboard.userManagement.passwordPlaceholderEdit')
-                    : t('dashboard.userManagement.passwordPlaceholderCreate')
-                }
-                required={!isEdit}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {showPassword ? (
-                  <EyeOff className="w-4 h-4" />
-                ) : (
-                  <Eye className="w-4 h-4" />
-                )}
-              </button>
+          {/* Password - Only for Create */}
+          {!isEdit && (
+            <div>
+              <label className="block text-sm font-medium mb-1.5">
+                {t('dashboard.userManagement.passwordLabel')} *
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  className={cn(
+                    'input-base pr-10',
+                    errors.error_password && 'border-destructive'
+                  )}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder={t('dashboard.userManagement.passwordPlaceholderCreate')}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+              {errors.error_password && (
+                <p className="text-xs text-destructive mt-1">{errors.error_password}</p>
+              )}
             </div>
-            {errors.error_password && (
-              <p className="text-xs text-destructive mt-1">{errors.error_password}</p>
-            )}
-          </div>
+          )}
 
           {/* Role (only on create) */}
           {!isEdit && (

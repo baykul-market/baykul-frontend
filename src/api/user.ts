@@ -122,6 +122,11 @@ export interface UserCreateInput {
   phoneNumber?: string;
   role?: 'USER' | 'MANAGER' | 'ADMIN';
   blocked?: boolean;
+  profile?: {
+    name?: string;
+    surname?: string;
+    patronymic?: string | null;
+  };
 }
 
 export interface UserUpdateInput {
@@ -130,6 +135,11 @@ export interface UserUpdateInput {
   phoneNumber?: string;
   password?: string;
   blocked?: boolean;
+  profile?: {
+    name?: string;
+    surname?: string;
+    patronymic?: string | null;
+  };
 }
 
 export interface UserCreateResponse {
@@ -162,9 +172,9 @@ export const userAdminApi = {
     return response.data;
   },
 
-  /** PUT /users/id — update user */
+  /** PATCH /users/id — update user */
   update: async (id: string, data: UserUpdateInput): Promise<void> => {
-    await api.put('/users/id', data, {
+    await api.patch('/users/id', data, {
       params: { id },
     });
   },
