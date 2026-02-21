@@ -41,6 +41,9 @@ const profileUpdateSchema = z.object({
     (val) => !val || validatePhone(val) === null,
     { message: 'phone.validation.invalid' }
   ),
+  name: z.string().optional(),
+  surname: z.string().optional(),
+  patronymic: z.string().optional(),
   password: z.string().min(6, 'profile.edit.validation.passwordMin').optional().or(z.literal('')),
   confirmPassword: z.string().optional().or(z.literal('')),
 }).refine(
@@ -282,6 +285,9 @@ function EditTab({ onSuccess }: { onSuccess: () => void }) {
     login: user?.login ?? '',
     email: user?.email ?? '',
     phoneNumber: user?.phoneNumber ?? '',
+    name: user?.profile?.name ?? '',
+    surname: user?.profile?.surname ?? '',
+    patronymic: user?.profile?.patronymic ?? '',
     password: '',
     confirmPassword: '',
   };
@@ -298,9 +304,12 @@ function EditTab({ onSuccess }: { onSuccess: () => void }) {
     if (watched.login && watched.login !== defaults.login) changed.add('login');
     if (watched.email && watched.email !== defaults.email) changed.add('email');
     if (watched.phoneNumber && watched.phoneNumber !== defaults.phoneNumber) changed.add('phoneNumber');
+    if (watched.name !== defaults.name) changed.add('name');
+    if (watched.surname !== defaults.surname) changed.add('surname');
+    if (watched.patronymic !== defaults.patronymic) changed.add('patronymic');
     if (watched.password) changed.add('password');
     return changed;
-  }, [watched.login, watched.email, watched.phoneNumber, watched.password, defaults.login, defaults.email, defaults.phoneNumber]);
+  }, [watched, defaults]);
 
   const hasChanges = changedFields.size > 0;
 
@@ -312,6 +321,18 @@ function EditTab({ onSuccess }: { onSuccess: () => void }) {
       if (data.phoneNumber && data.phoneNumber !== user?.phoneNumber)
         payload.phoneNumber = data.phoneNumber;
       if (data.password) payload.password = data.password;
+
+      if (
+        data.name !== (user?.profile?.name ?? '') ||
+        data.surname !== (user?.profile?.surname ?? '') ||
+        data.patronymic !== (user?.profile?.patronymic ?? '')
+      ) {
+        payload.profile = {
+          name: data.name || undefined,
+          surname: data.surname || undefined,
+          patronymic: data.patronymic || null,
+        };
+      }
 
       if (Object.keys(payload).length === 0) {
         throw new Error(t('profile.edit.noChanges'));
@@ -373,6 +394,72 @@ function EditTab({ onSuccess }: { onSuccess: () => void }) {
           </button>
         </div>
       )}
+
+      {/* Personal Information Section */}
+      <div className="card p-6">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <User className="h-4 w-4" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold">{t('profile.edit.personalInfoSection')}</h2>
+            <p className="text-xs text-muted-foreground">{t('profile.edit.personalInfoSectionHint')}</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          {/* Surname */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium mb-1.5">
+              {t('profile.edit.surname')}
+              {changedFields.has('surname') && (
+                <span className="inline-flex items-center gap-1 text-xs font-normal text-amber-500">
+                  <Pencil className="h-3 w-3" /> {t('profile.edit.modified')}
+                </span>
+              )}
+            </label>
+            <input
+              {...form.register('surname')}
+              className={cn('input-base', changedFields.has('surname') && 'border-amber-500/50 ring-1 ring-amber-500/20')}
+              placeholder={t('profile.edit.surnamePlaceholder')}
+            />
+          </div>
+
+          {/* Name */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium mb-1.5">
+              {t('profile.edit.name')}
+              {changedFields.has('name') && (
+                <span className="inline-flex items-center gap-1 text-xs font-normal text-amber-500">
+                  <Pencil className="h-3 w-3" /> {t('profile.edit.modified')}
+                </span>
+              )}
+            </label>
+            <input
+              {...form.register('name')}
+              className={cn('input-base', changedFields.has('name') && 'border-amber-500/50 ring-1 ring-amber-500/20')}
+              placeholder={t('profile.edit.namePlaceholder')}
+            />
+          </div>
+
+          {/* Patronymic */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium mb-1.5">
+              {t('profile.edit.patronymic')}
+              {changedFields.has('patronymic') && (
+                <span className="inline-flex items-center gap-1 text-xs font-normal text-amber-500">
+                  <Pencil className="h-3 w-3" /> {t('profile.edit.modified')}
+                </span>
+              )}
+            </label>
+            <input
+              {...form.register('patronymic')}
+              className={cn('input-base', changedFields.has('patronymic') && 'border-amber-500/50 ring-1 ring-amber-500/20')}
+              placeholder={t('profile.edit.patronymicPlaceholder')}
+            />
+          </div>
+        </div>
+      </div>
 
       {/* Account Information Section */}
       <div className="card p-6">

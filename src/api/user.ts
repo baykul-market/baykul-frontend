@@ -54,6 +54,11 @@ export interface ProfileUpdateInput {
   phoneNumber?: string;
   password?: string;
   blocked?: boolean;
+  profile?: {
+    name?: string;
+    surname?: string;
+    patronymic?: string | null;
+  };
 }
 
 export interface BalanceHistory {
