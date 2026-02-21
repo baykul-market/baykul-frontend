@@ -9,6 +9,7 @@ import OrderHistoryPage from './features/order/OrderHistoryPage';
 import DashboardPage from './features/dashboard/DashboardPage';
 import ProfilePage from './features/profile/ProfilePage';
 import UserManagementPage from './features/dashboard/UserManagementPage';
+import OrderManagementPage from './features/dashboard/OrderManagementPage';
 import PartsUploadPage from './features/dashboard/PartsUploadPage';
 import { useAuthStore } from './store/useAuthStore';
 
@@ -31,6 +32,7 @@ function App() {
           <Route path="profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
           <Route path="dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
           <Route path="dashboard/users" element={<ProtectedRoute><UserManagementPage /></ProtectedRoute>} />
+          <Route path="dashboard/orders" element={<ProtectedRoute><OrderManagementPage /></ProtectedRoute>} />
           <Route path="dashboard/parts-upload" element={<ProtectedRoute><PartsUploadPage /></ProtectedRoute>} />
         </Route>
       </Routes>

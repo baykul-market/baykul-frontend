@@ -285,6 +285,32 @@
         "PAYMENT": "Payment"
       }
     },
+    "orderManagement": {
+      "title": "Order Management",
+      "subtitle": "View and manage all orders, update statuses, and track shipments.",
+      "description": "Track orders, update statuses, and manage shipments.",
+      "loadingOrders": "Loading orders...",
+      "orderNumber": "Order #",
+      "user": "User",
+      "date": "Date",
+      "status": "Status",
+      "actions": "Actions",
+      "viewDetails": "View Details",
+      "page": "Page {{page}}",
+      "prev": "Previous",
+      "next": "Next",
+      "noOrders": "No orders found.",
+      "orderDetails": "Order Details",
+      "customerInfo": "Customer Information",
+      "orderStatus": "Order Status",
+      "currentStatus": "Current Status",
+      "products": "Products",
+      "productStatus": "Status",
+      "updateSuccess": "Order status updated successfully",
+      "updateError": "Failed to update order status",
+      "productUpdateSuccess": "Product status updated successfully",
+      "productUpdateError": "Failed to update product status"
+    },
     "userManagement": {
       "title": "User Management",
       "subtitle": "View, create, edit, and manage all user accounts, roles, and access.",

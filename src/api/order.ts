@@ -1,6 +1,12 @@
 import { api } from './client';
 import type { Part } from './product';
 
+export interface Pageable {
+  page?: number;
+  size?: number;
+  sort?: string[];
+}
+
 export enum OrderStatus {
   CREATED = 'CREATED',
   PAID = 'PAID',
@@ -70,5 +76,30 @@ export const orderApi = {
   createOrder: async (): Promise<CreateOrderResponse> => {
     const response = await api.post<CreateOrderResponse>('/order/user/create');
     return response.data;
+  },
+
+  // Admin endpoints
+  getAllOrders: async (params?: Pageable): Promise<Order[]> => {
+    const response = await api.get<Order[]>('/order', { params });
+    return response.data;
+  },
+
+  getOrderById: async (id: string): Promise<Order> => {
+    const response = await api.get<Order>('/order/id', {
+      params: { id },
+    });
+    return response.data;
+  },
+
+  updateOrder: async (id: string, data: Partial<Order>): Promise<void> => {
+    await api.patch('/order', data, {
+      params: { id },
+    });
+  },
+
+  updateOrderProduct: async (id: string, data: Partial<OrderProduct>): Promise<void> => {
+    await api.patch('/order/product', data, {
+      params: { id },
+    });
   },
 };

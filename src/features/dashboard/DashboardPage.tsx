@@ -1,6 +1,6 @@
 import { useAuthStore } from '../../store/useAuthStore';
 import { Navigate, Link } from 'react-router-dom';
-import { Shield, FileText, Box, Users, ArrowRight, Upload, Search } from 'lucide-react';
+import { Shield, FileText, Box, Users, ArrowRight, Upload, Search, Package } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 interface FeatureCard {
@@ -48,6 +48,13 @@ export default function DashboardPage() {
           },
         ]
       : []),
+    {
+      title: t('dashboard.orderManagement.title'),
+      description: t('dashboard.orderManagement.subtitle'),
+      icon: Package,
+      status: t('dashboard.main.available'),
+      link: '/dashboard/orders',
+    },
     {
       title: t('dashboard.main.billManagement'),
       description: t('dashboard.main.billDescription'),
