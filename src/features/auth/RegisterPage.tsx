@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { authApi, registerSchema, type RegisterInput } from '../../api/auth';
 import toast from 'react-hot-toast';
-import { Loader2, Mail, Lock, UserPlus, User, Phone } from 'lucide-react';
+import { Loader2, Mail, Lock, UserPlus, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import PhoneInput from '../../components/PhoneInput';
 

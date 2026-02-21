@@ -2,16 +2,27 @@ import { api } from './client';
 import type { Part } from './product';
 
 export enum OrderStatus {
-  NEW = 'NEW',
+  CREATED = 'CREATED',
+  PAID = 'PAID',
   PROCESSING = 'PROCESSING',
   COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
+}
+
+export enum OrderProductStatus {
+  ORDERED = 'ORDERED',
+  IN_WAREHOUSE = 'IN_WAREHOUSE',
+  ON_WAY = 'ON_WAY',
+  ARRIVED = 'ARRIVED',
+  DELIVERED = 'DELIVERED',
+  RETURNED = 'RETURNED',
   CANCELLED = 'CANCELLED',
 }
 
 export interface OrderProduct {
   id: string;
   number: number | null;
-  status: string;
+  status: OrderProductStatus;
   part: Part;
   partsCount: number;
 }

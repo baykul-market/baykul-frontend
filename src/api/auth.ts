@@ -4,7 +4,7 @@ import type { UserFull } from './user';
 
 export const loginSchema = z.object({
   login: z.string().min(1, 'Login is required'),
-  password: z.string().min(6),
+  password: z.string().min(1, 'Password is required'),
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;
@@ -16,8 +16,8 @@ export const registerSchema = z.object({
   patronymic: z.string().optional(),
   email: z.string().email('Invalid email address'),
   phoneNumber: z.string().optional(),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  confirmPassword: z.string().min(6),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  confirmPassword: z.string().min(8),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],

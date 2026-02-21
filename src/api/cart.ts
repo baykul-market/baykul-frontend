@@ -36,7 +36,7 @@ export const cartApi = {
   },
 
   updateCartProduct: async (cartProductId: string, partsCount: number): Promise<{ update_cart: string }> => {
-    const response = await api.put('/cart/user/update', { partsCount }, {
+    const response = await api.patch('/cart/user/update', { partsCount }, {
       params: { id: cartProductId },
     });
     return response.data;

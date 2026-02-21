@@ -35,7 +35,7 @@ import {
   Wallet,
   ArrowUpCircle,
   ArrowDownCircle,
-  DollarSign,
+  Euro,
   History,
   ChevronDown,
   ChevronUp,
@@ -1155,7 +1155,7 @@ function BalanceModal({
                     showOperationForm && 'bg-secondary text-foreground hover:bg-secondary/80'
                   )}
                 >
-                  <DollarSign className="w-4 h-4" />
+                  <Euro className="w-4 h-4" />
                   {showOperationForm ? t('common.cancel') : t('dashboard.balance.performOperation')}
                 </button>
               </div>
@@ -1199,7 +1199,7 @@ function BalanceModal({
                       <label className="block text-xs font-medium mb-1">{t('dashboard.balance.amountLabel')} *</label>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                          <DollarSign className="w-3.5 h-3.5 text-muted-foreground" />
+                          <Euro className="w-3.5 h-3.5 text-muted-foreground" />
                         </div>
                         <input
                           type="number"
@@ -1314,7 +1314,7 @@ function BalanceModal({
                 onClick={() => setShowOperationForm(!showOperationForm)}
                 className="btn-primary"
               >
-                <DollarSign className="w-4 h-4" />
+                <Euro className="w-4 h-4" />
                 {t('dashboard.balance.performOperation')}
               </button>
               {showOperationForm && (
@@ -1352,7 +1352,7 @@ function BalanceModal({
                       <label className="block text-xs font-medium mb-1">{t('dashboard.balance.amountLabel')} *</label>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                          <DollarSign className="w-3.5 h-3.5 text-muted-foreground" />
+                          <Euro className="w-3.5 h-3.5 text-muted-foreground" />
                         </div>
                         <input
                           type="number"

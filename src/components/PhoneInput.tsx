@@ -11,7 +11,7 @@ export interface CountryCode {
 const COUNTRY_CODES: CountryCode[] = [
   { code: 'BY', dial: '+375', maxLocal: 9 },
   { code: 'RU', dial: '+7',   maxLocal: 10 },
-  { code: 'KZ', dial: '+7',   maxLocal: 10 },
+  { code: 'KZ', dial: '+77',  maxLocal: 9 },
   { code: 'UA', dial: '+380', maxLocal: 9 },
   { code: 'UZ', dial: '+998', maxLocal: 9 },
   { code: 'KG', dial: '+996', maxLocal: 9 },

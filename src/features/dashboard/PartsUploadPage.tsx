@@ -246,13 +246,13 @@ export default function PartsUploadPage() {
 
       {/* Success Message */}
       {uploadMutation.isSuccess && (
-        <div className="mt-6 rounded-xl border border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/30 p-4 flex items-start gap-3 animate-fade-in">
-          <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
+        <div className="mt-6 rounded-xl border border-success/20 bg-success/10 p-4 flex items-start gap-3 animate-fade-in">
+          <CheckCircle className="h-5 w-5 text-success flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-medium text-green-800 dark:text-green-200">
+            <p className="text-sm font-medium text-success">
               {t('dashboard.partsUpload.successTitle')}
             </p>
-            <p className="text-xs text-green-600 dark:text-green-400 mt-0.5">
+            <p className="text-xs text-success/80 mt-0.5">
               {t('dashboard.partsUpload.successDescription')}
             </p>
           </div>
@@ -261,10 +261,10 @@ export default function PartsUploadPage() {
 
       {/* Error Details */}
       {errors && (
-        <div className="mt-6 rounded-xl border border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/30 p-4 animate-fade-in">
+        <div className="mt-6 rounded-xl border border-destructive/20 bg-destructive/10 p-4 animate-fade-in">
           <div className="flex items-start gap-3 mb-3">
-            <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
-            <p className="text-sm font-medium text-red-800 dark:text-red-200">
+            <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+            <p className="text-sm font-medium text-destructive">
               {errors.error || t('dashboard.partsUpload.errorsTitle')}
             </p>
           </div>
@@ -273,10 +273,10 @@ export default function PartsUploadPage() {
               .filter(([key]) => key !== 'error')
               .map(([key, value]) => (
                 <div key={key} className="flex items-start gap-2 text-xs">
-                  <span className="font-mono text-red-500 dark:text-red-400 flex-shrink-0">
+                  <span className="font-mono text-destructive/80 flex-shrink-0">
                     {key.replace('error_', '')}:
                   </span>
-                  <span className="text-red-700 dark:text-red-300">{value}</span>
+                  <span className="text-destructive">{value}</span>
                 </div>
               ))}
           </div>

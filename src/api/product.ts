@@ -23,8 +23,8 @@ export const productApi = {
     return response.data;
   },
 
-  getByArticle: async (article: string): Promise<Part[]> => {
-    const response = await api.get<Part[]>('/product/search/exact/article', {
+  getByArticle: async (article: string): Promise<Part> => {
+    const response = await api.get<Part>('/product/search/exact/article', {
       params: { article },
     });
     return response.data;

@@ -102,7 +102,7 @@ export const userProfileApi = {
 
   /** PUT /users/profile — update current user's profile */
   updateProfile: async (data: ProfileUpdateInput): Promise<void> => {
-    await api.put('/users/profile', data);
+    await api.patch('/users/profile', data);
   },
 
   /** GET /users/profile/balance — get current user's balance */

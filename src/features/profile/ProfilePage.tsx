@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -44,7 +44,7 @@ const profileUpdateSchema = z.object({
   name: z.string().optional(),
   surname: z.string().optional(),
   patronymic: z.string().optional(),
-  password: z.string().min(6, 'profile.edit.validation.passwordMin').optional().or(z.literal('')),
+  password: z.string().min(8, 'profile.edit.validation.passwordMin').optional().or(z.literal('')),
   confirmPassword: z.string().optional().or(z.literal('')),
 }).refine(
   (data) => !data.password || data.password === data.confirmPassword,
@@ -59,7 +59,16 @@ export default function ProfilePage() {
   const { t } = useTranslation();
   const { user, isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<TabId>('overview');
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const tabParam = searchParams.get('tab');
+  const activeTab: TabId = (['overview', 'edit', 'sessions', 'balance'] as const).includes(tabParam as any)
+    ? (tabParam as TabId)
+    : 'overview';
+
+  const setActiveTab = (id: TabId) => {
+    setSearchParams({ tab: id });
+  };
 
   if (!isAuthenticated || !user) {
     navigate('/login', { replace: true });
@@ -236,7 +245,7 @@ function PasswordStrengthBar({ password }: { password: string }) {
   const { score, label, color } = useMemo(() => {
     if (!password) return { score: 0, label: '', color: '' };
     let s = 0;
-    if (password.length >= 6) s++;
+    if (password.length >= 8) s++;
     if (password.length >= 10) s++;
     if (/[A-Z]/.test(password) && /[a-z]/.test(password)) s++;
     if (/\d/.test(password)) s++;
