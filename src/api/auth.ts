@@ -10,10 +10,13 @@ export const loginSchema = z.object({
 export type LoginInput = z.infer<typeof loginSchema>;
 
 export const registerSchema = z.object({
-  firstName: z.string().min(2),
-  lastName: z.string().min(2),
-  email: z.string().email(),
-  password: z.string().min(6),
+  login: z.string().min(3, 'Login is required (min 3 chars)'),
+  name: z.string().min(2, 'Name is required'),
+  surname: z.string().min(2, 'Surname is required'),
+  patronymic: z.string().optional(),
+  email: z.string().email('Invalid email address'),
+  phoneNumber: z.string().optional(),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string().min(6),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
@@ -29,8 +32,15 @@ export const authApi = {
   },
   register: async (data: RegisterInput) => {
     const response = await api.post('/users/registration', {
-      ...data,
-      login: data.email,
+      login: data.login,
+      password: data.password,
+      email: data.email,
+      phoneNumber: data.phoneNumber || undefined,
+      profile: {
+        name: data.name,
+        surname: data.surname,
+        patronymic: data.patronymic || null,
+      },
     });
     return response.data;
   },

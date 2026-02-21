@@ -9,7 +9,6 @@ import {
   type UserBasic,
   type UserCreateInput,
   type UserUpdateInput,
-  type BalanceFull,
   type BalanceOperationDto,
 } from '../../api/user';
 import {
