@@ -92,8 +92,9 @@ export default function BoxTrackingPage() {
             </div>
           </div>
           <div className="w-full sm:w-[200px]">
-            <label className="block text-sm font-medium mb-1.5">{t('dashboard.boxTracking.status')}</label>
+            <label htmlFor="status-filter" className="block text-sm font-medium mb-1.5">{t('dashboard.boxTracking.status')}</label>
             <select
+              id="status-filter"
               className="input-base"
               value={statusFilter}
               onChange={(e) => {

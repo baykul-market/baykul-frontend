@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { orderApi, Order, OrderStatus } from '../../api/order';
-import { Loader2, Package, Clock, CheckCircle2, XCircle, ArrowRight, RotateCw } from 'lucide-react';
+import { Loader2, Package, Clock, CheckCircle2, XCircle, ArrowRight, RotateCw, CreditCard } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../i18n/i18n';
@@ -164,6 +164,14 @@ function getStatusConfig(status: OrderStatus, t: (key: string) => string) {
         bgClass: 'bg-primary/10',
         iconClass: 'text-primary',
         badgeClass: 'bg-primary/10 text-primary border-primary/20',
+      };
+    case OrderStatus.PAID:
+      return {
+        label: t('orders.statusPaid'),
+        icon: CreditCard,
+        bgClass: 'bg-info/10',
+        iconClass: 'text-info',
+        badgeClass: 'bg-info/10 text-info border-info/20',
       };
     case OrderStatus.CANCELLED:
       return {
