@@ -7,23 +7,18 @@ import {
   OrderStatus,
   OrderProductStatus,
   type Order,
-  type OrderProduct,
 } from '../../api/order';
 import {
   FileText,
-  Search,
   Loader2,
   ChevronLeft,
   ChevronRight,
   X,
   Eye,
-  CheckCircle,
-  AlertTriangle,
   Package,
   Calendar,
   User,
   CreditCard,
-  Truck,
   Box,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
@@ -293,7 +288,6 @@ function OrderDetailsModal({
   t: (key: string, opts?: Record<string, unknown>) => string;
 }) {
     const queryClient = useQueryClient();
-    const [status, setStatus] = useState<OrderStatus>(order.status);
     
     // Fetch full order details to get products if not present in list view
     const { data: fullOrder, isLoading } = useQuery({

@@ -173,9 +173,9 @@ function getStatusConfig(status: OrderStatus, t: (key: string) => string) {
         iconClass: 'text-destructive',
         badgeClass: 'bg-destructive/10 text-destructive border-destructive/20',
       };
-    case OrderStatus.NEW:
+    case OrderStatus.CREATED:
       return {
-        label: t('orders.statusNew'),
+        label: t('orders.statusCreated'),
         icon: Clock,
         bgClass: 'bg-muted',
         iconClass: 'text-muted-foreground',

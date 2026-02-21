@@ -411,6 +411,26 @@
       "successTitle": "Загрузка завершена",
       "successDescription": "Все запчасти из CSV-файла были обработаны и добавлены в каталог.",
       "errorsTitle": "Ошибка загрузки"
+    },
+    "boxTracking": {
+      "title": "Отслеживание коробок",
+      "subtitle": "Поиск и обновление статусов отдельных коробок (товаров).",
+      "searchPlaceholder": "Введите номер коробки...",
+      "status": "Статус",
+      "boxNumber": "Номер коробки",
+      "part": "Деталь",
+      "quantity": "Кол-во",
+      "order": "Заказ",
+      "actions": "Действия",
+      "updateStatus": "Обновить статус",
+      "noBoxes": "Коробки не найдены",
+      "foundBoxes": "Найдено {{count}} коробок",
+      "foundBoxes_one": "Найдена {{count}} коробка",
+      "foundBoxes_few": "Найдено {{count}} коробки",
+      "foundBoxes_many": "Найдено {{count}} коробок",
+      "foundBoxes_other": "Найдено {{count}} коробок",
+      "updateSuccess": "Статус обновлен",
+      "updateError": "Ошибка обновления статуса"
     }
   },
   "phone": {

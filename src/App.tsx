@@ -11,6 +11,7 @@ import ProfilePage from './features/profile/ProfilePage';
 import UserManagementPage from './features/dashboard/UserManagementPage';
 import OrderManagementPage from './features/dashboard/OrderManagementPage';
 import PartsUploadPage from './features/dashboard/PartsUploadPage';
+import BoxTrackingPage from './features/dashboard/BoxTrackingPage';
 import { useAuthStore } from './store/useAuthStore';
 
 function RootRedirect() {
@@ -33,6 +34,7 @@ function App() {
           <Route path="dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
           <Route path="dashboard/users" element={<ProtectedRoute><UserManagementPage /></ProtectedRoute>} />
           <Route path="dashboard/orders" element={<ProtectedRoute><OrderManagementPage /></ProtectedRoute>} />
+          <Route path="dashboard/boxes" element={<ProtectedRoute><BoxTrackingPage /></ProtectedRoute>} />
           <Route path="dashboard/parts-upload" element={<ProtectedRoute><PartsUploadPage /></ProtectedRoute>} />
         </Route>
       </Routes>

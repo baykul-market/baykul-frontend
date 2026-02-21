@@ -66,8 +66,8 @@ export default function DashboardPage() {
       title: t('dashboard.main.boxTracking'),
       description: t('dashboard.main.boxDescription'),
       icon: Box,
-      status: t('dashboard.main.comingSoon'),
-      link: null,
+      status: t('dashboard.main.available'),
+      link: '/dashboard/boxes',
     },
   ];
 

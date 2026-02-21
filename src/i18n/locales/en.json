@@ -138,7 +138,7 @@
     "statusCompleted": "Completed",
     "statusProcessing": "Processing",
     "statusCancelled": "Cancelled",
-    "statusNew": "New"
+    "statusCreated": "Created"
   },
   "profile": {
     "blocked": "Blocked",
@@ -393,6 +393,23 @@
       "successTitle": "Upload Successful",
       "successDescription": "All parts from the CSV file have been parsed and added to the catalog.",
       "errorsTitle": "Upload Failed"
+    },
+    "boxTracking": {
+      "title": "Box Tracking",
+      "subtitle": "Search and update statuses of individual boxes (order products).",
+      "searchPlaceholder": "Enter box number...",
+      "status": "Status",
+      "boxNumber": "Box Number",
+      "part": "Part",
+      "quantity": "Quantity",
+      "order": "Order",
+      "actions": "Actions",
+      "updateStatus": "Update Status",
+      "noBoxes": "No boxes found",
+      "foundBoxes": "Found {{count}} box",
+      "foundBoxes_other": "Found {{count}} boxes",
+      "updateSuccess": "Status updated successfully",
+      "updateError": "Failed to update status"
     }
   },
   "phone": {

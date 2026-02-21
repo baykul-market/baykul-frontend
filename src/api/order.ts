@@ -31,6 +31,10 @@ export interface OrderProduct {
   status: OrderProductStatus;
   part: Part;
   partsCount: number;
+  order?: {
+    id: string;
+    number: number;
+  };
 }
 
 export interface Order {
@@ -101,5 +105,10 @@ export const orderApi = {
     await api.patch('/order/product', data, {
       params: { id },
     });
+  },
+
+  searchBoxes: async (params: { number?: number; status?: string; page?: number; size?: number; sort?: string[] }): Promise<{ content: OrderProduct[]; totalElements: number; totalPages: number }> => {
+    const response = await api.get('/order/product/search', { params });
+    return response.data;
   },
 };
