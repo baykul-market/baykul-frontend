@@ -12,7 +12,12 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <App />
-      <Toaster position="top-right" />
+      <Toaster 
+        position="top-right" 
+        containerStyle={{
+          top: 80,
+        }}
+      />
     </QueryClientProvider>
   </StrictMode>,
 )
