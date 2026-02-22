@@ -129,7 +129,7 @@ function ProductCard({
   isAdding: boolean;
 }) {
   const { t } = useTranslation();
-  const inStock = (product.storageCount ?? 0) > 0;
+  const hasStock = (product.storageCount ?? 0) > 0;
 
   return (
     <div className="card-hover group flex flex-col overflow-hidden">
@@ -139,12 +139,12 @@ function ProductCard({
         {/* Stock Badge */}
         <span
           className={`badge absolute top-3 right-3 ${
-            inStock
+            hasStock
               ? 'bg-success/10 text-success border-success/20'
-              : 'bg-destructive/10 text-destructive border-destructive/20'
+              : 'bg-warning/10 text-warning border-warning/20'
           }`}
         >
-          {inStock ? t('products.inStock') : t('products.outOfStock')}
+          {hasStock ? t('products.inStock') : t('products.orderFromSupplier')}
         </span>
       </div>
 
@@ -175,8 +175,8 @@ function ProductCard({
               <Package className="h-3 w-3" />
               {t('products.stock')}
             </span>
-            <span className={inStock ? 'text-success font-medium' : 'text-destructive font-medium'}>
-              {inStock ? t('products.units', { count: product.storageCount ?? 0 }) : t('products.unavailable')}
+            <span className={hasStock ? 'text-success font-medium' : 'text-warning font-medium'}>
+              {hasStock ? t('products.units', { count: product.storageCount ?? 0 }) : t('products.extendedDelivery')}
             </span>
           </div>
           {product.weight != null && (
@@ -198,7 +198,7 @@ function ProductCard({
           </span>
           <button
             onClick={onAddToCart}
-            disabled={!inStock || isAdding}
+            disabled={isAdding}
             className="btn-primary px-4 py-2 text-sm"
           >
             {isAdding ? (
@@ -206,7 +206,7 @@ function ProductCard({
             ) : (
               <ShoppingCart className="w-4 h-4" />
             )}
-            <span>{inStock ? t('products.add') : t('products.soldOut')}</span>
+            <span>{hasStock ? t('products.add') : t('products.order')}</span>
           </button>
         </div>
       </div>

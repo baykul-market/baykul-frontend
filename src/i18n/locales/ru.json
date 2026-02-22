@@ -93,6 +93,9 @@
     "units": "{{count}} шт.",
     "unavailable": "Недоступно",
     "add": "В корзину",
+    "order": "Заказать",
+    "orderFromSupplier": "Под заказ",
+    "extendedDelivery": "Увеличенный срок доставки",
     "soldOut": "Распродано",
     "addedToCart": "Добавлено в корзину",
     "failedToAdd": "Не удалось добавить в корзину"

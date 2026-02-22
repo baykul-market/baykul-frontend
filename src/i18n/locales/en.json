@@ -90,6 +90,9 @@
     "units": "{{count}} units",
     "unavailable": "Unavailable",
     "add": "Add",
+    "order": "Order",
+    "orderFromSupplier": "Order from Supplier",
+    "extendedDelivery": "Extended Delivery",
     "soldOut": "Sold Out",
     "addedToCart": "Added to cart",
     "failedToAdd": "Failed to add to cart"
