@@ -122,7 +122,10 @@
     "removeError": "Failed to remove item",
     "orderSuccess": "Order placed successfully!",
     "unavailable": "Some products are unavailable",
-    "checkoutError": "Checkout failed"
+    "checkoutError": "Checkout failed",
+    "undo": "Undo",
+    "itemRestored": "Item restored",
+    "restoreError": "Failed to restore item"
   },
   "orders": {
     "title": "Order History",
