@@ -106,7 +106,7 @@ export default function BoxTrackingPage() {
             >
               <option value="">{t('dashboard.userManagement.searchAll')}</option>
               {Object.values(OrderProductStatus).map((s) => (
-                <option key={s} value={s}>{s}</option>
+                <option key={s} value={s}>{t(`status.product.${s}`)}</option>
               ))}
             </select>
           </div>
@@ -132,8 +132,8 @@ export default function BoxTrackingPage() {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {searchResults && searchResults.length > 0 ? (
-                  searchResults.map((box: OrderProduct) => (
+                {searchResults && searchResults.content.length > 0 ? (
+                  searchResults.content.map((box: OrderProduct) => (
                     <tr key={box.id} className="hover:bg-secondary/20 transition-colors">
                       <td className="px-5 py-4 font-mono font-medium text-sm">
                         {box.number || '-'}
@@ -149,7 +149,7 @@ export default function BoxTrackingPage() {
                             box.status === OrderProductStatus.CANCELLED || box.status === OrderProductStatus.RETURNED ? "bg-destructive/10 text-destructive border-destructive/20" :
                               "bg-primary/10 text-primary border-primary/20"
                         )}>
-                          {box.status}
+                          {t(`status.product.${box.status}`)}
                         </span>
                       </td>
                       <td className="px-5 py-4 text-sm">{box.partsCount}</td>
@@ -172,7 +172,7 @@ export default function BoxTrackingPage() {
                               className="btn-ghost px-2 py-1 text-[10px] border border-border hover:bg-secondary h-auto"
                               disabled={updateStatusMutation.isPending}
                             >
-                              {nextStatus}
+                              {t(`status.product.${nextStatus}`)}
                             </button>
                           ))}
                         </div>
@@ -194,7 +194,7 @@ export default function BoxTrackingPage() {
           </div>
 
           {/* Pagination */}
-          {(page > 0 || (searchResults && searchResults.length === pageSize)) && (
+          {(page > 0 || (searchResults && searchResults.content.length === pageSize)) && (
             <div className="flex items-center justify-between px-5 py-4 border-t bg-secondary/10 flex-wrap gap-4">
               <div className="flex items-center gap-4">
                 <p className="text-sm text-muted-foreground whitespace-nowrap">
@@ -227,7 +227,7 @@ export default function BoxTrackingPage() {
                 </button>
                 <button
                   onClick={() => setPage((p) => p + 1)}
-                  disabled={!searchResults || searchResults.length < pageSize}
+                  disabled={!searchResults || searchResults.content.length < pageSize}
                   className="btn-secondary px-3 py-2"
                 >
                   {t('dashboard.userManagement.next')}

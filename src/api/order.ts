@@ -1,4 +1,5 @@
 import { api } from './client';
+import type { PageResponse } from './types';
 import type { Part } from './product';
 
 export interface Pageable {
@@ -118,8 +119,8 @@ export const orderApi = {
     });
   },
 
-  searchBoxes: async (params: { number?: number; status?: string; forBill?: boolean; page?: number; size?: number; sort?: string[] }): Promise<OrderProduct[]> => {
-    const response = await api.get('/order/product/search', { params });
+  searchBoxes: async (params: { number?: number; status?: string; forBill?: boolean; page?: number; size?: number; sort?: string[] }): Promise<PageResponse<OrderProduct>> => {
+    const response = await api.get<PageResponse<OrderProduct>>('/order/product/search', { params });
     return response.data;
   },
 };

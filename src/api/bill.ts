@@ -1,4 +1,5 @@
 import { api } from './client';
+import { PageResponse } from './types';
 
 export type BillStatus = 'DRAFT' | 'APPLIED';
 
@@ -23,35 +24,6 @@ export interface Bill {
 export interface BillCreateRequest {
   number: number;
   orderProducts: { id: string }[];
-}
-
-export interface PageableSort {
-  sorted: boolean;
-  unsorted: boolean;
-  empty?: boolean;
-}
-
-export interface Pageable {
-  pageNumber: number;
-  pageSize: number;
-  sort: PageableSort;
-  offset: number;
-  unpaged: boolean;
-  paged: boolean;
-}
-
-export interface PageResponse<T> {
-  content: T[];
-  pageable: Pageable;
-  last: boolean;
-  totalElements: number;
-  totalPages: number;
-  size: number;
-  number: number;
-  sort: PageableSort;
-  first: boolean;
-  numberOfElements: number;
-  empty: boolean;
 }
 
 export const billApi = {

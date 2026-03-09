@@ -151,12 +151,7 @@
     "subtotal": "Subtotal",
     "shipping": "Shipping",
     "total": "Total",
-    "shippingDetails": "Shipping Details",
-    "statusCompleted": "Completed",
-    "statusProcessing": "Processing",
-    "statusCancelled": "Cancelled",
-    "statusPaid": "Paid",
-    "statusCreated": "Created"
+    "shippingDetails": "Shipping Details"
   },
   "profile": {
     "blocked": "Blocked",
@@ -494,5 +489,32 @@
   "language": {
     "en": "English",
     "ru": "Русский"
+  },
+  "status": {
+    "order": {
+      "CONFIRMATION_WAITING": "Awaiting Confirmation",
+      "PAYMENT_WAITING": "Awaiting Payment",
+      "ORDERED": "Ordered",
+      "ON_WAY": "On Way",
+      "IN_WAREHOUSE": "In Warehouse",
+      "READY_FOR_PICKUP": "Ready for Pickup",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    },
+    "product": {
+      "CREATED": "Created",
+      "TO_ORDER": "To Order",
+      "ON_WAY": "On Way",
+      "ARRIVED": "Arrived",
+      "IN_WAREHOUSE": "In Warehouse",
+      "SHIPPED": "Shipped",
+      "DELIVERED": "Delivered",
+      "RETURNED": "Returned",
+      "CANCELLED": "Cancelled"
+    },
+    "bill": {
+      "DRAFT": "Draft",
+      "APPLIED": "Applied"
+    }
   }
 }

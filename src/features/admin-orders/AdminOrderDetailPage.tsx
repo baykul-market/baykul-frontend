@@ -178,7 +178,7 @@ export default function AdminOrderDetailPage() {
                         {order.status === OrderStatus.CANCELLED ? (
                             <div className="bg-destructive/10 text-destructive border-destructive/20 border rounded-lg p-4 flex items-center gap-3">
                                 <XCircle className="w-6 h-6" />
-                                <span className="font-semibold text-lg">{t('orders.statusCancelled', 'Cancelled')}</span>
+                                <span className="font-semibold text-lg">{t(`status.order.${order.status}`)}</span>
                             </div>
                         ) : (
                             <div className="relative mt-2">
@@ -210,7 +210,7 @@ export default function AdminOrderDetailPage() {
                                                     "text-[10px] font-medium text-left sm:text-center max-w-[80px]",
                                                     (isCurrent || isCompleted) ? "text-foreground" : "text-muted-foreground"
                                                 )}>
-                                                    {status.replace(/_/g, ' ')}
+                                                    {t(`status.order.${status}`)}
                                                 </span>
                                             </div>
                                         );
@@ -252,11 +252,11 @@ export default function AdminOrderDetailPage() {
                                     {/* Product Status Stepper */}
                                     {product.status === OrderProductStatus.CANCELLED ? (
                                         <div className="bg-destructive/10 text-destructive border border-destructive/20 rounded-lg p-3 text-sm font-medium flex items-center gap-2">
-                                            <XCircle className="w-4 h-4" /> Cancelled
+                                            <XCircle className="w-4 h-4" /> {t(`status.product.${product.status}`)}
                                         </div>
                                     ) : product.status === OrderProductStatus.RETURNED ? (
                                         <div className="bg-destructive/10 text-destructive border border-destructive/20 rounded-lg p-3 text-sm font-medium flex items-center gap-2">
-                                            <RotateCw className="w-4 h-4" /> Returned
+                                            <RotateCw className="w-4 h-4" /> {t(`status.product.${product.status}`)}
                                         </div>
                                     ) : (
                                         <div className="bg-secondary/20 p-4 rounded-lg">
@@ -292,7 +292,7 @@ export default function AdminOrderDetailPage() {
                                                         >
                                                             {isCompleted && <CheckCircle2 className="w-3 h-3" />}
                                                             {!isCompleted && !isCurrent && <div className="w-1.5 h-1.5 rounded-full bg-current opacity-50"></div>}
-                                                            {status.replace(/_/g, ' ')}
+                                                            {t(`status.product.${status}`)}
                                                         </button>
                                                     );
                                                 })}
@@ -384,6 +384,6 @@ export default function AdminOrderDetailPage() {
                 confirmText={t('common.confirm', 'Confirm')}
                 cancelText={t('common.cancel', 'Cancel')}
             />
-        </div>
+        </div >
     );
 }

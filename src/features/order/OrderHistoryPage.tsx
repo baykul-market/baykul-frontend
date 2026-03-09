@@ -152,7 +152,7 @@ function getStatusConfig(status: OrderStatus, t: (key: string) => string) {
   switch (status) {
     case OrderStatus.COMPLETED:
       return {
-        label: t('orders.statusCompleted'),
+        label: t(`status.order.${status}`),
         icon: CheckCircle2,
         bgClass: 'bg-success/10',
         iconClass: 'text-success',
@@ -160,7 +160,7 @@ function getStatusConfig(status: OrderStatus, t: (key: string) => string) {
       };
     case OrderStatus.READY_FOR_PICKUP:
       return {
-        label: t('orders.statusReady') || 'Ready for Pickup',
+        label: t(`status.order.${status}`),
         icon: CheckCircle2,
         bgClass: 'bg-info/10',
         iconClass: 'text-info',
@@ -170,7 +170,7 @@ function getStatusConfig(status: OrderStatus, t: (key: string) => string) {
     case OrderStatus.IN_WAREHOUSE:
     case OrderStatus.ORDERED:
       return {
-        label: status === OrderStatus.ON_WAY ? 'On Way' : status === OrderStatus.IN_WAREHOUSE ? 'In Warehouse' : (t('orders.statusProcessing') || 'Ordered'),
+        label: t(`status.order.${status}`),
         icon: RotateCw,
         bgClass: 'bg-primary/10',
         iconClass: 'text-primary',
@@ -178,7 +178,7 @@ function getStatusConfig(status: OrderStatus, t: (key: string) => string) {
       };
     case OrderStatus.PAYMENT_WAITING:
       return {
-        label: t('orders.statusPaid') || 'Awaiting Payment',
+        label: t(`status.order.${status}`),
         icon: CreditCard,
         bgClass: 'bg-warning/10',
         iconClass: 'text-warning',
@@ -186,7 +186,7 @@ function getStatusConfig(status: OrderStatus, t: (key: string) => string) {
       };
     case OrderStatus.CANCELLED:
       return {
-        label: t('orders.statusCancelled'),
+        label: t(`status.order.${status}`),
         icon: XCircle,
         bgClass: 'bg-destructive/10',
         iconClass: 'text-destructive',
@@ -194,7 +194,7 @@ function getStatusConfig(status: OrderStatus, t: (key: string) => string) {
       };
     case OrderStatus.CONFIRMATION_WAITING:
       return {
-        label: t('orders.statusCreated'),
+        label: t(`status.order.${status}`),
         icon: Clock,
         bgClass: 'bg-muted',
         iconClass: 'text-muted-foreground',
