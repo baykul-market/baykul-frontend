@@ -19,14 +19,14 @@ const ORDER_STATUS_FLOW = [
     OrderStatus.COMPLETED
 ];
 
-// We group ARRIVED and IN_WAREHOUSE together since they represent parallel statuses
+// We simplify visual flow: ARRIVED is visually always treated as IN_WAREHOUSE
 const BOX_STATUS_FLOW = [
-    [OrderProductStatus.CREATED],
-    [OrderProductStatus.TO_ORDER],
-    [OrderProductStatus.ON_WAY],
-    [OrderProductStatus.ARRIVED, OrderProductStatus.IN_WAREHOUSE],
-    [OrderProductStatus.SHIPPED],
-    [OrderProductStatus.DELIVERED]
+    OrderProductStatus.CREATED,
+    OrderProductStatus.TO_ORDER,
+    OrderProductStatus.ON_WAY,
+    OrderProductStatus.IN_WAREHOUSE,
+    OrderProductStatus.SHIPPED,
+    OrderProductStatus.DELIVERED
 ];
 
 export default function AdminOrderDetailPage() {
@@ -261,39 +261,40 @@ export default function AdminOrderDetailPage() {
                                     ) : (
                                         <div className="bg-secondary/20 p-4 rounded-lg">
                                             <div className="flex flex-wrap gap-2 mb-3">
-                                                {BOX_STATUS_FLOW.map((statusGroup, index) => {
-                                                    const currentIndex = BOX_STATUS_FLOW.findIndex(g => g.includes(product.status));
+                                                {BOX_STATUS_FLOW.map((status, index) => {
+                                                    const visualStatus = product.status === OrderProductStatus.ARRIVED ? OrderProductStatus.IN_WAREHOUSE : product.status;
+                                                    const currentIndex = BOX_STATUS_FLOW.indexOf(visualStatus);
                                                     const isCompleted = index < currentIndex;
                                                     const isCurrent = index === currentIndex;
                                                     const isNext = index === currentIndex + 1;
 
-                                                    // If it's a grouped status, render each option if it's the current/next step
-                                                    return statusGroup.map(status => {
-                                                        // Hide alternative parallel statuses if one is already selected/completed
-                                                        if ((isCompleted || isCurrent) && status !== product.status && statusGroup.length > 1) {
-                                                            return null;
+                                                    const handleBoxStatusUpdate = () => {
+                                                        let beStatus = status;
+                                                        if (product.status === OrderProductStatus.ON_WAY) {
+                                                            beStatus = OrderProductStatus.ARRIVED;
                                                         }
+                                                        updateProductStatusMutation.mutate({ id: product.id, status: beStatus });
+                                                    };
 
-                                                        return (
-                                                            <button
-                                                                key={status}
-                                                                onClick={() => updateProductStatusMutation.mutate({ id: product.id, status })}
-                                                                disabled={!isNext || updateProductStatusMutation.isPending}
-                                                                className={cn(
-                                                                    "px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all border",
-                                                                    isCompleted ? "bg-success/10 text-success border-success/30" :
-                                                                        isCurrent ? "bg-primary text-primary-foreground border-primary ring-2 ring-primary/20 shadow-md" :
-                                                                            "bg-background text-muted-foreground border-border",
-                                                                    isNext ? "hover:bg-primary/20 hover:text-primary hover:border-primary/50 cursor-pointer shadow-sm scale-105" : "cursor-not-allowed opacity-70"
-                                                                )}
-                                                                title={isNext ? `Update box to ${status}` : ''}
-                                                            >
-                                                                {isCompleted && <CheckCircle2 className="w-3 h-3" />}
-                                                                {!isCompleted && !isCurrent && <div className="w-1.5 h-1.5 rounded-full bg-current opacity-50"></div>}
-                                                                {status.replace(/_/g, ' ')}
-                                                            </button>
-                                                        );
-                                                    });
+                                                    return (
+                                                        <button
+                                                            key={status}
+                                                            onClick={handleBoxStatusUpdate}
+                                                            disabled={!isNext || updateProductStatusMutation.isPending}
+                                                            className={cn(
+                                                                "px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all border",
+                                                                isCompleted ? "bg-success/10 text-success border-success/30" :
+                                                                    isCurrent ? "bg-primary text-primary-foreground border-primary ring-2 ring-primary/20 shadow-md" :
+                                                                        "bg-background text-muted-foreground border-border",
+                                                                isNext ? "hover:bg-primary/20 hover:text-primary hover:border-primary/50 cursor-pointer shadow-sm scale-105" : "cursor-not-allowed opacity-70"
+                                                            )}
+                                                            title={isNext ? `Update box to ${status}` : ''}
+                                                        >
+                                                            {isCompleted && <CheckCircle2 className="w-3 h-3" />}
+                                                            {!isCompleted && !isCurrent && <div className="w-1.5 h-1.5 rounded-full bg-current opacity-50"></div>}
+                                                            {status.replace(/_/g, ' ')}
+                                                        </button>
+                                                    );
                                                 })}
                                             </div>
                                             <div className="flex gap-4 justify-end mt-4 pt-3 border-t border-border/50">
