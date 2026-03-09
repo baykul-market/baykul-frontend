@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { ConfirmModal } from '../../components/ConfirmModal';
 import { useTranslation } from 'react-i18next';
 import { orderApi, OrderStatus, OrderProductStatus } from '../../api/order';
-import { Loader2, ArrowLeft, User, CreditCard, Box, CheckCircle2, RotateCw, Clock, XCircle } from 'lucide-react';
+import { Loader2, ArrowLeft, User, CreditCard, Box, CheckCircle2, RotateCw, Clock, XCircle, Pencil } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
@@ -86,6 +86,23 @@ export default function AdminOrderDetailPage() {
             toast.error(msg);
         }
     });
+
+    const updateProductDataMutation = useMutation({
+        mutationFn: ({ id, number }: { id: string, number: number }) =>
+            orderApi.updateOrderProduct(id, { number }),
+        onSuccess: () => {
+            toast.success(t('dashboard.orderManagement.productUpdateSuccess', 'Product updated successfully'));
+            queryClient.invalidateQueries({ queryKey: ['admin-order-details', orderId] });
+            setEditingBoxId(null);
+        },
+        onError: (err: any) => {
+            const msg = err?.response?.data?.error || t('dashboard.orderManagement.productUpdateError', 'Failed to update product');
+            toast.error(msg);
+        }
+    });
+
+    const [editingBoxId, setEditingBoxId] = useState<string | null>(null);
+    const [editingBoxNumber, setEditingBoxNumber] = useState<string>('');
 
     if (isLoading) {
         return (
@@ -241,10 +258,55 @@ export default function AdminOrderDetailPage() {
                                             <p className="font-medium text-lg">
                                                 {product.partsCount} x {product.part.price} {product.part.currency}
                                             </p>
-                                            {product.number && (
-                                                <p className="text-sm text-muted-foreground mt-1">
-                                                    Box #{product.number}
-                                                </p>
+                                            {editingBoxId === product.id ? (
+                                                <div className="flex items-center gap-2 mt-2 justify-end">
+                                                    <input
+                                                        type="number"
+                                                        value={editingBoxNumber}
+                                                        onChange={e => setEditingBoxNumber(e.target.value)}
+                                                        className="border rounded px-2 py-1 w-24 text-sm bg-background text-foreground"
+                                                        placeholder="≥100000"
+                                                    />
+                                                    <button
+                                                        onClick={() => {
+                                                            const num = parseInt(editingBoxNumber, 10);
+                                                            if (isNaN(num) || num < 100000) {
+                                                                toast.error(t('dashboard.orderManagement.boxNumberValidation', 'Box number must be >= 100000'));
+                                                                return;
+                                                            }
+                                                            updateProductDataMutation.mutate({ id: product.id, number: num });
+                                                        }}
+                                                        disabled={updateProductDataMutation.isPending}
+                                                        className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded hover:bg-primary/90 transition-colors"
+                                                    >
+                                                        {t('dashboard.orderManagement.boxSave', 'Save')}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setEditingBoxId(null)}
+                                                        className="text-xs text-muted-foreground hover:underline"
+                                                    >
+                                                        {t('common.cancel', 'Cancel')}
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center justify-end gap-2 mt-1">
+                                                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                                                        <span>Box #</span>
+                                                        <span className={cn(product.number ? "font-medium text-foreground" : "italic")}>
+                                                            {product.number ? product.number : t('dashboard.orderManagement.boxNotSet', 'Not set')}
+                                                        </span>
+                                                    </p>
+                                                    <button
+                                                        onClick={() => {
+                                                            setEditingBoxId(product.id);
+                                                            setEditingBoxNumber(product.number ? String(product.number) : '');
+                                                        }}
+                                                        className="text-muted-foreground hover:text-primary transition-colors hover:bg-primary/10 p-1.5 rounded-md"
+                                                        title={t('common.edit', 'Edit')}
+                                                    >
+                                                        <Pencil className="w-4 h-4" />
+                                                    </button>
+                                                </div>
                                             )}
                                         </div>
                                     </div>

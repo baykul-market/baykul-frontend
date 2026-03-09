@@ -133,52 +133,85 @@ export default function BoxTrackingPage() {
               </thead>
               <tbody className="divide-y">
                 {searchResults?.content?.length ? (
-                  searchResults.content.map((box: OrderProduct) => (
-                    <tr key={box.id} className="hover:bg-secondary/20 transition-colors">
-                      <td className="px-5 py-4 font-mono font-medium text-sm">
-                        {box.number || '-'}
-                      </td>
-                      <td className="px-5 py-4">
-                        <div className="font-medium text-sm">{box.part.brand} - {box.part.article}</div>
-                        <div className="text-xs text-muted-foreground truncate max-w-[200px]">{box.part.name}</div>
-                      </td>
-                      <td className="px-5 py-4">
-                        <span className={cn(
-                          "badge text-[10px]",
-                          box.status === OrderProductStatus.DELIVERED ? "bg-success/10 text-success border-success/20" :
-                            box.status === OrderProductStatus.CANCELLED || box.status === OrderProductStatus.RETURNED ? "bg-destructive/10 text-destructive border-destructive/20" :
-                              "bg-primary/10 text-primary border-primary/20"
+                  (() => {
+                    let lastOrderId = '';
+                    let isGrey = false;
+                    // Cache to store full order objects encountered in the list
+                    const ordersMap = new Map<string, { id: string; number: number }>();
+
+                    return searchResults.content.map((box: OrderProduct) => {
+                      // Resolve the order: it can be a full object or just a string ID
+                      let orderObj: { id: string; number?: number } | undefined = undefined;
+
+                      if (typeof box.order === 'string') {
+                        // If it's a string, try to find the full object in our cache
+                        orderObj = ordersMap.get(box.order) || { id: box.order };
+                      } else if (box.order && typeof box.order === 'object') {
+                        // If it's an object, store it in the cache for future references
+                        orderObj = box.order as { id: string; number: number };
+                        ordersMap.set(orderObj.id, orderObj as { id: string; number: number });
+                      }
+
+                      const currentOrderId = orderObj?.id || `no-order-${box.id}`;
+                      if (currentOrderId !== lastOrderId && lastOrderId !== '') {
+                        isGrey = !isGrey;
+                      } else if (lastOrderId === '') {
+                        // For the very first row, start with grey
+                        isGrey = true;
+                      }
+                      lastOrderId = currentOrderId;
+
+                      return (
+                        <tr key={box.id} className={cn(
+                          "transition-colors",
+                          isGrey ? "bg-muted" : "bg-background box-white-row"
                         )}>
-                          {t(`status.product.${box.status}`)}
-                        </span>
-                      </td>
-                      <td className="px-5 py-4 text-sm">{box.partsCount}</td>
-                      <td className="px-5 py-4 text-sm">
-                        {box.order ? (
-                          <Link to={`/dashboard/orders/${box.order.id}`} className="text-primary hover:underline flex items-center gap-1">
-                            <Package className="w-3 h-3" />
-                            #{box.order.number}
-                          </Link>
-                        ) : (
-                          <span className="text-muted-foreground">-</span>
-                        )}
-                      </td>
-                      <td className="px-5 py-4 text-right">
-                        <div className="flex justify-end gap-2 flex-wrap max-w-[300px] ml-auto">
-                          {getNextStatuses(box.status).map((nextStatus) => (
-                            <button
-                              key={nextStatus}
-                              onClick={() => updateStatusMutation.mutate({ id: box.id, status: nextStatus })}
-                              className="btn-ghost px-2 py-1 text-[10px] border border-border hover:bg-secondary h-auto"
-                              disabled={updateStatusMutation.isPending}
-                            >
-                              {t(`status.product.${nextStatus}`)}
-                            </button>
-                          ))}
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                          <td className="px-5 py-4 font-mono font-medium text-sm">
+                            {box.number || '-'}
+                          </td>
+                          <td className="px-5 py-4">
+                            <div className="font-medium text-sm">{box.part.brand} - {box.part.article}</div>
+                            <div className="text-xs text-muted-foreground truncate max-w-[200px]">{box.part.name}</div>
+                          </td>
+                          <td className="px-5 py-4">
+                            <span className={cn(
+                              "badge text-[10px]",
+                              box.status === OrderProductStatus.DELIVERED ? "bg-success/10 text-success border-success/20" :
+                                box.status === OrderProductStatus.CANCELLED || box.status === OrderProductStatus.RETURNED ? "bg-destructive/10 text-destructive border-destructive/20" :
+                                  "bg-primary/10 text-primary border-primary/20"
+                            )}>
+                              {t(`status.product.${box.status}`)}
+                            </span>
+                          </td>
+                          <td className="px-5 py-4 text-sm">{box.partsCount}</td>
+                          <td className="px-5 py-4 text-sm">
+                            {orderObj ? (
+                              <Link to={`/dashboard/orders/${orderObj.id}`} className="text-primary hover:underline flex items-center gap-1">
+                                <Package className="w-3 h-3" />
+                                #{orderObj.number || '...'}
+                              </Link>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </td>
+                          <td className="px-5 py-4 text-right">
+                            <div className="flex justify-end gap-2 flex-wrap max-w-[300px] ml-auto">
+                              {getNextStatuses(box.status).map((nextStatus) => (
+                                <button
+                                  key={nextStatus}
+                                  onClick={() => updateStatusMutation.mutate({ id: box.id, status: nextStatus })}
+                                  className="btn-ghost cursor-pointer px-2 py-1 text-[10px] border border-border hover:bg-secondary h-auto disabled:cursor-not-allowed"
+                                  disabled={updateStatusMutation.isPending}
+                                >
+                                  {t(`status.product.${nextStatus}`)}
+                                </button>
+                              ))}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    });
+                  })()
                 ) : (
                   <tr>
                     <td colSpan={6} className="px-5 py-12 text-center text-muted-foreground">

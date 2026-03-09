@@ -338,7 +338,10 @@
       "updateSuccess": "Статус заказа успешно обновлён",
       "updateError": "Не удалось обновить статус заказа",
       "productUpdateSuccess": "Статус товара успешно обновлён",
-      "productUpdateError": "Не удалось обновить статус товара"
+      "productUpdateError": "Не удалось обновить статус товара",
+      "boxNotSet": "Не указана",
+      "boxSave": "Сохранить",
+      "boxNumberValidation": "Номер коробки должен быть >= 100000"
     },
     "userManagement": {
       "title": "Управление пользователями",

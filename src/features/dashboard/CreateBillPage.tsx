@@ -294,55 +294,91 @@ export default function CreateBillPage() {
                                     </td>
                                 </tr>
                             ) : (
-                                products.map((product) => {
-                                    const isSelected = selectedIds.has(product.id);
-                                    return (
-                                        <tr
-                                            key={product.id}
-                                            onClick={() => toggleProduct(product.id)}
-                                            className={cn(
-                                                'cursor-pointer transition-colors',
-                                                isSelected
-                                                    ? 'bg-primary/5 hover:bg-primary/10'
-                                                    : 'hover:bg-secondary/50'
-                                            )}
-                                        >
-                                            <td className="px-4 py-3">
-                                                <div className="flex items-center justify-center">
-                                                    {isSelected ? (
-                                                        <CheckSquare className="h-4 w-4 text-primary" />
-                                                    ) : (
-                                                        <Square className="h-4 w-4 text-muted-foreground" />
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td className="px-4 py-3 font-medium text-primary">
-                                                #{product.number ?? '—'}
-                                            </td>
-                                            <td className="px-4 py-3 text-center">
-                                                {product.partsCount}
-                                            </td>
-                                            <td className="px-4 py-3 text-right font-medium">
-                                                {product.part?.price != null
-                                                    ? `${product.part.price.toLocaleString('ru-RU')} ₽`
-                                                    : '—'
-                                                }
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                <span className={cn(
-                                                    'badge text-[10px]',
-                                                    product.status === 'ARRIVED' || product.status === 'DELIVERED'
-                                                        ? 'bg-success/10 text-success border-success/20'
-                                                        : product.status === 'IN_WAREHOUSE'
-                                                            ? 'bg-info/10 text-info border-info/20'
-                                                            : 'bg-warning/10 text-warning border-warning/20'
-                                                )}>
-                                                    {product.status}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    );
-                                })
+                                (() => {
+                                    let lastOrderId = '';
+                                    let isGrey = false;
+                                    // Cache to resolve identity references
+                                    const ordersMap = new Map<string, any>();
+
+                                    return products.map((product: any) => {
+                                        // Resolve order reference
+                                        let orderId = '';
+                                        if (product.order) {
+                                            if (typeof product.order === 'string') {
+                                                orderId = product.order;
+                                            } else {
+                                                orderId = product.order.id;
+                                                ordersMap.set(orderId, product.order);
+                                            }
+                                        }
+
+                                        const currentOrderId = orderId || `no-order-${product.id}`;
+                                        if (currentOrderId !== lastOrderId && lastOrderId !== '') {
+                                            isGrey = !isGrey;
+                                        } else if (lastOrderId === '') {
+                                            // For the very first row, start with grey
+                                            isGrey = true;
+                                        }
+                                        lastOrderId = currentOrderId;
+
+                                        const isSelected = selectedIds.has(product.id);
+                                        return (
+                                            <tr
+                                                key={product.id}
+                                                className={cn(
+                                                    'transition-colors',
+                                                    isSelected
+                                                        ? 'bg-primary/10'
+                                                        : isGrey ? 'bg-muted' : 'bg-background'
+                                                )}
+                                            >
+                                                <td className="px-4 py-3">
+                                                    <button
+                                                        onClick={() => toggleProduct(product.id)}
+                                                        className="flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity outline-none"
+                                                    >
+                                                        {isSelected ? (
+                                                            <CheckSquare className="h-4 w-4 text-primary" />
+                                                        ) : (
+                                                            <Square className="h-4 w-4 text-muted-foreground" />
+                                                        )}
+                                                    </button>
+                                                </td>
+                                                <td className="px-4 py-3 font-medium text-primary">
+                                                    <div className="flex flex-col">
+                                                        <span>#{product.number ?? '—'}</span>
+                                                        {orderId && (
+                                                            <span className="text-[10px] text-muted-foreground font-mono">
+                                                                Order: {ordersMap.get(orderId)?.number || orderId.substring(0, 8)}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-3 text-center">
+                                                    {product.partsCount}
+                                                </td>
+                                                <td className="px-4 py-3 text-right font-medium">
+                                                    {product.price != null
+                                                        ? `${product.price.toLocaleString('ru-RU')} ₽`
+                                                        : (product.part?.price != null ? `${product.part.price.toLocaleString('ru-RU')} ₽` : '—')
+                                                    }
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    <span className={cn(
+                                                        'badge text-[10px]',
+                                                        product.status === 'ARRIVED' || product.status === 'DELIVERED'
+                                                            ? 'bg-success/10 text-success border-success/20'
+                                                            : product.status === 'IN_WAREHOUSE'
+                                                                ? 'bg-info/10 text-info border-info/20'
+                                                                : 'bg-warning/10 text-warning border-warning/20'
+                                                    )}>
+                                                        {product.status}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        );
+                                    });
+                                })()
                             )}
                         </tbody>
                     </table>

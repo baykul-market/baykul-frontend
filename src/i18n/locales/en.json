@@ -323,7 +323,10 @@
       "updateSuccess": "Order status updated successfully",
       "updateError": "Failed to update order status",
       "productUpdateSuccess": "Product status updated successfully",
-      "productUpdateError": "Failed to update product status"
+      "productUpdateError": "Failed to update product status",
+      "boxNotSet": "Not set",
+      "boxSave": "Save",
+      "boxNumberValidation": "Box number must be >= 100000"
     },
     "userManagement": {
       "title": "User Management",

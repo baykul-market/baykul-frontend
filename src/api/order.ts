@@ -73,14 +73,31 @@ export interface CreateOrderResponse {
 export const orderApi = {
   getOrders: async (): Promise<Order[]> => {
     const response = await api.get<Order[]>('/order/user');
-    return response.data;
+    return response.data.map(order => {
+      if (order.orderProducts) {
+        order.orderProducts.forEach(p => {
+          if (typeof p.order === 'string' && p.order === order.id) {
+            p.order = order;
+          }
+        });
+      }
+      return order;
+    });
   },
 
   getOrder: async (id: string): Promise<Order> => {
     const response = await api.get<Order>('/order/user/id', {
       params: { id },
     });
-    return response.data;
+    const order = response.data;
+    if (order.orderProducts) {
+      order.orderProducts.forEach(p => {
+        if (typeof p.order === 'string' && p.order === order.id) {
+          p.order = order;
+        }
+      });
+    }
+    return order;
   },
 
   createOrder: async (): Promise<CreateOrderResponse> => {
@@ -97,14 +114,31 @@ export const orderApi = {
   // Admin endpoints
   getAllOrders: async (params?: Pageable): Promise<Order[]> => {
     const response = await api.get<Order[]>('/order', { params });
-    return response.data;
+    return response.data.map(order => {
+      if (order.orderProducts) {
+        order.orderProducts.forEach(p => {
+          if (typeof p.order === 'string' && p.order === order.id) {
+            p.order = order;
+          }
+        });
+      }
+      return order;
+    });
   },
 
   getOrderById: async (id: string): Promise<Order> => {
     const response = await api.get<Order>('/order/id', {
       params: { id },
     });
-    return response.data;
+    const order = response.data;
+    if (order.orderProducts) {
+      order.orderProducts.forEach(p => {
+        if (typeof p.order === 'string' && p.order === order.id) {
+          p.order = order;
+        }
+      });
+    }
+    return order;
   },
 
   updateOrder: async (id: string, data: Partial<Order>): Promise<void> => {
@@ -127,21 +161,44 @@ export const orderApi = {
 
   searchBoxes: async (params: { number?: number; status?: string; forBill?: boolean; page?: number; size?: number; sort?: string[] }): Promise<PageResponse<OrderProduct>> => {
     const response = await api.get<any>('/order/product/search', { params });
-    if (Array.isArray(response.data)) {
+    const data = response.data;
+
+    // Helper to resolve identity references in a collection
+    const resolveIdentities = (items: any[]) => {
+      const ordersMap = new Map<string, any>();
+      return items.map(item => {
+        if (item.order) {
+          if (typeof item.order === 'string') {
+            item.order = ordersMap.get(item.order) || { id: item.order };
+          } else {
+            ordersMap.set(item.order.id, item.order);
+          }
+        }
+        return item;
+      });
+    };
+
+    if (Array.isArray(data)) {
+      const content = resolveIdentities(data);
       return {
-        content: response.data,
+        content,
         pageable: { pageNumber: params.page || 0, pageSize: params.size || 20, sort: { sorted: false, unsorted: true }, offset: 0, unpaged: false, paged: true },
-        last: response.data.length < (params.size || 20),
-        totalElements: response.data.length,
-        totalPages: response.data.length === (params.size || 20) ? (params.page || 0) + 2 : (params.page || 0) + 1,
+        last: content.length < (params.size || 20),
+        totalElements: content.length,
+        totalPages: content.length === (params.size || 20) ? (params.page || 0) + 2 : (params.page || 0) + 1,
         size: params.size || 20,
         number: params.page || 0,
         sort: { sorted: false, unsorted: true },
         first: (params.page || 0) === 0,
-        numberOfElements: response.data.length,
-        empty: response.data.length === 0
+        numberOfElements: content.length,
+        empty: content.length === 0
       };
     }
-    return response.data;
+
+    if (data && data.content) {
+      data.content = resolveIdentities(data.content);
+    }
+
+    return data;
   },
 };
