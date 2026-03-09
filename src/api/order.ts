@@ -8,18 +8,23 @@ export interface Pageable {
 }
 
 export enum OrderStatus {
-  CREATED = 'CREATED',
-  PAID = 'PAID',
-  PROCESSING = 'PROCESSING',
+  CONFIRMATION_WAITING = 'CONFIRMATION_WAITING',
+  PAYMENT_WAITING = 'PAYMENT_WAITING',
+  ORDERED = 'ORDERED',
+  ON_WAY = 'ON_WAY',
+  IN_WAREHOUSE = 'IN_WAREHOUSE',
+  READY_FOR_PICKUP = 'READY_FOR_PICKUP',
   COMPLETED = 'COMPLETED',
   CANCELLED = 'CANCELLED',
 }
 
 export enum OrderProductStatus {
-  ORDERED = 'ORDERED',
-  IN_WAREHOUSE = 'IN_WAREHOUSE',
+  CREATED = 'CREATED',
+  TO_ORDER = 'TO_ORDER',
   ON_WAY = 'ON_WAY',
   ARRIVED = 'ARRIVED',
+  IN_WAREHOUSE = 'IN_WAREHOUSE',
+  SHIPPED = 'SHIPPED',
   DELIVERED = 'DELIVERED',
   RETURNED = 'RETURNED',
   CANCELLED = 'CANCELLED',
@@ -107,7 +112,7 @@ export const orderApi = {
     });
   },
 
-  searchBoxes: async (params: { number?: number; status?: string; page?: number; size?: number; sort?: string[] }): Promise<{ content: OrderProduct[]; totalElements: number; totalPages: number }> => {
+  searchBoxes: async (params: { number?: number; status?: string; forBill?: boolean; page?: number; size?: number; sort?: string[] }): Promise<{ content: OrderProduct[]; totalElements: number; totalPages: number }> => {
     const response = await api.get('/order/product/search', { params });
     return response.data;
   },

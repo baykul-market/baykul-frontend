@@ -490,7 +490,18 @@
       "enterBillNumber": "Введите номер счета (мин. 10000)",
       "searchProductPlaceholder": "Поиск товара по номеру...",
       "addProductToBill": "Добавить товар в накладную",
-      "productAlreadyAdded": "Товар уже добавлен"
+      "productAlreadyAdded": "Товар уже добавлен",
+      "createBillSubtitle": "Выберите продукты заказа для включения в новый счёт",
+      "backToBills": "Назад к счетам",
+      "filterByNumber": "Фильтр по номеру...",
+      "allStatuses": "Все статусы",
+      "clearFilters": "Очистить",
+      "selectedCount": "{{count}} продуктов выбрано",
+      "clearSelection": "Снять выделение",
+      "selectAtLeastOne": "Выберите хотя бы один продукт",
+      "noBillableProducts": "Нет продуктов без счета",
+      "tryOtherFilters": "Попробуйте изменить фильтры",
+      "allProductsBilled": "Все продукты уже включены в счета"
     }
   },
   "phone": {

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { billApi, Bill, BillStatus } from '../../api/bill';
 import { orderApi } from '../../api/order';
 import {
@@ -30,9 +31,9 @@ function statusColor(status: BillStatus) {
 export default function BillManagementPage() {
     const { t } = useTranslation();
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
     const [page, setPage] = useState(0);
     const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
     // Queries
     const { data, isLoading } = useQuery({
@@ -69,7 +70,7 @@ export default function BillManagementPage() {
                     <p className="text-muted-foreground">{t('dashboard.billManagement.subtitle')}</p>
                 </div>
                 <button
-                    onClick={() => setIsCreateModalOpen(true)}
+                    onClick={() => navigate('/dashboard/bills/create')}
                     className="btn-primary"
                 >
                     <Plus className="h-4 w-4 mr-2" />
@@ -167,12 +168,7 @@ export default function BillManagementPage() {
                 )}
             </div>
 
-            {isCreateModalOpen && (
-                <CreateBillModal
-                    onClose={() => setIsCreateModalOpen(false)}
-                    t={t}
-                />
-            )}
+
 
             {selectedBill && (
                 <BillDetailsModal
@@ -188,6 +184,7 @@ export default function BillManagementPage() {
         </div>
     );
 }
+
 
 function ProductSearch({
     onSelect,
@@ -249,117 +246,6 @@ function ProductSearch({
                     )}
                 </div>
             )}
-        </div>
-    );
-}
-
-function CreateBillModal({
-    onClose,
-    t,
-}: {
-    onClose: () => void;
-    t: any;
-}) {
-    const queryClient = useQueryClient();
-    const [number, setNumber] = useState('');
-    const [selectedProducts, setSelectedProducts] = useState<any[]>([]);
-
-    const createMutation = useMutation({
-        mutationFn: billApi.create,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['bills'] });
-            toast.success(t('dashboard.billManagement.createSuccess'));
-            onClose();
-        },
-        onError: () => toast.error(t('dashboard.billManagement.createError')),
-    });
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!number || isNaN(Number(number)) || Number(number) < 10000) return;
-        createMutation.mutate({
-            number: Number(number),
-            orderProducts: selectedProducts.map(p => ({ id: p.id }))
-        });
-    };
-
-    return (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="card w-full max-w-md animate-scale-in">
-                <div className="p-6 border-b border-border flex items-center justify-between">
-                    <h3 className="text-lg font-semibold flex items-center gap-2">
-                        <FileText className="h-5 w-5 text-primary" />
-                        {t('dashboard.billManagement.createBill')}
-                    </h3>
-                    <button onClick={onClose} className="btn-ghost h-8 w-8 p-0 rounded-full">
-                        &times;
-                    </button>
-                </div>
-                <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                    <div className="space-y-4">
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">
-                                {t('dashboard.billManagement.billNumber')}
-                            </label>
-                            <input
-                                type="number"
-                                value={number}
-                                onChange={(e) => setNumber(e.target.value)}
-                                className="input w-full"
-                                placeholder={t('dashboard.billManagement.enterBillNumber')}
-                                min="10000"
-                                required
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">
-                                {t('dashboard.billManagement.orderProducts')}
-                            </label>
-                            <ProductSearch
-                                t={t}
-                                onSelect={(product) => {
-                                    if (!selectedProducts.find(p => p.id === product.id)) {
-                                        setSelectedProducts([...selectedProducts, product]);
-                                    }
-                                }}
-                            />
-
-                            {selectedProducts.length > 0 && (
-                                <ul className="mt-3 space-y-2 max-h-40 overflow-y-auto bg-secondary/20 p-2 rounded-lg border border-border">
-                                    {selectedProducts.map(p => (
-                                        <li key={p.id} className="flex justify-between items-center bg-card p-2 rounded border border-border text-sm">
-                                            <div className="flex items-center gap-2">
-                                                <Box className="h-4 w-4 text-muted-foreground" />
-                                                <span>#{p.number} ({p.partsCount} parts)</span>
-                                            </div>
-                                            <button
-                                                type="button"
-                                                onClick={() => setSelectedProducts(selectedProducts.filter(x => x.id !== p.id))}
-                                                className="text-destructive hover:bg-destructive/10 p-1 rounded"
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </button>
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
-                        </div>
-                    </div>
-                    <div className="flex justify-end gap-3 pt-4">
-                        <button type="button" onClick={onClose} className="btn-secondary">
-                            {t('common.cancel')}
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={createMutation.isPending || !number || Number(number) < 10000}
-                            className="btn-primary"
-                        >
-                            {createMutation.isPending ? t('common.loading') : t('dashboard.billManagement.createBill')}
-                        </button>
-                    </div>
-                </form>
-            </div>
         </div>
     );
 }

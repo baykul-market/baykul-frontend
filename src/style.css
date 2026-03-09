@@ -184,6 +184,15 @@
            disabled:pointer-events-none disabled:opacity-50;
   }
 
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg
+           border border-input bg-transparent px-4 py-2.5 text-sm font-medium
+           transition-all duration-200 whitespace-nowrap
+           hover:bg-accent hover:text-accent-foreground
+           active:scale-[0.98]
+           disabled:pointer-events-none disabled:opacity-50;
+  }
+
   .btn-ghost {
     @apply inline-flex items-center justify-center gap-2 rounded-lg
            px-4 py-2.5 text-sm font-medium

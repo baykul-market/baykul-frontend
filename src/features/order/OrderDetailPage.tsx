@@ -53,8 +53,8 @@ export default function OrderDetailPage() {
     <div className="max-w-4xl mx-auto animate-fade-in pb-10">
       {/* Breadcrumb / Back Navigation */}
       <div className="mb-6">
-        <button 
-          onClick={() => navigate('/orders')} 
+        <button
+          onClick={() => navigate('/orders')}
           className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="w-4 h-4 mr-1" />
@@ -82,11 +82,11 @@ export default function OrderDetailPage() {
             })}
           </p>
         </div>
-        
+
         {/* Actions (Future: Cancel button, etc.) */}
         <div className="flex gap-2">
-           {/* Placeholder for future actions */}
-           {/* <button className="btn-outline text-destructive hover:bg-destructive/10 border-destructive/20">
+          {/* Placeholder for future actions */}
+          {/* <button className="btn-outline text-destructive hover:bg-destructive/10 border-destructive/20">
              Cancel Order
            </button> */}
         </div>
@@ -100,7 +100,7 @@ export default function OrderDetailPage() {
               <Package className="w-5 h-5" />
               {t('orders.items')}
             </h2>
-            
+
             <div className="divide-y">
               {order.orderProducts?.map((op) => (
                 <div key={op.id} className="py-4 first:pt-0 last:pb-0 flex gap-4">
@@ -108,7 +108,7 @@ export default function OrderDetailPage() {
                   <div className="w-16 h-16 bg-muted rounded-md flex items-center justify-center flex-shrink-0">
                     <Box className="w-8 h-8 text-muted-foreground/50" />
                   </div>
-                  
+
                   <div className="flex-1 min-w-0">
                     <h3 className="font-medium truncate">{op.part.name}</h3>
                     <p className="text-sm text-muted-foreground font-mono">{op.part.article}</p>
@@ -119,7 +119,7 @@ export default function OrderDetailPage() {
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="text-right">
                     <p className="font-medium">
                       {currencySymbol}{(op.part.price * op.partsCount).toFixed(2)}
@@ -139,7 +139,7 @@ export default function OrderDetailPage() {
           {/* Order Summary */}
           <div className="card p-6">
             <h2 className="text-lg font-semibold mb-4">{t('orders.summary')}</h2>
-            
+
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">{t('orders.subtotal')}</span>
@@ -192,21 +192,31 @@ function getStatusConfig(status: OrderStatus, t: (key: string) => string) {
         iconClass: 'text-success',
         badgeClass: 'bg-success/10 text-success border-success/20',
       };
-    case OrderStatus.PROCESSING:
+    case OrderStatus.READY_FOR_PICKUP:
       return {
-        label: t('orders.statusProcessing'),
+        label: t('orders.statusReady') || 'Ready for Pickup',
+        icon: CheckCircle2,
+        bgClass: 'bg-info/10',
+        iconClass: 'text-info',
+        badgeClass: 'bg-info/10 text-info border-info/20',
+      };
+    case OrderStatus.ON_WAY:
+    case OrderStatus.IN_WAREHOUSE:
+    case OrderStatus.ORDERED:
+      return {
+        label: status === OrderStatus.ON_WAY ? 'On Way' : status === OrderStatus.IN_WAREHOUSE ? 'In Warehouse' : (t('orders.statusProcessing') || 'Ordered'),
         icon: RotateCw,
         bgClass: 'bg-primary/10',
         iconClass: 'text-primary',
         badgeClass: 'bg-primary/10 text-primary border-primary/20',
       };
-    case OrderStatus.PAID:
+    case OrderStatus.PAYMENT_WAITING:
       return {
-        label: t('orders.statusPaid'),
+        label: t('orders.statusPaid') || 'Awaiting Payment',
         icon: CreditCard,
-        bgClass: 'bg-info/10',
-        iconClass: 'text-info',
-        badgeClass: 'bg-info/10 text-info border-info/20',
+        bgClass: 'bg-warning/10',
+        iconClass: 'text-warning',
+        badgeClass: 'bg-warning/10 text-warning border-warning/20',
       };
     case OrderStatus.CANCELLED:
       return {
@@ -216,7 +226,7 @@ function getStatusConfig(status: OrderStatus, t: (key: string) => string) {
         iconClass: 'text-destructive',
         badgeClass: 'bg-destructive/10 text-destructive border-destructive/20',
       };
-    case OrderStatus.CREATED:
+    case OrderStatus.CONFIRMATION_WAITING:
       return {
         label: t('orders.statusCreated'),
         icon: Clock,

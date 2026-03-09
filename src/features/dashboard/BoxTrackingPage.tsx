@@ -47,13 +47,16 @@ export default function BoxTrackingPage() {
 
   const getNextStatuses = (currentStatus: OrderProductStatus): OrderProductStatus[] => {
     switch (currentStatus) {
-      case OrderProductStatus.ORDERED:
-        return [OrderProductStatus.IN_WAREHOUSE, OrderProductStatus.CANCELLED];
-      case OrderProductStatus.IN_WAREHOUSE:
+      case OrderProductStatus.CREATED:
+        return [OrderProductStatus.TO_ORDER, OrderProductStatus.CANCELLED];
+      case OrderProductStatus.TO_ORDER:
         return [OrderProductStatus.ON_WAY, OrderProductStatus.CANCELLED];
       case OrderProductStatus.ON_WAY:
-        return [OrderProductStatus.ARRIVED, OrderProductStatus.RETURNED];
+        return [OrderProductStatus.ARRIVED, OrderProductStatus.IN_WAREHOUSE, OrderProductStatus.RETURNED];
       case OrderProductStatus.ARRIVED:
+      case OrderProductStatus.IN_WAREHOUSE:
+        return [OrderProductStatus.SHIPPED, OrderProductStatus.RETURNED];
+      case OrderProductStatus.SHIPPED:
         return [OrderProductStatus.DELIVERED, OrderProductStatus.RETURNED];
       case OrderProductStatus.DELIVERED:
         return [OrderProductStatus.RETURNED];
@@ -144,8 +147,8 @@ export default function BoxTrackingPage() {
                         <span className={cn(
                           "badge text-[10px]",
                           box.status === OrderProductStatus.DELIVERED ? "bg-success/10 text-success border-success/20" :
-                          box.status === OrderProductStatus.CANCELLED || box.status === OrderProductStatus.RETURNED ? "bg-destructive/10 text-destructive border-destructive/20" :
-                          "bg-primary/10 text-primary border-primary/20"
+                            box.status === OrderProductStatus.CANCELLED || box.status === OrderProductStatus.RETURNED ? "bg-destructive/10 text-destructive border-destructive/20" :
+                              "bg-primary/10 text-primary border-primary/20"
                         )}>
                           {box.status}
                         </span>
@@ -190,7 +193,7 @@ export default function BoxTrackingPage() {
               </tbody>
             </table>
           </div>
-          
+
           {/* Simple Pagination */}
           {searchResults && searchResults.totalPages > 1 && (
             <div className="flex items-center justify-between px-5 py-4 border-t bg-secondary/10">
