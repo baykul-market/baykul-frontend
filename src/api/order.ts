@@ -112,6 +112,12 @@ export const orderApi = {
     });
   },
 
+  completeOrder: async (id: string): Promise<void> => {
+    await api.post('/order/complete', null, {
+      params: { id },
+    });
+  },
+
   searchBoxes: async (params: { number?: number; status?: string; forBill?: boolean; page?: number; size?: number; sort?: string[] }): Promise<{ content: OrderProduct[]; totalElements: number; totalPages: number }> => {
     const response = await api.get('/order/product/search', { params });
     return response.data;

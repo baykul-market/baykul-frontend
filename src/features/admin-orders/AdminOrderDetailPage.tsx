@@ -60,7 +60,10 @@ export default function AdminOrderDetailPage() {
     });
 
     const updateStatusMutation = useMutation({
-        mutationFn: (newStatus: OrderStatus) => orderApi.updateOrder(orderId!, { status: newStatus }),
+        mutationFn: (newStatus: OrderStatus) =>
+            newStatus === OrderStatus.COMPLETED
+                ? orderApi.completeOrder(orderId!)
+                : orderApi.updateOrder(orderId!, { status: newStatus }),
         onSuccess: () => {
             toast.success(t('dashboard.orderManagement.updateSuccess', 'Order status updated successfully'));
             queryClient.invalidateQueries({ queryKey: ['admin-order-details', orderId] });
