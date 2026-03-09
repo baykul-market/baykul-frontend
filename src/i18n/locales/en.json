@@ -130,6 +130,7 @@
   },
   "orders": {
     "title": "Order History",
+    "payNow": "Pay Now",
     "orderCount": "{{count}} order placed",
     "orderCount_other": "{{count}} orders placed",
     "loadingOrders": "Loading your orders...",

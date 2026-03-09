@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { orderApi, Order, OrderStatus } from '../../api/order';
 import { Loader2, Package, Clock, CheckCircle2, XCircle, ArrowRight, RotateCw, CreditCard } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -7,9 +7,18 @@ import i18n from '../../i18n/i18n';
 
 export default function OrderHistoryPage() {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
+
   const { data: orders, isLoading } = useQuery({
     queryKey: ['orders'],
     queryFn: orderApi.getOrders,
+  });
+
+  const payMutation = useMutation({
+    mutationFn: (id: string) => orderApi.payOrder(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+    },
   });
 
   if (isLoading) {
@@ -107,6 +116,24 @@ export default function OrderHistoryPage() {
                   <span className="font-bold text-lg">
                     {currencySymbol}{totalPrice.toFixed(2)}
                   </span>
+                  {order.status === OrderStatus.PAYMENT_WAITING && (
+                    <button
+                      className="btn-primary py-1 px-3 text-sm h-8 mt-2 w-full sm:w-auto"
+                      disabled={payMutation.isPending && payMutation.variables === order.id}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        payMutation.mutate(order.id);
+                      }}
+                    >
+                      {payMutation.isPending && payMutation.variables === order.id ? (
+                        <Loader2 className="w-4 h-4 animate-spin mr-2 inline" />
+                      ) : (
+                        <CreditCard className="w-4 h-4 mr-2 inline" />
+                      )}
+                      {t('orders.payNow')}
+                    </button>
+                  )}
                 </div>
               </div>
 

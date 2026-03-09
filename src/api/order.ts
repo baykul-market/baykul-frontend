@@ -88,6 +88,12 @@ export const orderApi = {
     return response.data;
   },
 
+  payOrder: async (id: string): Promise<void> => {
+    await api.post('/order/user/pay', null, {
+      params: { id },
+    });
+  },
+
   // Admin endpoints
   getAllOrders: async (params?: Pageable): Promise<Order[]> => {
     const response = await api.get<Order[]>('/order', { params });

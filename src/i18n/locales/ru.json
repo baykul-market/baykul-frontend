@@ -136,6 +136,7 @@
   },
   "orders": {
     "title": "История заказов",
+    "payNow": "Оплатить сейчас",
     "orderCount": "{{count}} заказ оформлен",
     "orderCount_one": "{{count}} заказ оформлен",
     "orderCount_few": "{{count}} заказа оформлено",
