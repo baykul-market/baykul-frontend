@@ -13,7 +13,8 @@
     "products": "Products",
     "orders": "Orders",
     "cart": "Cart",
-    "profile": "Profile"
+    "profile": "Profile",
+    "pageSize": "Items per page"
   },
   "nav": {
     "brandFull": "Baykul Auto Parts",
@@ -129,6 +130,7 @@
   },
   "orders": {
     "title": "Order History",
+    "payNow": "Pay Now",
     "orderCount": "{{count}} order placed",
     "orderCount_other": "{{count}} orders placed",
     "loadingOrders": "Loading your orders...",
@@ -150,12 +152,7 @@
     "subtotal": "Subtotal",
     "shipping": "Shipping",
     "total": "Total",
-    "shippingDetails": "Shipping Details",
-    "statusCompleted": "Completed",
-    "statusProcessing": "Processing",
-    "statusCancelled": "Cancelled",
-    "statusPaid": "Paid",
-    "statusCreated": "Created"
+    "shippingDetails": "Shipping Details"
   },
   "profile": {
     "blocked": "Blocked",
@@ -326,7 +323,10 @@
       "updateSuccess": "Order status updated successfully",
       "updateError": "Failed to update order status",
       "productUpdateSuccess": "Product status updated successfully",
-      "productUpdateError": "Failed to update product status"
+      "productUpdateError": "Failed to update product status",
+      "boxNotSet": "Not set",
+      "boxSave": "Save",
+      "boxNumberValidation": "Box number must be >= 100000"
     },
     "userManagement": {
       "title": "User Management",
@@ -493,5 +493,32 @@
   "language": {
     "en": "English",
     "ru": "Русский"
+  },
+  "status": {
+    "order": {
+      "CONFIRMATION_WAITING": "Awaiting Confirmation",
+      "PAYMENT_WAITING": "Awaiting Payment",
+      "ORDERED": "Ordered",
+      "ON_WAY": "On Way",
+      "IN_WAREHOUSE": "In Warehouse",
+      "READY_FOR_PICKUP": "Ready for Pickup",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    },
+    "product": {
+      "CREATED": "Created",
+      "TO_ORDER": "To Order",
+      "ON_WAY": "On Way",
+      "ARRIVED": "Arrived",
+      "IN_WAREHOUSE": "In Warehouse",
+      "SHIPPED": "Shipped",
+      "DELIVERED": "Delivered",
+      "RETURNED": "Returned",
+      "CANCELLED": "Cancelled"
+    },
+    "bill": {
+      "DRAFT": "Draft",
+      "APPLIED": "Applied"
+    }
   }
 }

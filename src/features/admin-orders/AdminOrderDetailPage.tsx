@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { ConfirmModal } from '../../components/ConfirmModal';
 import { useTranslation } from 'react-i18next';
 import { orderApi, OrderStatus, OrderProductStatus } from '../../api/order';
-import { Loader2, ArrowLeft, User, CreditCard, Box, CheckCircle2, RotateCw, Clock, XCircle } from 'lucide-react';
+import { Loader2, ArrowLeft, User, CreditCard, Box, CheckCircle2, RotateCw, Clock, XCircle, Pencil } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
@@ -19,14 +19,14 @@ const ORDER_STATUS_FLOW = [
     OrderStatus.COMPLETED
 ];
 
-// We group ARRIVED and IN_WAREHOUSE together since they represent parallel statuses
+// We simplify visual flow: ARRIVED is visually always treated as IN_WAREHOUSE
 const BOX_STATUS_FLOW = [
-    [OrderProductStatus.CREATED],
-    [OrderProductStatus.TO_ORDER],
-    [OrderProductStatus.ON_WAY],
-    [OrderProductStatus.ARRIVED, OrderProductStatus.IN_WAREHOUSE],
-    [OrderProductStatus.SHIPPED],
-    [OrderProductStatus.DELIVERED]
+    OrderProductStatus.CREATED,
+    OrderProductStatus.TO_ORDER,
+    OrderProductStatus.ON_WAY,
+    OrderProductStatus.IN_WAREHOUSE,
+    OrderProductStatus.SHIPPED,
+    OrderProductStatus.DELIVERED
 ];
 
 export default function AdminOrderDetailPage() {
@@ -60,7 +60,10 @@ export default function AdminOrderDetailPage() {
     });
 
     const updateStatusMutation = useMutation({
-        mutationFn: (newStatus: OrderStatus) => orderApi.updateOrder(orderId!, { status: newStatus }),
+        mutationFn: (newStatus: OrderStatus) =>
+            newStatus === OrderStatus.COMPLETED
+                ? orderApi.completeOrder(orderId!)
+                : orderApi.updateOrder(orderId!, { status: newStatus }),
         onSuccess: () => {
             toast.success(t('dashboard.orderManagement.updateSuccess', 'Order status updated successfully'));
             queryClient.invalidateQueries({ queryKey: ['admin-order-details', orderId] });
@@ -83,6 +86,23 @@ export default function AdminOrderDetailPage() {
             toast.error(msg);
         }
     });
+
+    const updateProductDataMutation = useMutation({
+        mutationFn: ({ id, number }: { id: string, number: number }) =>
+            orderApi.updateOrderProduct(id, { number }),
+        onSuccess: () => {
+            toast.success(t('dashboard.orderManagement.productUpdateSuccess', 'Product updated successfully'));
+            queryClient.invalidateQueries({ queryKey: ['admin-order-details', orderId] });
+            setEditingBoxId(null);
+        },
+        onError: (err: any) => {
+            const msg = err?.response?.data?.error || t('dashboard.orderManagement.productUpdateError', 'Failed to update product');
+            toast.error(msg);
+        }
+    });
+
+    const [editingBoxId, setEditingBoxId] = useState<string | null>(null);
+    const [editingBoxNumber, setEditingBoxNumber] = useState<string>('');
 
     if (isLoading) {
         return (
@@ -175,7 +195,7 @@ export default function AdminOrderDetailPage() {
                         {order.status === OrderStatus.CANCELLED ? (
                             <div className="bg-destructive/10 text-destructive border-destructive/20 border rounded-lg p-4 flex items-center gap-3">
                                 <XCircle className="w-6 h-6" />
-                                <span className="font-semibold text-lg">{t('orders.statusCancelled', 'Cancelled')}</span>
+                                <span className="font-semibold text-lg">{t(`status.order.${order.status}`)}</span>
                             </div>
                         ) : (
                             <div className="relative mt-2">
@@ -207,7 +227,7 @@ export default function AdminOrderDetailPage() {
                                                     "text-[10px] font-medium text-left sm:text-center max-w-[80px]",
                                                     (isCurrent || isCompleted) ? "text-foreground" : "text-muted-foreground"
                                                 )}>
-                                                    {status.replace(/_/g, ' ')}
+                                                    {t(`status.order.${status}`)}
                                                 </span>
                                             </div>
                                         );
@@ -238,10 +258,55 @@ export default function AdminOrderDetailPage() {
                                             <p className="font-medium text-lg">
                                                 {product.partsCount} x {product.part.price} {product.part.currency}
                                             </p>
-                                            {product.number && (
-                                                <p className="text-sm text-muted-foreground mt-1">
-                                                    Box #{product.number}
-                                                </p>
+                                            {editingBoxId === product.id ? (
+                                                <div className="flex items-center gap-2 mt-2 justify-end">
+                                                    <input
+                                                        type="number"
+                                                        value={editingBoxNumber}
+                                                        onChange={e => setEditingBoxNumber(e.target.value)}
+                                                        className="border rounded px-2 py-1 w-24 text-sm bg-background text-foreground"
+                                                        placeholder="≥100000"
+                                                    />
+                                                    <button
+                                                        onClick={() => {
+                                                            const num = parseInt(editingBoxNumber, 10);
+                                                            if (isNaN(num) || num < 100000) {
+                                                                toast.error(t('dashboard.orderManagement.boxNumberValidation', 'Box number must be >= 100000'));
+                                                                return;
+                                                            }
+                                                            updateProductDataMutation.mutate({ id: product.id, number: num });
+                                                        }}
+                                                        disabled={updateProductDataMutation.isPending}
+                                                        className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded hover:bg-primary/90 transition-colors"
+                                                    >
+                                                        {t('dashboard.orderManagement.boxSave', 'Save')}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setEditingBoxId(null)}
+                                                        className="text-xs text-muted-foreground hover:underline"
+                                                    >
+                                                        {t('common.cancel', 'Cancel')}
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center justify-end gap-2 mt-1">
+                                                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                                                        <span>Box #</span>
+                                                        <span className={cn(product.number ? "font-medium text-foreground" : "italic")}>
+                                                            {product.number ? product.number : t('dashboard.orderManagement.boxNotSet', 'Not set')}
+                                                        </span>
+                                                    </p>
+                                                    <button
+                                                        onClick={() => {
+                                                            setEditingBoxId(product.id);
+                                                            setEditingBoxNumber(product.number ? String(product.number) : '');
+                                                        }}
+                                                        className="text-muted-foreground hover:text-primary transition-colors hover:bg-primary/10 p-1.5 rounded-md"
+                                                        title={t('common.edit', 'Edit')}
+                                                    >
+                                                        <Pencil className="w-4 h-4" />
+                                                    </button>
+                                                </div>
                                             )}
                                         </div>
                                     </div>
@@ -249,48 +314,49 @@ export default function AdminOrderDetailPage() {
                                     {/* Product Status Stepper */}
                                     {product.status === OrderProductStatus.CANCELLED ? (
                                         <div className="bg-destructive/10 text-destructive border border-destructive/20 rounded-lg p-3 text-sm font-medium flex items-center gap-2">
-                                            <XCircle className="w-4 h-4" /> Cancelled
+                                            <XCircle className="w-4 h-4" /> {t(`status.product.${product.status}`)}
                                         </div>
                                     ) : product.status === OrderProductStatus.RETURNED ? (
                                         <div className="bg-destructive/10 text-destructive border border-destructive/20 rounded-lg p-3 text-sm font-medium flex items-center gap-2">
-                                            <RotateCw className="w-4 h-4" /> Returned
+                                            <RotateCw className="w-4 h-4" /> {t(`status.product.${product.status}`)}
                                         </div>
                                     ) : (
                                         <div className="bg-secondary/20 p-4 rounded-lg">
                                             <div className="flex flex-wrap gap-2 mb-3">
-                                                {BOX_STATUS_FLOW.map((statusGroup, index) => {
-                                                    const currentIndex = BOX_STATUS_FLOW.findIndex(g => g.includes(product.status));
+                                                {BOX_STATUS_FLOW.map((status, index) => {
+                                                    const visualStatus = product.status === OrderProductStatus.ARRIVED ? OrderProductStatus.IN_WAREHOUSE : product.status;
+                                                    const currentIndex = BOX_STATUS_FLOW.indexOf(visualStatus);
                                                     const isCompleted = index < currentIndex;
                                                     const isCurrent = index === currentIndex;
                                                     const isNext = index === currentIndex + 1;
 
-                                                    // If it's a grouped status, render each option if it's the current/next step
-                                                    return statusGroup.map(status => {
-                                                        // Hide alternative parallel statuses if one is already selected/completed
-                                                        if ((isCompleted || isCurrent) && status !== product.status && statusGroup.length > 1) {
-                                                            return null;
+                                                    const handleBoxStatusUpdate = () => {
+                                                        let beStatus = status;
+                                                        if (product.status === OrderProductStatus.ON_WAY) {
+                                                            beStatus = OrderProductStatus.ARRIVED;
                                                         }
+                                                        updateProductStatusMutation.mutate({ id: product.id, status: beStatus });
+                                                    };
 
-                                                        return (
-                                                            <button
-                                                                key={status}
-                                                                onClick={() => updateProductStatusMutation.mutate({ id: product.id, status })}
-                                                                disabled={!isNext || updateProductStatusMutation.isPending}
-                                                                className={cn(
-                                                                    "px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all border",
-                                                                    isCompleted ? "bg-success/10 text-success border-success/30" :
-                                                                        isCurrent ? "bg-primary text-primary-foreground border-primary ring-2 ring-primary/20 shadow-md" :
-                                                                            "bg-background text-muted-foreground border-border",
-                                                                    isNext ? "hover:bg-primary/20 hover:text-primary hover:border-primary/50 cursor-pointer shadow-sm scale-105" : "cursor-not-allowed opacity-70"
-                                                                )}
-                                                                title={isNext ? `Update box to ${status}` : ''}
-                                                            >
-                                                                {isCompleted && <CheckCircle2 className="w-3 h-3" />}
-                                                                {!isCompleted && !isCurrent && <div className="w-1.5 h-1.5 rounded-full bg-current opacity-50"></div>}
-                                                                {status.replace(/_/g, ' ')}
-                                                            </button>
-                                                        );
-                                                    });
+                                                    return (
+                                                        <button
+                                                            key={status}
+                                                            onClick={handleBoxStatusUpdate}
+                                                            disabled={!isNext || updateProductStatusMutation.isPending}
+                                                            className={cn(
+                                                                "px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all border",
+                                                                isCompleted ? "bg-success/10 text-success border-success/30" :
+                                                                    isCurrent ? "bg-primary text-primary-foreground border-primary ring-2 ring-primary/20 shadow-md" :
+                                                                        "bg-background text-muted-foreground border-border",
+                                                                isNext ? "hover:bg-primary/20 hover:text-primary hover:border-primary/50 cursor-pointer shadow-sm scale-105" : "cursor-not-allowed opacity-70"
+                                                            )}
+                                                            title={isNext ? `Update box to ${status}` : ''}
+                                                        >
+                                                            {isCompleted && <CheckCircle2 className="w-3 h-3" />}
+                                                            {!isCompleted && !isCurrent && <div className="w-1.5 h-1.5 rounded-full bg-current opacity-50"></div>}
+                                                            {t(`status.product.${status}`)}
+                                                        </button>
+                                                    );
                                                 })}
                                             </div>
                                             <div className="flex gap-4 justify-end mt-4 pt-3 border-t border-border/50">
@@ -380,6 +446,6 @@ export default function AdminOrderDetailPage() {
                 confirmText={t('common.confirm', 'Confirm')}
                 cancelText={t('common.cancel', 'Cancel')}
             />
-        </div>
+        </div >
     );
 }

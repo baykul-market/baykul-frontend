@@ -147,7 +147,7 @@ export default function OrderManagementPage() {
                             statusColor(order.status)
                           )}
                         >
-                          {order.status}
+                          {t(`status.order.${order.status}`)}
                         </span>
                       </td>
                       <td className="px-5 py-4 text-right">
@@ -178,7 +178,7 @@ export default function OrderManagementPage() {
                       statusColor(order.status)
                     )}
                   >
-                    {order.status}
+                    {t(`status.order.${order.status}`)}
                   </span>
                 </div>
                 <div className="text-sm space-y-1">

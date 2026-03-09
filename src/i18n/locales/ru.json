@@ -13,7 +13,8 @@
     "products": "Товары",
     "orders": "Заказы",
     "cart": "Корзина",
-    "profile": "Профиль"
+    "profile": "Профиль",
+    "pageSize": "Элементов на странице"
   },
   "nav": {
     "brandFull": "Baykul Автозапчасти",
@@ -135,6 +136,7 @@
   },
   "orders": {
     "title": "История заказов",
+    "payNow": "Оплатить сейчас",
     "orderCount": "{{count}} заказ оформлен",
     "orderCount_one": "{{count}} заказ оформлен",
     "orderCount_few": "{{count}} заказа оформлено",
@@ -165,12 +167,7 @@
     "subtotal": "Подытог",
     "shipping": "Доставка",
     "total": "Итого",
-    "shippingDetails": "Детали доставки",
-    "statusCompleted": "Завершён",
-    "statusProcessing": "В обработке",
-    "statusCancelled": "Отменён",
-    "statusPaid": "Оплачен",
-    "statusCreated": "Создан"
+    "shippingDetails": "Детали доставки"
   },
   "profile": {
     "blocked": "Заблокирован",
@@ -341,7 +338,10 @@
       "updateSuccess": "Статус заказа успешно обновлён",
       "updateError": "Не удалось обновить статус заказа",
       "productUpdateSuccess": "Статус товара успешно обновлён",
-      "productUpdateError": "Не удалось обновить статус товара"
+      "productUpdateError": "Не удалось обновить статус товара",
+      "boxNotSet": "Не указана",
+      "boxSave": "Сохранить",
+      "boxNumberValidation": "Номер коробки должен быть >= 100000"
     },
     "userManagement": {
       "title": "Управление пользователями",
@@ -514,5 +514,32 @@
   "language": {
     "en": "English",
     "ru": "Русский"
+  },
+  "status": {
+    "order": {
+      "CONFIRMATION_WAITING": "Ожидает подтверждения",
+      "PAYMENT_WAITING": "Ожидает оплаты",
+      "ORDERED": "Заказан",
+      "ON_WAY": "В пути",
+      "IN_WAREHOUSE": "На складе",
+      "READY_FOR_PICKUP": "Готов к выдаче",
+      "COMPLETED": "Завершен",
+      "CANCELLED": "Отменен"
+    },
+    "product": {
+      "CREATED": "Создан",
+      "TO_ORDER": "К заказу",
+      "ON_WAY": "В пути",
+      "ARRIVED": "Прибыл",
+      "IN_WAREHOUSE": "На складе",
+      "SHIPPED": "Отгружен",
+      "DELIVERED": "Доставлен",
+      "RETURNED": "Возврат",
+      "CANCELLED": "Отменен"
+    },
+    "bill": {
+      "DRAFT": "Черновик",
+      "APPLIED": "Применен"
+    }
   }
 }

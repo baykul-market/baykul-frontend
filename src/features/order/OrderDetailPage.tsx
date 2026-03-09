@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { orderApi, Order, OrderStatus } from '../../api/order';
 import { Loader2, ArrowLeft, Package, Clock, CheckCircle2, XCircle, RotateCw, CreditCard, Box, MapPin } from 'lucide-react';
@@ -9,6 +9,15 @@ export default function OrderDetailPage() {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
+
+  const payMutation = useMutation({
+    mutationFn: (id: string) => orderApi.payOrder(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['order', orderId] });
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+    },
+  });
 
   const { data: order, isLoading, error } = useQuery({
     queryKey: ['order', orderId],
@@ -115,7 +124,7 @@ export default function OrderDetailPage() {
                     <div className="mt-1 flex items-center gap-2 text-sm">
                       <span className="badge bg-muted text-muted-foreground">
                         {/* Using order status as product status logic might be more complex in real app */}
-                        {op.status}
+                        {t(`status.product.${op.status}`)}
                       </span>
                     </div>
                   </div>
@@ -154,6 +163,21 @@ export default function OrderDetailPage() {
                 <span>{currencySymbol}{totalPrice.toFixed(2)}</span>
               </div>
             </div>
+
+            {order.status === OrderStatus.PAYMENT_WAITING && (
+              <button
+                className="btn-primary w-full mt-4"
+                disabled={payMutation.isPending}
+                onClick={() => payMutation.mutate(order.id)}
+              >
+                {payMutation.isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin mr-2 inline" />
+                ) : (
+                  <CreditCard className="w-4 h-4 mr-2 inline" />
+                )}
+                {t('orders.payNow')}
+              </button>
+            )}
           </div>
 
           {/* Customer Info (Optional/Future) */}
@@ -186,7 +210,7 @@ function getStatusConfig(status: OrderStatus, t: (key: string) => string) {
   switch (status) {
     case OrderStatus.COMPLETED:
       return {
-        label: t('orders.statusCompleted'),
+        label: t(`status.order.${status}`),
         icon: CheckCircle2,
         bgClass: 'bg-success/10',
         iconClass: 'text-success',
@@ -194,7 +218,7 @@ function getStatusConfig(status: OrderStatus, t: (key: string) => string) {
       };
     case OrderStatus.READY_FOR_PICKUP:
       return {
-        label: t('orders.statusReady') || 'Ready for Pickup',
+        label: t(`status.order.${status}`),
         icon: CheckCircle2,
         bgClass: 'bg-info/10',
         iconClass: 'text-info',
@@ -204,7 +228,7 @@ function getStatusConfig(status: OrderStatus, t: (key: string) => string) {
     case OrderStatus.IN_WAREHOUSE:
     case OrderStatus.ORDERED:
       return {
-        label: status === OrderStatus.ON_WAY ? 'On Way' : status === OrderStatus.IN_WAREHOUSE ? 'In Warehouse' : (t('orders.statusProcessing') || 'Ordered'),
+        label: t(`status.order.${status}`),
         icon: RotateCw,
         bgClass: 'bg-primary/10',
         iconClass: 'text-primary',
@@ -212,7 +236,7 @@ function getStatusConfig(status: OrderStatus, t: (key: string) => string) {
       };
     case OrderStatus.PAYMENT_WAITING:
       return {
-        label: t('orders.statusPaid') || 'Awaiting Payment',
+        label: t(`status.order.${status}`),
         icon: CreditCard,
         bgClass: 'bg-warning/10',
         iconClass: 'text-warning',
@@ -220,7 +244,7 @@ function getStatusConfig(status: OrderStatus, t: (key: string) => string) {
       };
     case OrderStatus.CANCELLED:
       return {
-        label: t('orders.statusCancelled'),
+        label: t(`status.order.${status}`),
         icon: XCircle,
         bgClass: 'bg-destructive/10',
         iconClass: 'text-destructive',
@@ -228,7 +252,7 @@ function getStatusConfig(status: OrderStatus, t: (key: string) => string) {
       };
     case OrderStatus.CONFIRMATION_WAITING:
       return {
-        label: t('orders.statusCreated'),
+        label: t(`status.order.${status}`),
         icon: Clock,
         bgClass: 'bg-muted',
         iconClass: 'text-muted-foreground',

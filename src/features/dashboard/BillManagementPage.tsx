@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { billApi, Bill, BillStatus } from '../../api/bill';
-import { orderApi } from '../../api/order';
+import { orderApi, OrderProduct } from '../../api/order';
 import {
     FileText,
     Plus,
@@ -117,7 +117,7 @@ export default function BillManagementPage() {
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className={cn('badge text-[10px]', statusColor(bill.status))}>
-                                                {bill.status}
+                                                {t(`status.bill.${bill.status}`)}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
@@ -190,7 +190,7 @@ function ProductSearch({
     onSelect,
     t,
 }: {
-    onSelect: (product: any) => void;
+    onSelect: (product: OrderProduct) => void;
     t: any;
 }) {
     const [search, setSearch] = useState('');
@@ -227,7 +227,7 @@ function ProductSearch({
                         <div className="p-3 text-center text-sm text-muted-foreground">No products found</div>
                     ) : (
                         <ul className="max-h-48 overflow-y-auto">
-                            {data?.content?.map((product: any) => (
+                            {data?.content?.map((product: OrderProduct) => (
                                 <li key={product.id}>
                                     <button
                                         type="button"
@@ -312,7 +312,7 @@ function BillDetailsModal({
                             </h3>
                             <div className="flex items-center gap-2 mt-1">
                                 <span className={cn('badge text-[10px]', statusColor(bill.status))}>
-                                    {bill.status}
+                                    {t(`status.bill.${bill.status}`)}
                                 </span>
                                 <span className="text-xs text-muted-foreground">
                                     {format(new Date(bill.createdTs), 'MMM d, yyyy HH:mm')}
@@ -382,7 +382,7 @@ function BillDetailsModal({
                             <h5 className="font-medium text-sm mb-3">{t('dashboard.billManagement.addProductToBill') || 'Add Product to Bill'}</h5>
                             <ProductSearch
                                 t={t}
-                                onSelect={(product) => {
+                                onSelect={(product: OrderProduct) => {
                                     if (!billDetails?.orderProducts?.find((p: any) => p.id === product.id)) {
                                         addProductMutation.mutate(product.id);
                                     } else {
