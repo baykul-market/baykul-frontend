@@ -13,7 +13,8 @@
     "products": "Products",
     "orders": "Orders",
     "cart": "Cart",
-    "profile": "Profile"
+    "profile": "Profile",
+    "pageSize": "Items per page"
   },
   "nav": {
     "brandFull": "Baykul Auto Parts",

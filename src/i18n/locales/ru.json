@@ -13,7 +13,8 @@
     "products": "Товары",
     "orders": "Заказы",
     "cart": "Корзина",
-    "profile": "Профиль"
+    "profile": "Профиль",
+    "pageSize": "Элементов на странице"
   },
   "nav": {
     "brandFull": "Baykul Автозапчасти",

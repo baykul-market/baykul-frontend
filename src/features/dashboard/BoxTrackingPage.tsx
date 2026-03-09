@@ -1,13 +1,11 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Search, Box, Loader2, Package } from 'lucide-react';
+import { Search, Box, Loader2, Package, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { orderApi, OrderProductStatus, type OrderProduct } from '../../api/order';
 import { cn } from '../../lib/utils';
 import toast from 'react-hot-toast';
-
-const PAGE_SIZE = 20;
 
 export default function BoxTrackingPage() {
   const { t } = useTranslation();
@@ -15,17 +13,18 @@ export default function BoxTrackingPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<OrderProductStatus | ''>('');
   const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(20);
 
   // Parse search term as number for searchBoxes call, but keep string for input
   const searchNumber = searchTerm && !isNaN(parseInt(searchTerm)) ? parseInt(searchTerm) : undefined;
 
   const { data: searchResults, isLoading } = useQuery({
-    queryKey: ['box-tracking', searchNumber, statusFilter, page],
+    queryKey: ['box-tracking', searchNumber, statusFilter, page, pageSize],
     queryFn: () => orderApi.searchBoxes({
       number: searchNumber,
       status: statusFilter || undefined,
       page,
-      size: PAGE_SIZE
+      size: pageSize
     }),
     enabled: true,
   });
@@ -133,8 +132,8 @@ export default function BoxTrackingPage() {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {searchResults?.content && searchResults.content.length > 0 ? (
-                  searchResults.content.map((box: OrderProduct) => (
+                {searchResults && searchResults.length > 0 ? (
+                  searchResults.map((box: OrderProduct) => (
                     <tr key={box.id} className="hover:bg-secondary/20 transition-colors">
                       <td className="px-5 py-4 font-mono font-medium text-sm">
                         {box.number || '-'}
@@ -194,26 +193,45 @@ export default function BoxTrackingPage() {
             </table>
           </div>
 
-          {/* Simple Pagination */}
-          {searchResults && searchResults.totalPages > 1 && (
-            <div className="flex items-center justify-between px-5 py-4 border-t bg-secondary/10">
-              <p className="text-sm text-muted-foreground">
-                {t('dashboard.userManagement.page', { page: page + 1 })}
-              </p>
+          {/* Pagination */}
+          {(page > 0 || (searchResults && searchResults.length === pageSize)) && (
+            <div className="flex items-center justify-between px-5 py-4 border-t bg-secondary/10 flex-wrap gap-4">
+              <div className="flex items-center gap-4">
+                <p className="text-sm text-muted-foreground whitespace-nowrap">
+                  {t('dashboard.userManagement.page', { page: page + 1 })}
+                </p>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">{t('common.pageSize')}:</span>
+                  <select
+                    className="input-base py-1 px-2 text-sm w-auto cursor-pointer"
+                    value={pageSize}
+                    onChange={(e) => {
+                      setPageSize(Number(e.target.value));
+                      setPage(0);
+                    }}
+                  >
+                    {[10, 20, 50, 100].map(size => (
+                      <option key={size} value={size}>{size}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
               <div className="flex gap-2">
                 <button
                   onClick={() => setPage((p) => Math.max(0, p - 1))}
                   disabled={page === 0}
-                  className="btn-secondary px-3 py-1.5 text-xs"
+                  className="btn-secondary px-3 py-2"
                 >
+                  <ChevronLeft className="w-4 h-4" />
                   {t('dashboard.userManagement.prev')}
                 </button>
                 <button
                   onClick={() => setPage((p) => p + 1)}
-                  disabled={page >= searchResults.totalPages - 1}
-                  className="btn-secondary px-3 py-1.5 text-xs"
+                  disabled={!searchResults || searchResults.length < pageSize}
+                  className="btn-secondary px-3 py-2"
                 >
                   {t('dashboard.userManagement.next')}
+                  <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
             </div>

@@ -118,7 +118,7 @@ export const orderApi = {
     });
   },
 
-  searchBoxes: async (params: { number?: number; status?: string; forBill?: boolean; page?: number; size?: number; sort?: string[] }): Promise<{ content: OrderProduct[]; totalElements: number; totalPages: number }> => {
+  searchBoxes: async (params: { number?: number; status?: string; forBill?: boolean; page?: number; size?: number; sort?: string[] }): Promise<OrderProduct[]> => {
     const response = await api.get('/order/product/search', { params });
     return response.data;
   },
