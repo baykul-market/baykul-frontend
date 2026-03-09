@@ -466,7 +466,10 @@
       "partsCount": "Parts Count",
       "price": "Price",
       "noProducts": "No products in this bill",
-      "enterBillNumber": "Enter bill number (min 10000)"
+      "enterBillNumber": "Enter bill number (min 10000)",
+      "searchProductPlaceholder": "Search product by number...",
+      "addProductToBill": "Add Product to Bill",
+      "productAlreadyAdded": "Product already added"
     }
   },
   "phone": {

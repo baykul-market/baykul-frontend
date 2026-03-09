@@ -487,7 +487,10 @@
       "partsCount": "Количество деталей",
       "price": "Цена",
       "noProducts": "В этом счете нет продуктов",
-      "enterBillNumber": "Введите номер счета (мин. 10000)"
+      "enterBillNumber": "Введите номер счета (мин. 10000)",
+      "searchProductPlaceholder": "Поиск товара по номеру...",
+      "addProductToBill": "Добавить товар в накладную",
+      "productAlreadyAdded": "Товар уже добавлен"
     }
   },
   "phone": {

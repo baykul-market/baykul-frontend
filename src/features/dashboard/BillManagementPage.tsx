@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { billApi, Bill, BillStatus } from '../../api/bill';
+import { orderApi } from '../../api/order';
 import {
     FileText,
     Plus,
@@ -98,7 +99,7 @@ export default function BillManagementPage() {
                                         </div>
                                     </td>
                                 </tr>
-                            ) : data?.content.length === 0 ? (
+                            ) : data?.content?.length === 0 ? (
                                 <tr>
                                     <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">
                                         <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
@@ -107,7 +108,7 @@ export default function BillManagementPage() {
                                     </td>
                                 </tr>
                             ) : (
-                                data?.content.map((bill) => (
+                                data?.content?.map((bill) => (
                                     <tr key={bill.id} className="hover:bg-secondary/50 transition-colors">
                                         <td className="px-6 py-4 font-medium text-primary">#{bill.number}</td>
                                         <td className="px-6 py-4 text-muted-foreground">
@@ -188,6 +189,70 @@ export default function BillManagementPage() {
     );
 }
 
+function ProductSearch({
+    onSelect,
+    t,
+}: {
+    onSelect: (product: any) => void;
+    t: any;
+}) {
+    const [search, setSearch] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
+
+    useEffect(() => {
+        const timer = setTimeout(() => setDebouncedSearch(search), 300);
+        return () => clearTimeout(timer);
+    }, [search]);
+
+    const { data, isLoading } = useQuery({
+        queryKey: ['orderProducts', 'search', debouncedSearch],
+        queryFn: () => orderApi.searchBoxes({
+            number: debouncedSearch ? Number(debouncedSearch) : undefined,
+            size: 5
+        }),
+        enabled: debouncedSearch.length > 0 && !isNaN(Number(debouncedSearch)),
+    });
+
+    return (
+        <div className="relative">
+            <input
+                type="number"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={t('dashboard.billManagement.searchProductPlaceholder') || 'Search product by number...'}
+                className="input w-full"
+            />
+            {debouncedSearch && (
+                <div className="absolute top-full mt-1 w-full bg-card border border-border rounded-lg shadow-lg overflow-hidden z-10">
+                    {isLoading ? (
+                        <div className="p-3 text-center text-sm text-muted-foreground">Loading...</div>
+                    ) : data?.content?.length === 0 ? (
+                        <div className="p-3 text-center text-sm text-muted-foreground">No products found</div>
+                    ) : (
+                        <ul className="max-h-48 overflow-y-auto">
+                            {data?.content?.map((product: any) => (
+                                <li key={product.id}>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            onSelect(product);
+                                            setSearch('');
+                                        }}
+                                        className="w-full text-left px-4 py-2 hover:bg-secondary/50 flex justify-between items-center"
+                                    >
+                                        <span className="font-medium">#{product.number}</span>
+                                        <span className="text-xs text-muted-foreground">{product.partsCount} parts</span>
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+}
+
 function CreateBillModal({
     onClose,
     t,
@@ -197,6 +262,7 @@ function CreateBillModal({
 }) {
     const queryClient = useQueryClient();
     const [number, setNumber] = useState('');
+    const [selectedProducts, setSelectedProducts] = useState<any[]>([]);
 
     const createMutation = useMutation({
         mutationFn: billApi.create,
@@ -211,7 +277,10 @@ function CreateBillModal({
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!number || isNaN(Number(number)) || Number(number) < 10000) return;
-        createMutation.mutate({ number: Number(number), orderProducts: [] });
+        createMutation.mutate({
+            number: Number(number),
+            orderProducts: selectedProducts.map(p => ({ id: p.id }))
+        });
     };
 
     return (
@@ -227,19 +296,55 @@ function CreateBillModal({
                     </button>
                 </div>
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium">
-                            {t('dashboard.billManagement.billNumber')}
-                        </label>
-                        <input
-                            type="number"
-                            value={number}
-                            onChange={(e) => setNumber(e.target.value)}
-                            className="input w-full"
-                            placeholder={t('dashboard.billManagement.enterBillNumber')}
-                            min="10000"
-                            required
-                        />
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">
+                                {t('dashboard.billManagement.billNumber')}
+                            </label>
+                            <input
+                                type="number"
+                                value={number}
+                                onChange={(e) => setNumber(e.target.value)}
+                                className="input w-full"
+                                placeholder={t('dashboard.billManagement.enterBillNumber')}
+                                min="10000"
+                                required
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">
+                                {t('dashboard.billManagement.orderProducts')}
+                            </label>
+                            <ProductSearch
+                                t={t}
+                                onSelect={(product) => {
+                                    if (!selectedProducts.find(p => p.id === product.id)) {
+                                        setSelectedProducts([...selectedProducts, product]);
+                                    }
+                                }}
+                            />
+
+                            {selectedProducts.length > 0 && (
+                                <ul className="mt-3 space-y-2 max-h-40 overflow-y-auto bg-secondary/20 p-2 rounded-lg border border-border">
+                                    {selectedProducts.map(p => (
+                                        <li key={p.id} className="flex justify-between items-center bg-card p-2 rounded border border-border text-sm">
+                                            <div className="flex items-center gap-2">
+                                                <Box className="h-4 w-4 text-muted-foreground" />
+                                                <span>#{p.number} ({p.partsCount} parts)</span>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => setSelectedProducts(selectedProducts.filter(x => x.id !== p.id))}
+                                                className="text-destructive hover:bg-destructive/10 p-1 rounded"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
                     </div>
                     <div className="flex justify-end gap-3 pt-4">
                         <button type="button" onClick={onClose} className="btn-secondary">
@@ -289,9 +394,20 @@ function BillDetailsModal({
         mutationFn: (productId: string) => billApi.removeOrderProduct(bill.id, productId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['bill', bill.id] });
+            queryClient.invalidateQueries({ queryKey: ['bills'] });
             toast.success(t('dashboard.billManagement.removeProductSuccess'));
         },
         onError: () => toast.error(t('dashboard.billManagement.removeProductError')),
+    });
+
+    const addProductMutation = useMutation({
+        mutationFn: (productId: string) => billApi.addOrderProduct(bill.id, productId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['bill', bill.id] });
+            queryClient.invalidateQueries({ queryKey: ['bills'] });
+            toast.success(t('dashboard.billManagement.addProductSuccess') || 'Product added to bill');
+        },
+        onError: () => toast.error(t('dashboard.billManagement.addProductError') || 'Failed to add product'),
     });
 
     const isDraft = bill.status === 'DRAFT';
@@ -326,11 +442,6 @@ function BillDetailsModal({
                 <div className="p-6 overflow-y-auto flex-1">
                     <div className="flex items-center justify-between mb-4">
                         <h4 className="font-medium">{t('dashboard.billManagement.orderProducts')}</h4>
-                        {isDraft && (
-                            <p className="text-xs text-muted-foreground">
-                                {t('dashboard.billManagement.notDraft')}... adding products is not yet fully linked in UI
-                            </p>
-                        )}
                     </div>
 
                     {isLoading ? (
@@ -377,6 +488,22 @@ function BillDetailsModal({
                                     ))}
                                 </tbody>
                             </table>
+                        </div>
+                    )}
+
+                    {isDraft && (
+                        <div className="mt-6 pt-4 border-t border-border">
+                            <h5 className="font-medium text-sm mb-3">{t('dashboard.billManagement.addProductToBill') || 'Add Product to Bill'}</h5>
+                            <ProductSearch
+                                t={t}
+                                onSelect={(product) => {
+                                    if (!billDetails?.orderProducts?.find((p: any) => p.id === product.id)) {
+                                        addProductMutation.mutate(product.id);
+                                    } else {
+                                        toast.error(t('dashboard.billManagement.productAlreadyAdded') || 'Product already added');
+                                    }
+                                }}
+                            />
                         </div>
                     )}
                 </div>
