@@ -13,6 +13,7 @@ import UserManagementPage from './features/dashboard/UserManagementPage';
 import OrderManagementPage from './features/dashboard/OrderManagementPage';
 import PartsUploadPage from './features/dashboard/PartsUploadPage';
 import BoxTrackingPage from './features/dashboard/BoxTrackingPage';
+import BillManagementPage from './features/dashboard/BillManagementPage';
 import { useAuthStore } from './store/useAuthStore';
 
 function RootRedirect() {
@@ -38,6 +39,7 @@ function App() {
           <Route path="dashboard/orders" element={<ProtectedRoute><OrderManagementPage /></ProtectedRoute>} />
           <Route path="dashboard/boxes" element={<ProtectedRoute><BoxTrackingPage /></ProtectedRoute>} />
           <Route path="dashboard/parts-upload" element={<ProtectedRoute><PartsUploadPage /></ProtectedRoute>} />
+          <Route path="dashboard/bills" element={<ProtectedRoute><BillManagementPage /></ProtectedRoute>} />
         </Route>
       </Routes>
     </BrowserRouter>
