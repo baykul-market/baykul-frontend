@@ -18,7 +18,7 @@ export interface Part {
 export const productApi = {
   search: async (text: string): Promise<Part[]> => {
     const response = await api.get<Part[]>('/product/search', {
-      params: { text: text || '' },
+      params: { text: text || undefined },
     });
     return response.data;
   },

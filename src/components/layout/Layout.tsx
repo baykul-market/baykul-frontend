@@ -25,7 +25,7 @@ export default function Layout() {
     },
   });
 
-  const cartItemCount = cart?.cartProducts?.length ?? 0;
+  const cartItemCount = cart?.cartProducts?.reduce((sum, item) => sum + item.partsCount, 0) ?? 0;
 
   const queryClient = useQueryClient();
 

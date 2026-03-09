@@ -6,6 +6,7 @@ import RegisterPage from './features/auth/RegisterPage';
 import ProductListPage from './features/product/ProductListPage';
 import CartPage from './features/cart/CartPage';
 import OrderHistoryPage from './features/order/OrderHistoryPage';
+import OrderDetailPage from './features/order/OrderDetailPage';
 import DashboardPage from './features/dashboard/DashboardPage';
 import ProfilePage from './features/profile/ProfilePage';
 import UserManagementPage from './features/dashboard/UserManagementPage';
@@ -30,6 +31,7 @@ function App() {
           <Route path="products" element={<ProtectedRoute><ProductListPage /></ProtectedRoute>} />
           <Route path="cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>} />
           <Route path="orders" element={<ProtectedRoute><OrderHistoryPage /></ProtectedRoute>} />
+          <Route path="orders/:orderId" element={<ProtectedRoute><OrderDetailPage /></ProtectedRoute>} />
           <Route path="profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
           <Route path="dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
           <Route path="dashboard/users" element={<ProtectedRoute><UserManagementPage /></ProtectedRoute>} />

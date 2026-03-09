@@ -93,6 +93,9 @@
     "units": "{{count}} шт.",
     "unavailable": "Недоступно",
     "add": "В корзину",
+    "order": "Заказать",
+    "orderFromSupplier": "Под заказ",
+    "extendedDelivery": "Увеличенный срок доставки",
     "soldOut": "Распродано",
     "addedToCart": "Добавлено в корзину",
     "failedToAdd": "Не удалось добавить в корзину"
@@ -125,7 +128,10 @@
     "removeError": "Не удалось удалить товар",
     "orderSuccess": "Заказ успешно оформлен!",
     "unavailable": "Некоторые товары недоступны",
-    "checkoutError": "Ошибка оформления заказа"
+    "checkoutError": "Ошибка оформления заказа",
+    "undo": "Вернуть",
+    "itemRestored": "Товар восстановлен",
+    "restoreError": "Не удалось восстановить товар"
   },
   "orders": {
     "title": "История заказов",
@@ -150,6 +156,16 @@
     "moreItems_many": "+{{count}} ещё товаров",
     "moreItems_other": "+{{count}} ещё товаров",
     "at": "в",
+    "loadingOrder": "Загрузка данных заказа...",
+    "notFoundTitle": "Заказ не найден",
+    "notFoundSubtitle": "Заказ, который вы ищете, не существует или у вас нет прав на его просмотр.",
+    "backToHistory": "Назад к истории заказов",
+    "items": "Товары",
+    "summary": "Сводка заказа",
+    "subtotal": "Подытог",
+    "shipping": "Доставка",
+    "total": "Итого",
+    "shippingDetails": "Детали доставки",
     "statusCompleted": "Завершён",
     "statusProcessing": "В обработке",
     "statusCancelled": "Отменён",

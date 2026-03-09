@@ -32,11 +32,45 @@ export default function CartPage() {
     },
   });
 
-  const removeMutation = useMutation({
-    mutationFn: (cartProductId: string) => cartApi.removeFromCart(cartProductId),
+  const restoreMutation = useMutation({
+    mutationFn: async ({ partId, count }: { partId: string; count: number }) => {
+      const res = await cartApi.addToCart(partId);
+      if (res.id && count > 1) {
+        await cartApi.updateCartProduct(res.id, count);
+      }
+      return res;
+    },
     onSuccess: () => {
-      toast.success(t('cart.itemRemoved'));
       queryClient.invalidateQueries({ queryKey: ['cart'] });
+      toast.success(t('cart.itemRestored'));
+    },
+    onError: () => {
+      toast.error(t('cart.restoreError'));
+    },
+  });
+
+  const removeMutation = useMutation({
+    mutationFn: ({ id }: { id: string; partId: string; count: number }) =>
+      cartApi.removeFromCart(id),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['cart'] });
+      toast(
+        (t2) => (
+          <span className="flex items-center gap-2 text-sm">
+            {t('cart.itemRemoved')}
+            <button
+              onClick={() => {
+                restoreMutation.mutate({ partId: variables.partId, count: variables.count });
+                toast.dismiss(t2.id);
+              }}
+              className="font-medium text-primary hover:underline ml-2"
+            >
+              {t('cart.undo')}
+            </button>
+          </span>
+        ),
+        { duration: 5000 }
+      );
     },
     onError: () => {
       toast.error(t('cart.removeError'));
@@ -73,7 +107,7 @@ export default function CartPage() {
   }
 
   // Handle 404 (no cart) or empty cart
-  const cartProducts = cart?.cartProducts ?? [];
+  const cartProducts = (cart?.cartProducts ?? []).slice().sort((a, b) => a.id.localeCompare(b.id));
   const isCartEmpty = !cart || cartProducts.length === 0 || (error as any)?.response?.status === 404;
 
   if (isCartEmpty) {
@@ -151,7 +185,7 @@ export default function CartPage() {
                       onClick={() =>
                         item.partsCount > 1
                           ? updateMutation.mutate({ cartProductId: item.id, partsCount: item.partsCount - 1 })
-                          : removeMutation.mutate(item.id)
+                          : removeMutation.mutate({ id: item.id, partId: item.part.id, count: item.partsCount })
                       }
                       disabled={updateMutation.isPending}
                       className="p-1 text-muted-foreground hover:text-foreground transition-colors"
@@ -178,7 +212,7 @@ export default function CartPage() {
                   {currencySymbol}{(item.part.price * item.partsCount).toFixed(2)}
                 </span>
                 <button
-                  onClick={() => removeMutation.mutate(item.id)}
+                  onClick={() => removeMutation.mutate({ id: item.id, partId: item.part.id, count: item.partsCount })}
                   disabled={removeMutation.isPending}
                   className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-destructive transition-colors rounded-md px-2 py-1 hover:bg-destructive/5"
                   aria-label={t('cart.remove')}

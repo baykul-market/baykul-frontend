@@ -90,6 +90,9 @@
     "units": "{{count}} units",
     "unavailable": "Unavailable",
     "add": "Add",
+    "order": "Order",
+    "orderFromSupplier": "Order from Supplier",
+    "extendedDelivery": "Extended Delivery",
     "soldOut": "Sold Out",
     "addedToCart": "Added to cart",
     "failedToAdd": "Failed to add to cart"
@@ -119,7 +122,10 @@
     "removeError": "Failed to remove item",
     "orderSuccess": "Order placed successfully!",
     "unavailable": "Some products are unavailable",
-    "checkoutError": "Checkout failed"
+    "checkoutError": "Checkout failed",
+    "undo": "Undo",
+    "itemRestored": "Item restored",
+    "restoreError": "Failed to restore item"
   },
   "orders": {
     "title": "Order History",
@@ -135,6 +141,16 @@
     "moreItems": "+{{count}} more item",
     "moreItems_other": "+{{count}} more items",
     "at": "at",
+    "loadingOrder": "Loading order details...",
+    "notFoundTitle": "Order not found",
+    "notFoundSubtitle": "The order you are looking for does not exist or you do not have permission to view it.",
+    "backToHistory": "Back to Order History",
+    "items": "Items",
+    "summary": "Order Summary",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "total": "Total",
+    "shippingDetails": "Shipping Details",
     "statusCompleted": "Completed",
     "statusProcessing": "Processing",
     "statusCancelled": "Cancelled",

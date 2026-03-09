@@ -62,9 +62,10 @@ export default function OrderHistoryPage() {
           const currencySymbol = currency === 'EUR' ? '\u20AC' : currency === 'USD' ? '$' : currency;
 
           return (
-            <div
+            <Link
+              to={`/orders/${order.id}`}
               key={order.id}
-              className="card-hover p-5 sm:p-6"
+              className="card-hover p-5 sm:p-6 block transition-colors hover:bg-muted/50"
             >
               <div className="flex flex-col sm:flex-row justify-between gap-4">
                 {/* Left: Order Info */}
@@ -131,7 +132,7 @@ export default function OrderHistoryPage() {
                   </div>
                 </div>
               )}
-            </div>
+            </Link>
           );
         })}
       </div>
