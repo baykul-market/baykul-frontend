@@ -126,7 +126,22 @@ export const orderApi = {
   },
 
   searchBoxes: async (params: { number?: number; status?: string; forBill?: boolean; page?: number; size?: number; sort?: string[] }): Promise<PageResponse<OrderProduct>> => {
-    const response = await api.get<PageResponse<OrderProduct>>('/order/product/search', { params });
+    const response = await api.get<any>('/order/product/search', { params });
+    if (Array.isArray(response.data)) {
+      return {
+        content: response.data,
+        pageable: { pageNumber: params.page || 0, pageSize: params.size || 20, sort: { sorted: false, unsorted: true }, offset: 0, unpaged: false, paged: true },
+        last: response.data.length < (params.size || 20),
+        totalElements: response.data.length,
+        totalPages: response.data.length === (params.size || 20) ? (params.page || 0) + 2 : (params.page || 0) + 1,
+        size: params.size || 20,
+        number: params.page || 0,
+        sort: { sorted: false, unsorted: true },
+        first: (params.page || 0) === 0,
+        numberOfElements: response.data.length,
+        empty: response.data.length === 0
+      };
+    }
     return response.data;
   },
 };

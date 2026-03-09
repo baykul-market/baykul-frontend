@@ -132,7 +132,7 @@ export default function BoxTrackingPage() {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {searchResults && searchResults.content.length > 0 ? (
+                {searchResults?.content?.length ? (
                   searchResults.content.map((box: OrderProduct) => (
                     <tr key={box.id} className="hover:bg-secondary/20 transition-colors">
                       <td className="px-5 py-4 font-mono font-medium text-sm">
@@ -194,7 +194,7 @@ export default function BoxTrackingPage() {
           </div>
 
           {/* Pagination */}
-          {(page > 0 || (searchResults && searchResults.content.length === pageSize)) && (
+          {(page > 0 || (searchResults?.content?.length === pageSize)) && (
             <div className="flex items-center justify-between px-5 py-4 border-t bg-secondary/10 flex-wrap gap-4">
               <div className="flex items-center gap-4">
                 <p className="text-sm text-muted-foreground whitespace-nowrap">
@@ -227,7 +227,7 @@ export default function BoxTrackingPage() {
                 </button>
                 <button
                   onClick={() => setPage((p) => p + 1)}
-                  disabled={!searchResults || searchResults.content.length < pageSize}
+                  disabled={!searchResults || (searchResults.content?.length ?? 0) < pageSize}
                   className="btn-secondary px-3 py-2"
                 >
                   {t('dashboard.userManagement.next')}
