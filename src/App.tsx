@@ -11,8 +11,11 @@ import DashboardPage from './features/dashboard/DashboardPage';
 import ProfilePage from './features/profile/ProfilePage';
 import UserManagementPage from './features/dashboard/UserManagementPage';
 import OrderManagementPage from './features/dashboard/OrderManagementPage';
+import AdminOrderDetailPage from './features/admin-orders/AdminOrderDetailPage';
 import PartsUploadPage from './features/dashboard/PartsUploadPage';
 import BoxTrackingPage from './features/dashboard/BoxTrackingPage';
+import BillManagementPage from './features/dashboard/BillManagementPage';
+import CreateBillPage from './features/dashboard/CreateBillPage';
 import { useAuthStore } from './store/useAuthStore';
 
 function RootRedirect() {
@@ -36,8 +39,11 @@ function App() {
           <Route path="dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
           <Route path="dashboard/users" element={<ProtectedRoute><UserManagementPage /></ProtectedRoute>} />
           <Route path="dashboard/orders" element={<ProtectedRoute><OrderManagementPage /></ProtectedRoute>} />
+          <Route path="dashboard/orders/:orderId" element={<ProtectedRoute><AdminOrderDetailPage /></ProtectedRoute>} />
           <Route path="dashboard/boxes" element={<ProtectedRoute><BoxTrackingPage /></ProtectedRoute>} />
           <Route path="dashboard/parts-upload" element={<ProtectedRoute><PartsUploadPage /></ProtectedRoute>} />
+          <Route path="dashboard/bills" element={<ProtectedRoute><BillManagementPage /></ProtectedRoute>} />
+          <Route path="dashboard/bills/create" element={<ProtectedRoute><CreateBillPage /></ProtectedRoute>} />
         </Route>
       </Routes>
     </BrowserRouter>

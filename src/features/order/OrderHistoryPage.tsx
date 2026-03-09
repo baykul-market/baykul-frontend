@@ -158,21 +158,31 @@ function getStatusConfig(status: OrderStatus, t: (key: string) => string) {
         iconClass: 'text-success',
         badgeClass: 'bg-success/10 text-success border-success/20',
       };
-    case OrderStatus.PROCESSING:
+    case OrderStatus.READY_FOR_PICKUP:
       return {
-        label: t('orders.statusProcessing'),
+        label: t('orders.statusReady') || 'Ready for Pickup',
+        icon: CheckCircle2,
+        bgClass: 'bg-info/10',
+        iconClass: 'text-info',
+        badgeClass: 'bg-info/10 text-info border-info/20',
+      };
+    case OrderStatus.ON_WAY:
+    case OrderStatus.IN_WAREHOUSE:
+    case OrderStatus.ORDERED:
+      return {
+        label: status === OrderStatus.ON_WAY ? 'On Way' : status === OrderStatus.IN_WAREHOUSE ? 'In Warehouse' : (t('orders.statusProcessing') || 'Ordered'),
         icon: RotateCw,
         bgClass: 'bg-primary/10',
         iconClass: 'text-primary',
         badgeClass: 'bg-primary/10 text-primary border-primary/20',
       };
-    case OrderStatus.PAID:
+    case OrderStatus.PAYMENT_WAITING:
       return {
-        label: t('orders.statusPaid'),
+        label: t('orders.statusPaid') || 'Awaiting Payment',
         icon: CreditCard,
-        bgClass: 'bg-info/10',
-        iconClass: 'text-info',
-        badgeClass: 'bg-info/10 text-info border-info/20',
+        bgClass: 'bg-warning/10',
+        iconClass: 'text-warning',
+        badgeClass: 'bg-warning/10 text-warning border-warning/20',
       };
     case OrderStatus.CANCELLED:
       return {
@@ -182,7 +192,7 @@ function getStatusConfig(status: OrderStatus, t: (key: string) => string) {
         iconClass: 'text-destructive',
         badgeClass: 'bg-destructive/10 text-destructive border-destructive/20',
       };
-    case OrderStatus.CREATED:
+    case OrderStatus.CONFIRMATION_WAITING:
       return {
         label: t('orders.statusCreated'),
         icon: Clock,

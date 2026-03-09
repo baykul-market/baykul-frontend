@@ -24,29 +24,29 @@ export default function DashboardPage() {
   const features: FeatureCard[] = [
     isAdmin
       ? {
-          title: t('dashboard.main.userManagement'),
-          description: t('dashboard.main.userDescription'),
-          icon: Users,
-          status: t('dashboard.main.available'),
-          link: '/dashboard/users',
-        }
+        title: t('dashboard.main.userManagement'),
+        description: t('dashboard.main.userDescription'),
+        icon: Users,
+        status: t('dashboard.main.available'),
+        link: '/dashboard/users',
+      }
       : {
-          title: t('dashboard.main.userSearch'),
-          description: t('dashboard.main.userSearchDescription'),
-          icon: Search,
-          status: t('dashboard.main.available'),
-          link: '/dashboard/users',
-        },
+        title: t('dashboard.main.userSearch'),
+        description: t('dashboard.main.userSearchDescription'),
+        icon: Search,
+        status: t('dashboard.main.available'),
+        link: '/dashboard/users',
+      },
     ...(isAdmin
       ? [
-          {
-            title: t('dashboard.main.partsUpload'),
-            description: t('dashboard.main.partsUploadDescription'),
-            icon: Upload,
-            status: t('dashboard.main.available'),
-            link: '/dashboard/parts-upload',
-          },
-        ]
+        {
+          title: t('dashboard.main.partsUpload'),
+          description: t('dashboard.main.partsUploadDescription'),
+          icon: Upload,
+          status: t('dashboard.main.available'),
+          link: '/dashboard/parts-upload',
+        },
+      ]
       : []),
     {
       title: t('dashboard.orderManagement.title'),
@@ -59,8 +59,8 @@ export default function DashboardPage() {
       title: t('dashboard.main.billManagement'),
       description: t('dashboard.main.billDescription'),
       icon: FileText,
-      status: t('dashboard.main.comingSoon'),
-      link: null,
+      status: t('dashboard.main.available'),
+      link: '/dashboard/bills',
     },
     {
       title: t('dashboard.main.boxTracking'),
