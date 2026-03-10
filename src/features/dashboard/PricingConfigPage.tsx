@@ -60,7 +60,7 @@ export default function PricingConfigPage() {
             setRates(fetchedRates);
 
             setDeliveryRules(fetchedConfig.deliveryCostConfigs || []);
-            setMarkupPercentage(String(fetchedConfig.markupPercentage));
+            setMarkupPercentage(String((fetchedConfig.markupPercentage || 0) * 100));
             setSystemCurrency(fetchedConfig.systemCurrency);
 
             setLoading(false);
@@ -74,7 +74,7 @@ export default function PricingConfigPage() {
         setSavingConfig(true);
         try {
             await configApi.updateConfig({
-                markupPercentage: Number(markupPercentage),
+                markupPercentage: Number(markupPercentage) / 100,
                 systemCurrency: systemCurrency
             });
             toast.success(t('pricing.success.configSaved', 'Configuration saved successfully'));
@@ -89,10 +89,11 @@ export default function PricingConfigPage() {
     const handleSaveRule = async () => {
         setAddingRule(true);
         try {
+            const val = Number(newRuleValue);
             await configApi.saveDeliveryRule({
                 minimumSum: Number(newRuleMinSum),
                 markupType: newRuleType,
-                value: Number(newRuleValue)
+                value: newRuleType === 'PERCENTAGE' ? val / 100 : val
             });
             toast.success(t('pricing.success.ruleSaved', 'Delivery rule saved successfully'));
             resetRuleForm();

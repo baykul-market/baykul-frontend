@@ -77,7 +77,7 @@ describe('PricingConfigPage', () => {
         expect(screen.getByTestId('pricing-config-page')).toBeInTheDocument();
 
         // Check markup loaded
-        expect(screen.getByDisplayValue('0.2')).toBeInTheDocument();
+        expect(screen.getByDisplayValue('20')).toBeInTheDocument();
 
         // Check rule loaded
         expect(screen.getByText('15%')).toBeInTheDocument();
