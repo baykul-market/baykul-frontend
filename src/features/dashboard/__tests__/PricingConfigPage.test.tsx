@@ -1,0 +1,113 @@
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import PricingConfigPage from '../PricingConfigPage';
+import { configApi } from '../../../api/config';
+import { useAuthStore } from '../../../store/useAuthStore';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import '@testing-library/jest-dom';
+
+vi.mock('../../../api/config', () => ({
+    configApi: {
+        getConfig: vi.fn(),
+        getExchangeRates: vi.fn(),
+        updateConfig: vi.fn(),
+        createOrUpdateExchangeRate: vi.fn(),
+        deleteExchangeRate: vi.fn(),
+    },
+}));
+
+vi.mock('../../../store/useAuthStore', () => ({
+    useAuthStore: vi.fn(),
+}));
+
+vi.mock('react-i18next', () => ({
+    useTranslation: () => ({
+        t: (key: string, fallback: string) => fallback || key,
+    }),
+}));
+
+const renderWithRouter = (ui: React.ReactNode) => {
+    return render(
+        <MemoryRouter initialEntries={['/dashboard/pricing-config']}>
+            <Routes>
+                <Route path="/dashboard/pricing-config" element={ui} />
+                <Route path="/products" element={<div>Redirected to Products</div>} />
+            </Routes>
+        </MemoryRouter>
+    );
+};
+
+describe('PricingConfigPage', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
+    it('redirects non-admin users', () => {
+        (useAuthStore as unknown as any).mockReturnValue({ role: 'USER' });
+
+        renderWithRouter(<PricingConfigPage />);
+        expect(screen.getByText('Redirected to Products')).toBeInTheDocument();
+    });
+
+    it('loads and displays configuration data for admin', async () => {
+        (useAuthStore as unknown as any).mockReturnValue({ role: 'ADMIN' });
+
+        (configApi.getConfig as any).mockResolvedValueOnce({
+            deliveryPercentage: 0.15,
+            markupPercentage: 0.2,
+            currency: 'RUB',
+        });
+
+        (configApi.getExchangeRates as any).mockResolvedValueOnce([
+            { currencyFrom: 'EUR', currencyTo: 'RUB', rate: 105 },
+        ]);
+
+        renderWithRouter(<PricingConfigPage />);
+
+        expect(screen.getByText('Loading...')).toBeInTheDocument();
+
+        await waitFor(() => {
+            expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
+        });
+
+        expect(screen.getByTestId('pricing-config-page')).toBeInTheDocument();
+
+        // Check global inputs loaded
+        const inputs = screen.getAllByRole('spinbutton');
+        expect(inputs[0]).toHaveValue(0.15); // Delivery
+        expect(inputs[1]).toHaveValue(0.2); // Markup
+
+        // Check rates loaded
+        expect(screen.getAllByText('EUR').length).toBeGreaterThan(0);
+        expect(screen.getByText('x 105')).toBeInTheDocument();
+    });
+
+    it('saves global configuration', async () => {
+        (useAuthStore as unknown as any).mockReturnValue({ role: 'ADMIN' });
+
+        (configApi.getConfig as any).mockResolvedValue({
+            deliveryPercentage: 0.1,
+            markupPercentage: 0.1,
+            currency: 'RUB',
+        });
+        (configApi.getExchangeRates as any).mockResolvedValue([]);
+        (configApi.updateConfig as any).mockResolvedValue({ success: true });
+
+        renderWithRouter(<PricingConfigPage />);
+
+        await waitFor(() => {
+            expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
+        });
+
+        const btn = screen.getByText('Save Changes');
+        fireEvent.click(btn);
+
+        await waitFor(() => {
+            expect(configApi.updateConfig).toHaveBeenCalledWith({
+                deliveryPercentage: 0.1,
+                markupPercentage: 0.1,
+                currency: 'RUB'
+            });
+        });
+    });
+});
