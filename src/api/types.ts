@@ -1,3 +1,5 @@
+export type Currency = string;
+
 export interface PageableSort {
     sorted: boolean;
     unsorted: boolean;

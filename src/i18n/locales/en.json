@@ -278,6 +278,8 @@
       "planned": "Planned",
       "available": "Available",
       "open": "Open",
+      "pricingConfig": "Pricing Configuration",
+      "pricingConfigDescription": "Manage global exchange rates and default checkout pricing rules.",
       "statsPlaceholder": "Dashboard analytics and quick stats will appear here once features are implemented."
     },
     "balance": {
@@ -530,6 +532,36 @@
     "bill": {
       "DRAFT": "Draft",
       "APPLIED": "Applied"
+    }
+  },
+  "pricing": {
+    "title": "Pricing Configuration",
+    "subtitle": "Manage global pricing rules and currency exchange rates.",
+    "global": {
+      "title": "Global Rules",
+      "deliveryPercentage": "Delivery Percentage",
+      "markupPercentage": "Markup Percentage",
+      "systemCurrency": "Default System Currency"
+    },
+    "rates": {
+      "title": "Exchange Rates",
+      "addNew": "Add New Rate",
+      "rateValue": "Rate (e.g. 105)",
+      "bothDirections": "Create reverse rate automatically (1/x)",
+      "noRates": "No exchange rates configured."
+    },
+    "errors": {
+      "fetchFailed": "Failed to fetch pricing config",
+      "saveFailed": "Failed to save configuration",
+      "deleteFailed": "Failed to delete rate"
+    },
+    "success": {
+      "configSaved": "Configuration saved successfully",
+      "rateSaved": "Rate added successfully",
+      "rateDeleted": "Rate deleted"
+    },
+    "confirm": {
+      "deleteRate": "Are you sure you want to delete this rate?"
     }
   }
 }
