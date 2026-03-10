@@ -215,7 +215,7 @@ function OverviewTab() {
             <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
               {t('profile.overview.balance')}
             </p>
-            <p className="text-lg font-bold">
+            <p className="text-lg font-bold whitespace-nowrap">
               {user.balance ? formatPrice(user.balance.account, user.balance.currency) : '0.00'}
             </p>
           </div>
@@ -773,7 +773,7 @@ function BalanceTab() {
           </div>
           <div>
             <p className="text-sm text-muted-foreground font-medium">{t('profile.balance.availableFunds')}</p>
-            <p className="text-3xl font-bold text-success">{formatPrice(balance.account, balance.currency)}</p>
+            <p className="text-3xl font-bold text-success whitespace-nowrap">{formatPrice(balance.account, balance.currency)}</p>
           </div>
         </div>
       </div>

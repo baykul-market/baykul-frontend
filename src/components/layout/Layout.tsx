@@ -149,7 +149,7 @@ export default function Layout() {
                       >
                         <Wallet className="h-3.5 w-3.5 text-muted-foreground" />
                         <span className={cn(
-                          'font-semibold tabular-nums',
+                          'font-semibold tabular-nums whitespace-nowrap',
                           user.balance.account >= 0 ? 'text-success' : 'text-destructive'
                         )}>
                           {formatPrice(user.balance.account, user.balance.currency)}
@@ -282,7 +282,7 @@ export default function Layout() {
                         <Wallet className="w-4 h-4" />
                         <span>{t('nav.balance')}:</span>
                         <span className={cn(
-                          'font-semibold tabular-nums',
+                          'font-semibold tabular-nums whitespace-nowrap',
                           user.balance.account >= 0 ? 'text-success' : 'text-destructive'
                         )}>
                           {formatPrice(user.balance.account, user.balance.currency)}
