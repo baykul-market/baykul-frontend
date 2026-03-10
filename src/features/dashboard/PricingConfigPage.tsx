@@ -18,14 +18,14 @@ export default function PricingConfigPage() {
     const [savingConfig, setSavingConfig] = useState(false);
 
     // Form states
-    const [deliveryPercentage, setDeliveryPercentage] = useState<number>(0);
-    const [markupPercentage, setMarkupPercentage] = useState<number>(0);
+    const [deliveryPercentage, setDeliveryPercentage] = useState<string>('0');
+    const [markupPercentage, setMarkupPercentage] = useState<string>('0');
     const [systemCurrency, setSystemCurrency] = useState<Currency>('RUB');
 
     // Rate Form
     const [newRateFrom, setNewRateFrom] = useState<Currency>('EUR');
     const [newRateTo, setNewRateTo] = useState<Currency>('RUB');
-    const [newRateValue, setNewRateValue] = useState<number>(1);
+    const [newRateValue, setNewRateValue] = useState<string>('1');
     const [newRateBothDir, setNewRateBothDir] = useState(false);
 
     // Delete confirmation
@@ -34,7 +34,7 @@ export default function PricingConfigPage() {
 
     // Inline edit state for rates
     const [editingRateKey, setEditingRateKey] = useState<string | null>(null);
-    const [editRateValue, setEditRateValue] = useState<number>(0);
+    const [editRateValue, setEditRateValue] = useState<string>('0');
     const [savingRate, setSavingRate] = useState(false);
 
     const currencyOptions: Currency[] = ['RUB', 'EUR', 'USD', 'BYN'];
@@ -59,8 +59,8 @@ export default function PricingConfigPage() {
             setConfig(fetchedConfig);
             setRates(fetchedRates);
 
-            setDeliveryPercentage(fetchedConfig.deliveryPercentage);
-            setMarkupPercentage(fetchedConfig.markupPercentage);
+            setDeliveryPercentage(String(fetchedConfig.deliveryPercentage));
+            setMarkupPercentage(String(fetchedConfig.markupPercentage));
             setSystemCurrency(fetchedConfig.currency);
 
             setLoading(false);
@@ -74,8 +74,8 @@ export default function PricingConfigPage() {
         setSavingConfig(true);
         try {
             await configApi.updateConfig({
-                deliveryPercentage,
-                markupPercentage,
+                deliveryPercentage: Number(deliveryPercentage),
+                markupPercentage: Number(markupPercentage),
                 currency: systemCurrency
             });
             toast.success(t('pricing.success.configSaved', 'Configuration saved successfully'));
@@ -93,7 +93,7 @@ export default function PricingConfigPage() {
             await configApi.createOrUpdateExchangeRate({
                 currencyFrom: newRateFrom,
                 currencyTo: newRateTo,
-                rate: newRateValue,
+                rate: Number(newRateValue),
                 bothDirections: newRateBothDir,
                 replaceExisting: true
             });
@@ -122,12 +122,12 @@ export default function PricingConfigPage() {
 
     const startEditRate = (rate: CurrencyExchangeDto) => {
         setEditingRateKey(`${rate.currencyFrom}_${rate.currencyTo}`);
-        setEditRateValue(rate.rate);
+        setEditRateValue(String(rate.rate));
     };
 
     const cancelEditRate = () => {
         setEditingRateKey(null);
-        setEditRateValue(0);
+        setEditRateValue('0');
     };
 
     const handleSaveRate = async (rate: CurrencyExchangeDto) => {
@@ -136,7 +136,7 @@ export default function PricingConfigPage() {
             await configApi.createOrUpdateExchangeRate({
                 currencyFrom: rate.currencyFrom,
                 currencyTo: rate.currencyTo,
-                rate: editRateValue,
+                rate: Number(editRateValue),
                 bothDirections: false,
                 replaceExisting: true
             });
@@ -207,7 +207,7 @@ export default function PricingConfigPage() {
                                     step="0.01"
                                     min="0"
                                     value={deliveryPercentage}
-                                    onChange={(e) => setDeliveryPercentage(Number(e.target.value))}
+                                    onChange={(e) => setDeliveryPercentage(e.target.value)}
                                     className="flex-1 py-2.5 bg-transparent outline-none border-none text-foreground text-sm"
                                 />
                                 <span className="text-muted-foreground text-sm font-medium">%</span>
@@ -231,7 +231,7 @@ export default function PricingConfigPage() {
                                     step="0.01"
                                     min="0"
                                     value={markupPercentage}
-                                    onChange={(e) => setMarkupPercentage(Number(e.target.value))}
+                                    onChange={(e) => setMarkupPercentage(e.target.value)}
                                     className="flex-1 py-2.5 bg-transparent outline-none border-none text-foreground text-sm"
                                 />
                                 <span className="text-muted-foreground text-sm font-medium">%</span>
@@ -338,7 +338,7 @@ export default function PricingConfigPage() {
                                                     step="0.01"
                                                     min="0"
                                                     value={editRateValue}
-                                                    onChange={(e) => setEditRateValue(Number(e.target.value))}
+                                                    onChange={(e) => setEditRateValue(e.target.value)}
                                                     className="w-32 bg-background border rounded-lg px-2.5 py-1.5 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                                                     autoFocus
                                                     onKeyDown={(e) => {
@@ -438,7 +438,7 @@ export default function PricingConfigPage() {
                                 step="0.01"
                                 min="0"
                                 value={newRateValue}
-                                onChange={(e) => setNewRateValue(Number(e.target.value))}
+                                onChange={(e) => setNewRateValue(e.target.value)}
                                 placeholder={t('pricing.rates.ratePlaceholder', 'e.g. 105')}
                                 className="w-full bg-background border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                             />
