@@ -1,10 +1,17 @@
 import { api } from './client';
 import { Currency } from './types';
 
+export interface DeliveryCostConfigDto {
+    id?: string;
+    minimumSum: number;
+    markupType: 'PERCENTAGE' | 'SUM';
+    value: number;
+}
+
 export interface PriceConfigDto {
-    deliveryPercentage: number;
     markupPercentage: number;
-    currency: Currency;
+    systemCurrency: Currency;
+    deliveryCostConfigs: DeliveryCostConfigDto[];
 }
 
 export interface CurrencyExchangeDto {
@@ -19,10 +26,17 @@ export const configApi = {
     // Price Config Endpoints
     getConfig: () => api.get<PriceConfigDto>('/price-config').then(res => res.data),
 
-    updateConfig: (data: Partial<PriceConfigDto>) =>
-        api.put('/price-config', data).then(res => res.data),
+    updateConfig: (data: Partial<Omit<PriceConfigDto, 'deliveryCostConfigs'>>) =>
+        api.put('/price-config/base', data).then(res => res.data),
 
     resetConfig: () => api.post('/price-config/reset').then(res => res.data),
+
+    // Delivery Rules Endpoints
+    saveDeliveryRule: (data: DeliveryCostConfigDto) =>
+        api.post('/price-config/delivery-rule', data).then(res => res.data),
+
+    deleteDeliveryRule: (id: string) =>
+        api.delete('/price-config/delivery-rule', { params: { id } }).then(res => res.data),
 
     // Currency Exchange Endpoints
     getExchangeRates: () => api.get<CurrencyExchangeDto[]>('/currency-exchange').then(res => res.data),

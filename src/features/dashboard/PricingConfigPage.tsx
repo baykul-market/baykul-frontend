@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../store/useAuthStore';
 import { Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { configApi, PriceConfigDto, CurrencyExchangeDto } from '../../api/config';
+import { configApi, PriceConfigDto, CurrencyExchangeDto, DeliveryCostConfigDto } from '../../api/config';
 import { Currency } from '../../api/types';
 import toast from 'react-hot-toast';
-import { Save, Plus, Trash2, ArrowRight, Settings, Repeat, Pencil, Check, X, RefreshCw, Percent, DollarSign } from 'lucide-react';
+import { Save, Plus, Trash2, ArrowRight, Settings, Repeat, Pencil, Check, X, RefreshCw, Percent, DollarSign, ListOrdered } from 'lucide-react';
 import { ConfirmModal } from '../../components/ConfirmModal';
 import { getCurrencySymbol } from '../../lib/currency';
 
@@ -18,10 +18,16 @@ export default function PricingConfigPage() {
     const [loading, setLoading] = useState(true);
     const [savingConfig, setSavingConfig] = useState(false);
 
-    // Form states
-    const [deliveryPercentage, setDeliveryPercentage] = useState<string>('0');
+    const [deliveryRules, setDeliveryRules] = useState<DeliveryCostConfigDto[]>([]);
     const [markupPercentage, setMarkupPercentage] = useState<string>('0');
     const [systemCurrency, setSystemCurrency] = useState<Currency>('RUB');
+
+    // Rule Form
+    const [newRuleMinSum, setNewRuleMinSum] = useState<string>('0');
+    const [newRuleType, setNewRuleType] = useState<'PERCENTAGE' | 'SUM'>('PERCENTAGE');
+    const [newRuleValue, setNewRuleValue] = useState<string>('0');
+    const [addingRule, setAddingRule] = useState(false);
+    const [deleteRuleTarget, setDeleteRuleTarget] = useState<DeliveryCostConfigDto | null>(null);
 
     // Rate Form
     const [newRateFrom, setNewRateFrom] = useState<Currency>('EUR');
@@ -53,9 +59,9 @@ export default function PricingConfigPage() {
             setConfig(fetchedConfig);
             setRates(fetchedRates);
 
-            setDeliveryPercentage(String(fetchedConfig.deliveryPercentage));
+            setDeliveryRules(fetchedConfig.deliveryCostConfigs || []);
             setMarkupPercentage(String(fetchedConfig.markupPercentage));
-            setSystemCurrency(fetchedConfig.currency);
+            setSystemCurrency(fetchedConfig.systemCurrency);
 
             setLoading(false);
         } catch (error) {
@@ -68,9 +74,8 @@ export default function PricingConfigPage() {
         setSavingConfig(true);
         try {
             await configApi.updateConfig({
-                deliveryPercentage: Number(deliveryPercentage),
                 markupPercentage: Number(markupPercentage),
-                currency: systemCurrency
+                systemCurrency: systemCurrency
             });
             toast.success(t('pricing.success.configSaved', 'Configuration saved successfully'));
             fetchData();
@@ -79,6 +84,42 @@ export default function PricingConfigPage() {
         } finally {
             setSavingConfig(false);
         }
+    };
+
+    const handleSaveRule = async () => {
+        setAddingRule(true);
+        try {
+            await configApi.saveDeliveryRule({
+                minimumSum: Number(newRuleMinSum),
+                markupType: newRuleType,
+                value: Number(newRuleValue)
+            });
+            toast.success(t('pricing.success.ruleSaved', 'Delivery rule saved successfully'));
+            resetRuleForm();
+            fetchData();
+        } catch (error) {
+            toast.error(t('pricing.errors.saveFailed', 'Failed to save rule'));
+        } finally {
+            setAddingRule(false);
+        }
+    };
+
+    const handleDeleteRule = async () => {
+        if (!deleteRuleTarget?.id) return;
+        try {
+            await configApi.deleteDeliveryRule(deleteRuleTarget.id);
+            toast.success(t('pricing.success.ruleDeleted', 'Delivery rule deleted'));
+            setDeleteRuleTarget(null);
+            fetchData();
+        } catch (error) {
+            toast.error(t('pricing.errors.deleteFailed', 'Failed to delete rule'));
+        }
+    };
+
+    const resetRuleForm = () => {
+        setNewRuleMinSum('0');
+        setNewRuleType('PERCENTAGE');
+        setNewRuleValue('0');
     };
 
     const handleAddRate = async () => {
@@ -185,26 +226,92 @@ export default function PricingConfigPage() {
                 </div>
 
                 <div className="p-6">
-                    {/* Row 1: Delivery Percentage */}
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 py-4 border-b border-dashed">
-                        <div className="sm:w-56 shrink-0">
-                            <label className="text-sm font-medium flex items-center gap-2">
-                                <Percent size={14} className="text-muted-foreground" />
-                                {t('pricing.global.deliveryPercentage', 'Delivery Percentage')}
-                            </label>
-                            <p className="text-xs text-muted-foreground mt-0.5">{t('pricing.global.deliveryDesc', 'Added on top of delivery cost')}</p>
+                    {/* Delivery Rules List */}
+                    <div className="pb-6 border-b border-dashed mb-6">
+                        <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
+                            <ListOrdered size={14} className="text-primary" />
+                            {t('pricing.global.deliveryRules', 'Delivery Cost Rules')}
+                        </h3>
+
+                        <div className="space-y-3">
+                            {deliveryRules.length === 0 ? (
+                                <p className="text-sm text-muted-foreground italic bg-secondary/10 p-3 rounded-lg border border-dashed">
+                                    {t('pricing.global.noDeliveryRules', 'No delivery rules defined. Default cost will be applied.')}
+                                </p>
+                            ) : (
+                                deliveryRules.map((rule) => (
+                                    <div key={rule.id} className="flex items-center justify-between p-3 bg-background border rounded-lg group hover:bg-secondary/10 transition-colors">
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-medium">
+                                                {rule.markupType === 'PERCENTAGE' ? `${rule.value * 100}%` : `${rule.value} ${getCurrencySymbol(systemCurrency)}`}
+                                            </span>
+                                            <span className="text-xs text-muted-foreground">
+                                                {t('pricing.global.minSum', 'Minimal cost of the box')}: {rule.minimumSum} {getCurrencySymbol(systemCurrency)}
+                                            </span>
+                                        </div>
+                                        <button
+                                            onClick={() => setDeleteRuleTarget(rule)}
+                                            className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all opacity-0 group-hover:opacity-100"
+                                            title={t('common.delete', 'Delete')}
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
+                                ))
+                            )}
                         </div>
-                        <div className="flex-1 max-w-xs">
-                            <div className="flex items-center bg-background border rounded-lg px-3 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all">
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    value={deliveryPercentage}
-                                    onChange={(e) => setDeliveryPercentage(e.target.value)}
-                                    className="flex-1 py-2.5 bg-transparent outline-none border-none text-foreground text-sm"
-                                />
-                                <span className="text-muted-foreground text-sm font-medium">%</span>
+
+                        {/* Add Rule Form */}
+                        <div className="mt-4 p-4 bg-secondary/10 rounded-lg border border-dashed">
+                            <h4 className="text-xs font-semibold mb-3 uppercase tracking-wider text-muted-foreground">
+                                {t('pricing.global.addRule', 'Add New Delivery Rule')}
+                            </h4>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                                <div>
+                                    <label className="text-[10px] font-bold text-muted-foreground mb-1 block uppercase">
+                                        {t('pricing.global.minSum', 'Min Cost')}
+                                    </label>
+                                    <input
+                                        type="number"
+                                        value={newRuleMinSum}
+                                        onChange={(e) => setNewRuleMinSum(e.target.value)}
+                                        className="w-full py-1.5 bg-background border rounded-md text-sm px-2 outline-none focus:ring-1 focus:ring-primary h-9"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-[10px] font-bold text-muted-foreground mb-1 block uppercase">
+                                        {t('pricing.global.markupType', 'Type')}
+                                    </label>
+                                    <select
+                                        value={newRuleType}
+                                        onChange={(e) => setNewRuleType(e.target.value as 'PERCENTAGE' | 'SUM')}
+                                        className="w-full py-1.5 bg-background border rounded-md text-sm px-2 outline-none focus:ring-1 focus:ring-primary h-9"
+                                    >
+                                        <option value="PERCENTAGE">{t('pricing.global.percentage', 'Percentage (%)')}</option>
+                                        <option value="SUM">{t('pricing.global.fixed', 'Fixed Sum')}</option>
+                                    </select>
+                                </div>
+                                <div className="flex gap-2">
+                                    <div className="flex-1">
+                                        <label className="text-[10px] font-bold text-muted-foreground mb-1 block uppercase">
+                                            {t('pricing.global.value', 'Value')}
+                                        </label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            value={newRuleValue}
+                                            onChange={(e) => setNewRuleValue(e.target.value)}
+                                            className="w-full py-1.5 bg-background border rounded-md text-sm px-2 outline-none focus:ring-1 focus:ring-primary h-9"
+                                        />
+                                    </div>
+                                    <button
+                                        onClick={handleSaveRule}
+                                        disabled={addingRule}
+                                        className="btn-primary h-9 px-3 self-end"
+                                    >
+                                        {addingRule ? <RefreshCw size={14} className="animate-spin" /> : <Plus size={14} />}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -472,6 +579,20 @@ export default function PricingConfigPage() {
                     </label>
                 </div>
             </div>
+
+            <ConfirmModal
+                isOpen={deleteRuleTarget !== null}
+                onClose={() => setDeleteRuleTarget(null)}
+                onConfirm={handleDeleteRule}
+                title={t('pricing.confirm.deleteRuleTitle', 'Delete Delivery Rule')}
+                message={
+                    deleteRuleTarget
+                        ? t('pricing.confirm.deleteRuleMessage', 'Are you sure you want to delete this delivery rule?')
+                        : ''
+                }
+                confirmText={t('common.delete', 'Delete')}
+                isDestructive
+            />
 
             <ConfirmModal
                 isOpen={deleteTarget !== null}

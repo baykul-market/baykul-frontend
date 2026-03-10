@@ -11,6 +11,8 @@ vi.mock('../../../api/config', () => ({
         getConfig: vi.fn(),
         getExchangeRates: vi.fn(),
         updateConfig: vi.fn(),
+        saveDeliveryRule: vi.fn(),
+        deleteDeliveryRule: vi.fn(),
         createOrUpdateExchangeRate: vi.fn(),
         deleteExchangeRate: vi.fn(),
     },
@@ -53,9 +55,11 @@ describe('PricingConfigPage', () => {
         (useAuthStore as unknown as any).mockReturnValue({ role: 'ADMIN' });
 
         (configApi.getConfig as any).mockResolvedValueOnce({
-            deliveryPercentage: 0.15,
             markupPercentage: 0.2,
-            currency: 'RUB',
+            systemCurrency: 'RUB',
+            deliveryCostConfigs: [
+                { id: 'rule-1', minimumSum: 0, markupType: 'PERCENTAGE', value: 0.15 }
+            ]
         });
 
         (configApi.getExchangeRates as any).mockResolvedValueOnce([
@@ -72,10 +76,12 @@ describe('PricingConfigPage', () => {
 
         expect(screen.getByTestId('pricing-config-page')).toBeInTheDocument();
 
-        // Check global inputs loaded
-        const inputs = screen.getAllByRole('spinbutton');
-        expect(inputs[0]).toHaveValue(0.15); // Delivery
-        expect(inputs[1]).toHaveValue(0.2); // Markup
+        // Check markup loaded
+        expect(screen.getByDisplayValue('0.2')).toBeInTheDocument();
+
+        // Check rule loaded
+        expect(screen.getByText('15%')).toBeInTheDocument();
+        expect(screen.getByText(/Minimal cost of the box: 0/)).toBeInTheDocument();
 
         // Check rates loaded
         expect(screen.getAllByText('EUR').length).toBeGreaterThan(0);
@@ -86,9 +92,9 @@ describe('PricingConfigPage', () => {
         (useAuthStore as unknown as any).mockReturnValue({ role: 'ADMIN' });
 
         (configApi.getConfig as any).mockResolvedValue({
-            deliveryPercentage: 0.1,
             markupPercentage: 0.1,
-            currency: 'RUB',
+            systemCurrency: 'RUB',
+            deliveryCostConfigs: [],
         });
         (configApi.getExchangeRates as any).mockResolvedValue([]);
         (configApi.updateConfig as any).mockResolvedValue({ success: true });
@@ -104,9 +110,8 @@ describe('PricingConfigPage', () => {
 
         await waitFor(() => {
             expect(configApi.updateConfig).toHaveBeenCalledWith({
-                deliveryPercentage: 0.1,
                 markupPercentage: 0.1,
-                currency: 'RUB'
+                systemCurrency: 'RUB'
             });
         });
     });
@@ -115,9 +120,9 @@ describe('PricingConfigPage', () => {
         (useAuthStore as unknown as any).mockReturnValue({ role: 'ADMIN' });
 
         (configApi.getConfig as any).mockResolvedValue({
-            deliveryPercentage: 0.1,
             markupPercentage: 0.1,
-            currency: 'RUB',
+            systemCurrency: 'RUB',
+            deliveryCostConfigs: [],
         });
         (configApi.getExchangeRates as any).mockResolvedValue([
             { currencyFrom: 'EUR', currencyTo: 'RUB', rate: 105 },
@@ -159,9 +164,9 @@ describe('PricingConfigPage', () => {
         (useAuthStore as unknown as any).mockReturnValue({ role: 'ADMIN' });
 
         (configApi.getConfig as any).mockResolvedValue({
-            deliveryPercentage: 0.1,
             markupPercentage: 0.1,
-            currency: 'RUB',
+            systemCurrency: 'RUB',
+            deliveryCostConfigs: [],
         });
         (configApi.getExchangeRates as any).mockResolvedValue([
             { currencyFrom: 'EUR', currencyTo: 'RUB', rate: 105 },
