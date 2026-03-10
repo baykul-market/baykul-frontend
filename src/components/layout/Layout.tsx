@@ -7,6 +7,7 @@ import { cartApi } from '../../api/cart';
 import { authApi } from '../../api/auth';
 import { cn } from '../../lib/utils';
 import { useTranslation } from 'react-i18next';
+import { formatPrice } from '../../lib/currency';
 
 export default function Layout() {
   const { t, i18n } = useTranslation();
@@ -151,7 +152,7 @@ export default function Layout() {
                           'font-semibold tabular-nums',
                           user.balance.account >= 0 ? 'text-success' : 'text-destructive'
                         )}>
-                          {user.balance.account.toFixed(2)}
+                          {formatPrice(user.balance.account, user.balance.currency)}
                         </span>
                       </Link>
                     )}
@@ -284,7 +285,7 @@ export default function Layout() {
                           'font-semibold tabular-nums',
                           user.balance.account >= 0 ? 'text-success' : 'text-destructive'
                         )}>
-                          {user.balance.account.toFixed(2)}
+                          {formatPrice(user.balance.account, user.balance.currency)}
                         </span>
                       </Link>
                     )}

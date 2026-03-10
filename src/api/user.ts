@@ -12,6 +12,7 @@ export interface UserProfile {
 export interface UserBalance {
   id: string;
   account: number;
+  currency: string;
 }
 
 export interface RefreshTokenInfo {
@@ -87,6 +88,7 @@ export interface BalanceFull {
   createdTs: string;
   updatedTs: string;
   account: number;
+  currency: string;
   user: {
     id: string;
     login: string;

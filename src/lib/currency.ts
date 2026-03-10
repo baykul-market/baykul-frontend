@@ -31,7 +31,7 @@ export function getCurrencySymbol(currency: string): string {
  * formatPrice(4200, 'RUB')  // '₽4200.00'
  */
 export function formatPrice(amount: number, currency: string): string {
-    return `${getCurrencySymbol(currency)}${amount.toFixed(2)}`;
+    return `${amount.toFixed(2)} ${getCurrencySymbol(currency)}`;
 }
 
 export { CURRENCY_SYMBOLS };
