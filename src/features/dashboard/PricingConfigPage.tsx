@@ -7,6 +7,7 @@ import { Currency } from '../../api/types';
 import toast from 'react-hot-toast';
 import { Save, Plus, Trash2, ArrowRight, Settings, Repeat, Pencil, Check, X, RefreshCw, Percent, DollarSign } from 'lucide-react';
 import { ConfirmModal } from '../../components/ConfirmModal';
+import { getCurrencySymbol } from '../../lib/currency';
 
 export default function PricingConfigPage() {
     const { t } = useTranslation();
@@ -38,13 +39,6 @@ export default function PricingConfigPage() {
     const [savingRate, setSavingRate] = useState(false);
 
     const currencyOptions: Currency[] = ['RUB', 'EUR', 'USD', 'BYN'];
-
-    const currencySymbols: Record<string, string> = {
-        RUB: '₽',
-        EUR: '€',
-        USD: '$',
-        BYN: 'Br',
-    };
 
     useEffect(() => {
         fetchData();
@@ -255,7 +249,7 @@ export default function PricingConfigPage() {
                                 className="w-full bg-background border rounded-lg px-3 py-2.5 text-foreground text-sm focus:ring-2 focus:border-primary outline-none transition-all"
                             >
                                 {currencyOptions.map((c) => (
-                                    <option key={c} value={c}>{currencySymbols[c]} {c}</option>
+                                    <option key={c} value={c}>{getCurrencySymbol(c)} {c}</option>
                                 ))}
                             </select>
                         </div>
@@ -408,7 +402,7 @@ export default function PricingConfigPage() {
                                 data-testid="rate-from"
                             >
                                 {currencyOptions.map((c) => (
-                                    <option key={c} value={c}>{currencySymbols[c]} {c}</option>
+                                    <option key={c} value={c}>{getCurrencySymbol(c)} {c}</option>
                                 ))}
                             </select>
                         </div>
@@ -425,7 +419,7 @@ export default function PricingConfigPage() {
                                 data-testid="rate-to"
                             >
                                 {currencyOptions.map((c) => (
-                                    <option key={c} value={c}>{currencySymbols[c]} {c}</option>
+                                    <option key={c} value={c}>{getCurrencySymbol(c)} {c}</option>
                                 ))}
                             </select>
                         </div>

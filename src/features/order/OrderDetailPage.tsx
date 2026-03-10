@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { orderApi, Order, OrderStatus } from '../../api/order';
 import { Loader2, ArrowLeft, Package, Clock, CheckCircle2, XCircle, RotateCw, CreditCard, Box, MapPin } from 'lucide-react';
 import i18n from '../../i18n/i18n';
+import { getCurrencySymbol } from '../../lib/currency';
 
 export default function OrderDetailPage() {
   const { orderId } = useParams<{ orderId: string }>();
@@ -56,7 +57,7 @@ export default function OrderDetailPage() {
   const statusConfig = getStatusConfig(order.status, t);
   const totalPrice = getOrderTotal(order);
   const currency = order.orderProducts?.[0]?.part?.currency ?? 'EUR';
-  const currencySymbol = currency === 'EUR' ? '\u20AC' : currency === 'USD' ? '$' : currency;
+  const currencySymbol = getCurrencySymbol(currency);
 
   return (
     <div className="max-w-4xl mx-auto animate-fade-in pb-10">

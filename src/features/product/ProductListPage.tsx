@@ -6,6 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, ShoppingCart, Loader2, Package, Tag, Weight, Box } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
+import { getCurrencySymbol } from '../../lib/currency';
 
 export default function ProductListPage() {
   const { t } = useTranslation();
@@ -210,7 +211,7 @@ function ProductCard({
         {/* Footer */}
         <div className="flex items-center justify-between pt-4 border-t">
           <span className="text-xl font-bold">
-            {product.currency === 'EUR' ? '\u20AC' : product.currency === 'USD' ? '$' : product.currency}
+            {getCurrencySymbol(product.currency)}
             {product.price.toFixed(2)}
           </span>
           <button
