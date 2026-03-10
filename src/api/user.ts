@@ -30,6 +30,8 @@ export interface UserFull {
   phoneNumber: string | null;
   role: 'USER' | 'ADMIN' | 'MANAGER';
   blocked: boolean;
+  canPayLater?: boolean;
+  markupPercentage?: number;
   refreshTokens?: RefreshTokenInfo[];
   profile: UserProfile | null;
   balance: UserBalance | null;
@@ -45,6 +47,8 @@ export interface UserBasic {
   phoneNumber: string | null;
   role: 'USER' | 'ADMIN' | 'MANAGER';
   blocked: boolean;
+  canPayLater?: boolean;
+  markupPercentage?: number;
   profile: UserProfile | null;
 }
 
@@ -73,6 +77,7 @@ export interface BalanceOperationDto {
   userId?: string;
   balanceId?: string;
   amount: number;
+  currency: string;
   operationType: 'REPLENISHMENT' | 'WITHDRAWAL' | 'PAYMENT';
   description?: string;
 }
@@ -127,6 +132,8 @@ export interface UserCreateInput {
   phoneNumber?: string;
   role?: 'USER' | 'MANAGER' | 'ADMIN';
   blocked?: boolean;
+  canPayLater?: boolean;
+  markupPercentage?: number;
   profile?: {
     name?: string;
     surname?: string;
@@ -140,6 +147,8 @@ export interface UserUpdateInput {
   phoneNumber?: string;
   password?: string;
   blocked?: boolean;
+  canPayLater?: boolean;
+  markupPercentage?: number;
   profile?: {
     name?: string;
     surname?: string;
