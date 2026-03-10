@@ -16,7 +16,12 @@
     "orders": "Orders",
     "cart": "Cart",
     "profile": "Profile",
-    "pageSize": "Items per page"
+    "pageSize": "Items per page",
+    "save": "Save Changes",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "refresh": "Refresh"
   },
   "nav": {
     "brandFull": "Baykul Auto Parts",
@@ -278,6 +283,8 @@
       "planned": "Planned",
       "available": "Available",
       "open": "Open",
+      "pricingConfig": "Pricing Configuration",
+      "pricingConfigDescription": "Manage global exchange rates and default checkout pricing rules.",
       "statsPlaceholder": "Dashboard analytics and quick stats will appear here once features are implemented."
     },
     "balance": {
@@ -370,6 +377,9 @@
       "passwordPlaceholderCreate": "Enter a secure password",
       "passwordPlaceholderEdit": "Leave blank to keep current",
       "roleLabel": "Role",
+      "canPayLaterLabel": "Can Pay Later",
+      "canPayLaterHint": "Allow user to pay for orders later",
+      "markupPercentageLabel": "Markup Percentage (%)",
       "blockedLabel": "Block User",
       "blockedHint": "Blocked users cannot log in to the system",
       "saveChanges": "Save Changes",
@@ -527,6 +537,56 @@
     "bill": {
       "DRAFT": "Draft",
       "APPLIED": "Applied"
+    }
+  },
+  "pricing": {
+    "title": "Pricing Configuration",
+    "subtitle": "Manage global pricing rules and currency exchange rates.",
+    "global": {
+      "title": "Global Rules",
+      "description": "Default percentage markups applied to orders",
+      "deliveryRules": "Delivery Cost Rules",
+      "noDeliveryRules": "No delivery rules defined. Default cost will be applied.",
+      "minSum": "Minimal cost of the box",
+      "addRule": "Add New Delivery Rule",
+      "markupType": "Markup Type",
+      "percentage": "Percentage (%)",
+      "fixed": "Fixed Sum",
+      "value": "Value",
+      "markupPercentage": "Markup Percentage",
+      "markupDesc": "Applied to product base price",
+      "systemCurrency": "Default System Currency",
+      "currencyDesc": "Primary currency for the system"
+    },
+    "rates": {
+      "title": "Exchange Rates",
+      "description": "Currency conversion rates for price calculation",
+      "addNew": "Add New Rate",
+      "from": "From",
+      "to": "To",
+      "rateValue": "Rate",
+      "ratePlaceholder": "e.g. 105",
+      "bothDirections": "Create reverse rate automatically (1/x)",
+      "noRates": "No exchange rates configured.",
+      "addFirst": "Add your first rate below."
+    },
+    "errors": {
+      "fetchFailed": "Failed to fetch pricing config",
+      "saveFailed": "Failed to save configuration",
+      "deleteFailed": "Failed to delete rate"
+    },
+    "success": {
+      "configSaved": "Configuration saved successfully",
+      "rateSaved": "Rate updated successfully",
+      "rateDeleted": "Rate deleted",
+      "ruleSaved": "Delivery rule saved successfully",
+      "ruleDeleted": "Delivery rule deleted"
+    },
+    "confirm": {
+      "deleteRateTitle": "Delete Exchange Rate",
+      "deleteRateMessage": "Are you sure you want to delete the rate {{from}} → {{to}}? This cannot be undone.",
+      "deleteRuleTitle": "Delete Delivery Rule",
+      "deleteRuleMessage": "Are you sure you want to delete this delivery rule?"
     }
   }
 }

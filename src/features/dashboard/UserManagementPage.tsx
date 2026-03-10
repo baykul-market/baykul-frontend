@@ -35,7 +35,7 @@ import {
   Wallet,
   ArrowUpCircle,
   ArrowDownCircle,
-  Euro,
+  RussianRuble,
   History,
   ChevronDown,
   ChevronUp,
@@ -347,59 +347,59 @@ export default function UserManagementPage() {
                         )}
                       </td>
                       <td className="px-5 py-4">
-                          <div className="flex items-center justify-end gap-1">
-                            <button
-                              onClick={() => setBalanceUser(u)}
-                              className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-                              title={t('dashboard.userManagement.balance')}
-                            >
-                              <Wallet className="w-4 h-4" />
-                            </button>
-                            {isAdmin && (
-                              <>
-                                <button
-                                  onClick={() =>
-                                    toggleBlockMutation.mutate({
-                                      id: u.id,
-                                      blocked: !u.blocked,
-                                    })
-                                  }
-                                  className={cn(
-                                    'p-2 rounded-lg transition-colors',
-                                    u.blocked
-                                      ? 'text-success hover:bg-success/10'
-                                      : 'text-warning hover:bg-warning/10'
-                                  )}
-                                  title={
-                                    u.blocked
-                                      ? t('dashboard.userManagement.unblock')
-                                      : t('dashboard.userManagement.block')
-                                  }
-                                >
-                                  {u.blocked ? (
-                                    <CheckCircle className="w-4 h-4" />
-                                  ) : (
-                                    <Ban className="w-4 h-4" />
-                                  )}
-                                </button>
-                                <button
-                                  onClick={() => setEditUser(u)}
-                                  className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-                                  title={t('dashboard.userManagement.edit')}
-                                >
-                                  <Pencil className="w-4 h-4" />
-                                </button>
-                                <button
-                                  onClick={() => setDeleteUser(u)}
-                                  className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-                                  title={t('dashboard.userManagement.delete')}
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              </>
-                            )}
-                          </div>
-                        </td>
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            onClick={() => setBalanceUser(u)}
+                            className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                            title={t('dashboard.userManagement.balance')}
+                          >
+                            <Wallet className="w-4 h-4" />
+                          </button>
+                          {isAdmin && (
+                            <>
+                              <button
+                                onClick={() =>
+                                  toggleBlockMutation.mutate({
+                                    id: u.id,
+                                    blocked: !u.blocked,
+                                  })
+                                }
+                                className={cn(
+                                  'p-2 rounded-lg transition-colors',
+                                  u.blocked
+                                    ? 'text-success hover:bg-success/10'
+                                    : 'text-warning hover:bg-warning/10'
+                                )}
+                                title={
+                                  u.blocked
+                                    ? t('dashboard.userManagement.unblock')
+                                    : t('dashboard.userManagement.block')
+                                }
+                              >
+                                {u.blocked ? (
+                                  <CheckCircle className="w-4 h-4" />
+                                ) : (
+                                  <Ban className="w-4 h-4" />
+                                )}
+                              </button>
+                              <button
+                                onClick={() => setEditUser(u)}
+                                className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                                title={t('dashboard.userManagement.edit')}
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => setDeleteUser(u)}
+                                className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                                title={t('dashboard.userManagement.delete')}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -667,6 +667,8 @@ function UserFormModal({
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<'USER' | 'MANAGER' | 'ADMIN'>(user?.role ?? 'USER');
   const [blocked, setBlocked] = useState(user?.blocked ?? false);
+  const [canPayLater, setCanPayLater] = useState(user?.canPayLater ?? false);
+  const [markupPercentage, setMarkupPercentage] = useState(user?.markupPercentage != null ? String(user.markupPercentage * 100) : '');
   const [name, setName] = useState(user?.profile?.name ?? '');
   const [surname, setSurname] = useState(user?.profile?.surname ?? '');
   const [patronymic, setPatronymic] = useState(user?.profile?.patronymic ?? '');
@@ -728,7 +730,10 @@ function UserFormModal({
       if (phoneNumber !== (user.phoneNumber ?? ''))
         data.phoneNumber = phoneNumber || undefined;
       if (blocked !== user.blocked) data.blocked = blocked;
-      
+      if (canPayLater !== (user.canPayLater ?? false)) data.canPayLater = canPayLater;
+      const numMarkup = markupPercentage === '' ? undefined : parseFloat(markupPercentage) / 100;
+      if (numMarkup !== user.markupPercentage) data.markupPercentage = numMarkup;
+
       if (
         name !== (user.profile?.name ?? '') ||
         surname !== (user.profile?.surname ?? '') ||
@@ -746,6 +751,8 @@ function UserFormModal({
         phoneNumber: phoneNumber || undefined,
         role,
         blocked,
+        canPayLater,
+        markupPercentage: markupPercentage === '' ? undefined : parseFloat(markupPercentage) / 100,
         profile: profileData,
       });
     }
@@ -960,6 +967,50 @@ function UserFormModal({
             </button>
           </div>
 
+          {/* Can Pay Later Toggle */}
+          <div className="flex items-center justify-between py-2">
+            <div>
+              <p className="text-sm font-medium">
+                {t('dashboard.userManagement.canPayLaterLabel')}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {t('dashboard.userManagement.canPayLaterHint')}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setCanPayLater(!canPayLater)}
+              title={t('dashboard.userManagement.canPayLaterLabel')}
+              className={cn(
+                'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out',
+                canPayLater ? 'bg-primary' : 'bg-input'
+              )}
+            >
+              <span
+                className={cn(
+                  'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm transform transition-transform duration-200 ease-in-out',
+                  canPayLater ? 'translate-x-5' : 'translate-x-0'
+                )}
+              />
+            </button>
+          </div>
+
+          {/* Markup Percentage */}
+          <div>
+            <label className="block text-sm font-medium mb-1.5">
+              {t('dashboard.userManagement.markupPercentageLabel')}
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              className="input-base"
+              value={markupPercentage}
+              onChange={(e) => setMarkupPercentage(e.target.value)}
+              placeholder="e.g. 10"
+            />
+          </div>
+
           {/* Actions */}
           <div className="flex gap-3 pt-2">
             <button
@@ -1087,6 +1138,7 @@ function BalanceModal({
 
     const data: BalanceOperationDto = {
       amount: numAmount,
+      currency: 'RUB',
       operationType,
       description: description.trim() || undefined,
     };
@@ -1155,7 +1207,7 @@ function BalanceModal({
                     showOperationForm && 'bg-secondary text-foreground hover:bg-secondary/80'
                   )}
                 >
-                  <Euro className="w-4 h-4" />
+                  <RussianRuble className="w-4 h-4" />
                   {showOperationForm ? t('common.cancel') : t('dashboard.balance.performOperation')}
                 </button>
               </div>
@@ -1199,7 +1251,7 @@ function BalanceModal({
                       <label className="block text-xs font-medium mb-1">{t('dashboard.balance.amountLabel')} *</label>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                          <Euro className="w-3.5 h-3.5 text-muted-foreground" />
+                          <RussianRuble className="w-3.5 h-3.5 text-muted-foreground" />
                         </div>
                         <input
                           type="number"
@@ -1314,7 +1366,7 @@ function BalanceModal({
                 onClick={() => setShowOperationForm(!showOperationForm)}
                 className="btn-primary"
               >
-                <Euro className="w-4 h-4" />
+                <RussianRuble className="w-4 h-4" />
                 {t('dashboard.balance.performOperation')}
               </button>
               {showOperationForm && (
@@ -1352,7 +1404,7 @@ function BalanceModal({
                       <label className="block text-xs font-medium mb-1">{t('dashboard.balance.amountLabel')} *</label>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                          <Euro className="w-3.5 h-3.5 text-muted-foreground" />
+                          <RussianRuble className="w-3.5 h-3.5 text-muted-foreground" />
                         </div>
                         <input
                           type="number"

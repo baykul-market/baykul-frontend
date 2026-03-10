@@ -4,6 +4,7 @@ import { Loader2, Package, Clock, CheckCircle2, XCircle, ArrowRight, RotateCw, C
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../i18n/i18n';
+import { getCurrencySymbol } from '../../lib/currency';
 
 export default function OrderHistoryPage() {
   const { t } = useTranslation();
@@ -68,7 +69,7 @@ export default function OrderHistoryPage() {
           const statusConfig = getStatusConfig(order.status, t);
           const totalPrice = getOrderTotal(order);
           const currency = order.orderProducts?.[0]?.part?.currency ?? 'EUR';
-          const currencySymbol = currency === 'EUR' ? '\u20AC' : currency === 'USD' ? '$' : currency;
+          const currencySymbol = getCurrencySymbol(currency);
 
           return (
             <Link

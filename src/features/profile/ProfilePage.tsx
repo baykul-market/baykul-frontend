@@ -32,6 +32,7 @@ import {
 import { cn } from '../../lib/utils';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../i18n/i18n';
+import { formatPrice } from '../../lib/currency';
 import PhoneInput, { validatePhone } from '../../components/PhoneInput';
 
 const profileUpdateSchema = z.object({
@@ -214,8 +215,8 @@ function OverviewTab() {
             <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
               {t('profile.overview.balance')}
             </p>
-            <p className="text-lg font-bold">
-              {user.balance ? `${user.balance.account.toFixed(2)}` : '0.00'}
+            <p className="text-lg font-bold whitespace-nowrap">
+              {user.balance ? formatPrice(user.balance.account, user.balance.currency) : '0.00'}
             </p>
           </div>
         </div>
@@ -772,7 +773,7 @@ function BalanceTab() {
           </div>
           <div>
             <p className="text-sm text-muted-foreground font-medium">{t('profile.balance.availableFunds')}</p>
-            <p className="text-3xl font-bold text-success">{balance.account.toFixed(2)}</p>
+            <p className="text-3xl font-bold text-success whitespace-nowrap">{formatPrice(balance.account, balance.currency)}</p>
           </div>
         </div>
       </div>
@@ -814,7 +815,7 @@ function BalanceTab() {
                           : t('profile.balance.writeOff')}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {t('profile.balance.balanceAfter', { amount: entry.resultAccount.toFixed(2) })}
+                      {t('profile.balance.balanceAfter', { amount: formatPrice(entry.resultAccount, balance.currency) })}
                     </p>
                   </div>
                 </div>
@@ -825,7 +826,7 @@ function BalanceTab() {
                   )}
                 >
                   {entry.operationType === 'REPLENISHMENT' ? '+' : '-'}
-                  {entry.amount.toFixed(2)}
+                  {formatPrice(entry.amount, balance.currency)}
                 </span>
               </div>
             ))}

@@ -7,6 +7,7 @@ import { cartApi } from '../../api/cart';
 import { authApi } from '../../api/auth';
 import { cn } from '../../lib/utils';
 import { useTranslation } from 'react-i18next';
+import { formatPrice } from '../../lib/currency';
 
 export default function Layout() {
   const { t, i18n } = useTranslation();
@@ -148,10 +149,10 @@ export default function Layout() {
                       >
                         <Wallet className="h-3.5 w-3.5 text-muted-foreground" />
                         <span className={cn(
-                          'font-semibold tabular-nums',
+                          'font-semibold tabular-nums whitespace-nowrap',
                           user.balance.account >= 0 ? 'text-success' : 'text-destructive'
                         )}>
-                          {user.balance.account.toFixed(2)}
+                          {formatPrice(user.balance.account, user.balance.currency)}
                         </span>
                       </Link>
                     )}
@@ -281,10 +282,10 @@ export default function Layout() {
                         <Wallet className="w-4 h-4" />
                         <span>{t('nav.balance')}:</span>
                         <span className={cn(
-                          'font-semibold tabular-nums',
+                          'font-semibold tabular-nums whitespace-nowrap',
                           user.balance.account >= 0 ? 'text-success' : 'text-destructive'
                         )}>
-                          {user.balance.account.toFixed(2)}
+                          {formatPrice(user.balance.account, user.balance.currency)}
                         </span>
                       </Link>
                     )}
