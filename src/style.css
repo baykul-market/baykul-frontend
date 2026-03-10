@@ -28,7 +28,7 @@
   --success: 142 71% 45%;
   --success-foreground: 0 0% 100%;
 
-  --warning: 38 92% 50%;
+  --warning: 34 92% 50%;
   --warning-foreground: 0 0% 100%;
 
   --info: 199 89% 48%;
@@ -127,20 +127,45 @@
   --animate-slide-up: slide-up 0.3s ease-out;
 
   @keyframes accordion-down {
-    from { height: 0; }
-    to { height: var(--radix-accordion-content-height); }
+    from {
+      height: 0;
+    }
+
+    to {
+      height: var(--radix-accordion-content-height);
+    }
   }
+
   @keyframes accordion-up {
-    from { height: var(--radix-accordion-content-height); }
-    to { height: 0; }
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+
+    to {
+      height: 0;
+    }
   }
+
   @keyframes fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
   }
+
   @keyframes slide-up {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
 
@@ -148,75 +173,57 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground antialiased;
   }
-  h1, h2, h3, h4, h5, h6 {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply tracking-tight;
   }
 }
 
 @layer components {
+
   /* Shared input styles */
   .input-base {
-    @apply w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm
-           outline-none transition-all duration-200
-           placeholder:text-muted-foreground
-           focus:border-primary focus:ring-2 focus:ring-primary/20;
+    @apply w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm outline-none transition-all duration-200 placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20;
   }
 
   /* Shared button styles */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg
-           bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground
-           transition-all duration-200
-           hover:bg-primary/90 hover:shadow-md
-           active:scale-[0.98]
-           disabled:pointer-events-none disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-all duration-200 hover:bg-primary/90 hover:shadow-md active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg
-           border border-input bg-background px-4 py-2.5 text-sm font-medium
-           transition-all duration-200
-           hover:bg-accent hover:text-accent-foreground
-           active:scale-[0.98]
-           disabled:pointer-events-none disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-input bg-background px-4 py-2.5 text-sm font-medium transition-all duration-200 hover:bg-accent hover:text-accent-foreground active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50;
   }
 
   .btn-outline {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg
-           border border-input bg-transparent px-4 py-2.5 text-sm font-medium
-           transition-all duration-200 whitespace-nowrap
-           hover:bg-accent hover:text-accent-foreground
-           active:scale-[0.98]
-           disabled:pointer-events-none disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-input bg-transparent px-4 py-2.5 text-sm font-medium transition-all duration-200 whitespace-nowrap hover:bg-accent hover:text-accent-foreground active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50;
   }
 
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg
-           px-4 py-2.5 text-sm font-medium
-           transition-all duration-200
-           hover:bg-secondary
-           active:scale-[0.98]
-           disabled:pointer-events-none disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 hover:bg-secondary active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50;
   }
 
   /* Card component */
   .card {
-    @apply rounded-xl border bg-card text-card-foreground shadow-sm
-           transition-all duration-200;
+    @apply rounded-xl border bg-card text-card-foreground shadow-sm transition-all duration-200;
   }
+
   .card-hover {
-    @apply rounded-xl border bg-card text-card-foreground shadow-sm
-           transition-all duration-200
-           hover:shadow-md hover:-translate-y-0.5;
+    @apply rounded-xl border bg-card text-card-foreground shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5;
   }
 
   /* Badge */
   .badge {
-    @apply inline-flex items-center rounded-full px-2.5 py-0.5
-           text-xs font-medium border transition-colors;
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border transition-colors;
   }
 }
 
@@ -230,13 +237,16 @@ html {
   width: 8px;
   height: 8px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
   background: hsl(var(--muted-foreground) / 0.3);
   border-radius: 9999px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground) / 0.5);
 }

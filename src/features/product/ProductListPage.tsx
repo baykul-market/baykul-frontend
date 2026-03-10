@@ -134,15 +134,32 @@ function ProductCard({
   return (
     <div className="card-hover group flex flex-col overflow-hidden">
       {/* Image Placeholder */}
-      <div className="relative bg-gradient-to-br from-secondary to-muted h-36 flex items-center justify-center overflow-hidden">
-        <Package className="h-12 w-12 text-muted-foreground/30 transition-transform group-hover:scale-110" />
+      <div className="relative h-48 flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 dark:from-transparent dark:via-gray-800/20 dark:to-gray-900/20 dark:bg-muted/50">
+        {/* Background Decorative Circles */}
+        <div className="absolute top-0 right-0 h-32 w-32 bg-gray-400/10 dark:bg-gray-500/10 blur-3xl rounded-full" />
+        <div className="absolute bottom-0 left-0 h-32 w-32 bg-gray-500/10 dark:bg-gray-600/10 blur-3xl rounded-full" />
+
+        {/* Pedestal / Floor shadow */}
+        <div className="absolute bottom-12 w-20 h-3 bg-gray-900/15 dark:bg-black/50 rounded-[100%] blur-[5px] transform transition-all duration-500 group-hover:scale-75 group-hover:opacity-60" />
+
+        {/* The Box Wrapper */}
+        <div className="relative z-10 transform transition-all duration-500 group-hover:scale-[1.10] group-hover:-translate-y-2">
+          {/* Box inner glow */}
+          <div className="absolute inset-0 bg-amber-500/5 dark:bg-amber-500/5 blur-xl rounded-full scale-[1.5]" />
+
+          <Package
+            className="h-16 w-16 text-amber-700/80 dark:text-amber-600/80 relative z-10"
+            strokeWidth={1.5}
+            style={{ filter: 'drop-shadow(0px 8px 6px rgba(120, 53, 15, 0.2))' }}
+          />
+        </div>
+
         {/* Stock Badge */}
         <span
-          className={`badge absolute top-3 right-3 ${
-            hasStock
-              ? 'bg-success/10 text-success border-success/20'
-              : 'bg-warning/10 text-warning border-warning/20'
-          }`}
+          className={`badge absolute top-3 right-3 z-20 shadow-sm ${hasStock
+            ? 'bg-success/90 text-white border-transparent dark:bg-success/20 dark:text-success dark:border-success/20'
+            : 'bg-warning/90 text-gray-900 font-medium border-transparent dark:bg-warning/20 dark:text-warning dark:border-warning/20'
+            }`}
         >
           {hasStock ? t('products.inStock') : t('products.orderFromSupplier')}
         </span>

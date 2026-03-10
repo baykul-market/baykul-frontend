@@ -15,6 +15,7 @@ import { cn } from '../../lib/utils';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
+import { ConfirmModal } from '../../components/ConfirmModal';
 
 const PAGE_SIZE = 20;
 
@@ -34,6 +35,10 @@ export default function BillManagementPage() {
     const navigate = useNavigate();
     const [page, setPage] = useState(0);
     const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
+
+    // Actions state
+    const [applyConfirmId, setApplyConfirmId] = useState<string | null>(null);
+    const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
     // Queries
     const { data, isLoading } = useQuery({
@@ -61,6 +66,9 @@ export default function BillManagementPage() {
         },
         onError: () => toast.error(t('dashboard.billManagement.deleteError')),
     });
+
+    const billsList = Array.isArray(data) ? data : data?.content || [];
+    const hasBills = billsList.length > 0;
 
     return (
         <div className="space-y-6">
@@ -100,7 +108,7 @@ export default function BillManagementPage() {
                                         </div>
                                     </td>
                                 </tr>
-                            ) : data?.content?.length === 0 ? (
+                            ) : !hasBills ? (
                                 <tr>
                                     <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">
                                         <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
@@ -109,7 +117,7 @@ export default function BillManagementPage() {
                                     </td>
                                 </tr>
                             ) : (
-                                data?.content?.map((bill) => (
+                                billsList.map((bill: Bill) => (
                                     <tr key={bill.id} className="hover:bg-secondary/50 transition-colors">
                                         <td className="px-6 py-4 font-medium text-primary">#{bill.number}</td>
                                         <td className="px-6 py-4 text-muted-foreground">
@@ -127,13 +135,33 @@ export default function BillManagementPage() {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            <button
-                                                onClick={() => setSelectedBill(bill)}
-                                                className="btn-ghost text-primary h-8 w-8 p-0"
-                                                title={t('dashboard.billManagement.viewDetails')}
-                                            >
-                                                <Eye className="h-4 w-4" />
-                                            </button>
+                                            <div className="flex items-center justify-end gap-2">
+                                                <button
+                                                    onClick={() => setSelectedBill(bill)}
+                                                    className="btn-ghost text-primary h-8 w-8 p-0"
+                                                    title={t('dashboard.billManagement.viewDetails')}
+                                                >
+                                                    <Eye className="h-4 w-4" />
+                                                </button>
+                                                {bill.status === 'DRAFT' && (
+                                                    <>
+                                                        <button
+                                                            onClick={() => setApplyConfirmId(bill.id)}
+                                                            className="btn-ghost text-success h-8 w-8 p-0"
+                                                            title={t('dashboard.billManagement.apply')}
+                                                        >
+                                                            <CheckCircle2 className="h-4 w-4" />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setDeleteConfirmId(bill.id)}
+                                                            className="btn-ghost text-destructive h-8 w-8 p-0"
+                                                            title={t('dashboard.billManagement.delete')}
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </div>
                                         </td>
                                     </tr>
                                 ))
@@ -143,22 +171,22 @@ export default function BillManagementPage() {
                 </div>
 
                 {/* Pagination */}
-                {data && data.totalPages > 1 && (
+                {data && (data as any).totalPages > 1 && (
                     <div className="p-4 border-t border-border flex items-center justify-between">
                         <span className="text-sm text-muted-foreground">
-                            {t('dashboard.billManagement.page', { page: data.number + 1 })} of {data.totalPages}
+                            {t('dashboard.billManagement.page', { page: (data as any).number + 1 })} of {(data as any).totalPages}
                         </span>
                         <div className="flex gap-2">
                             <button
                                 onClick={() => setPage((p) => Math.max(0, p - 1))}
-                                disabled={data.first}
+                                disabled={(data as any).first}
                                 className="btn-secondary h-8 px-3 text-xs"
                             >
                                 {t('dashboard.billManagement.prev')}
                             </button>
                             <button
-                                onClick={() => setPage((p) => Math.min(data.totalPages - 1, p + 1))}
-                                disabled={data.last}
+                                onClick={() => setPage((p) => Math.min((data as any).totalPages - 1, p + 1))}
+                                disabled={(data as any).last}
                                 className="btn-secondary h-8 px-3 text-xs"
                             >
                                 {t('dashboard.billManagement.next')}
@@ -174,13 +202,32 @@ export default function BillManagementPage() {
                 <BillDetailsModal
                     bill={selectedBill}
                     onClose={() => setSelectedBill(null)}
-                    onApply={() => applyMutation.mutate(selectedBill.id)}
-                    onDelete={() => deleteMutation.mutate(selectedBill.id)}
-                    isApplying={applyMutation.isPending}
-                    isDeleting={deleteMutation.isPending}
                     t={t}
                 />
             )}
+
+            <ConfirmModal
+                isOpen={!!applyConfirmId}
+                onClose={() => setApplyConfirmId(null)}
+                onConfirm={() => {
+                    if (applyConfirmId) applyMutation.mutate(applyConfirmId);
+                }}
+                title={t('dashboard.billManagement.applyBillTitle') || 'Apply Bill'}
+                message={t('dashboard.billManagement.applyBillMessage') || 'Are you sure you want to apply this bill? This action cannot be undone.'}
+                confirmText={t('dashboard.billManagement.applyConfirm') || 'Yes, Apply'}
+            />
+
+            <ConfirmModal
+                isOpen={!!deleteConfirmId}
+                onClose={() => setDeleteConfirmId(null)}
+                onConfirm={() => {
+                    if (deleteConfirmId) deleteMutation.mutate(deleteConfirmId);
+                }}
+                title={t('dashboard.billManagement.deleteBillTitle') || 'Delete Bill'}
+                message={t('dashboard.billManagement.deleteBillMessage') || 'Are you sure you want to delete this draft bill?'}
+                confirmText={t('dashboard.billManagement.deleteConfirm') || 'Delete'}
+                isDestructive
+            />
         </div>
     );
 }
@@ -253,22 +300,13 @@ function ProductSearch({
 function BillDetailsModal({
     bill,
     onClose,
-    onApply,
-    onDelete,
-    isApplying,
-    isDeleting,
     t,
 }: {
     bill: Bill;
     onClose: () => void;
-    onApply: () => void;
-    onDelete: () => void;
-    isApplying: boolean;
-    isDeleting: boolean;
     t: any;
 }) {
     const queryClient = useQueryClient();
-    const [isApplyingConfirm, setIsApplyingConfirm] = useState(false);
 
     // We refetch the single bill to get the latest orderProducts list reliably
     const { data: billDetails, isLoading } = useQuery({
@@ -394,52 +432,10 @@ function BillDetailsModal({
                     )}
                 </div>
 
-                <div className="p-6 border-t border-border bg-secondary/30 flex justify-between items-center rounded-b-xl">
-                    <button
-                        onClick={onDelete}
-                        disabled={isDeleting || !isDraft}
-                        className="btn-ghost text-destructive hover:bg-destructive/10 disabled:opacity-50"
-                    >
-                        {isDeleting ? t('common.loading') : t('common.cancel')} Bill
+                <div className="p-6 border-t border-border bg-secondary/30 flex justify-end items-center rounded-b-xl">
+                    <button onClick={onClose} className="btn-primary">
+                        {t('common.close') || 'Close'}
                     </button>
-
-                    <div className="flex gap-3">
-                        <button onClick={onClose} className="btn-secondary">
-                            {t('common.cancel')}
-                        </button>
-                        {isDraft && (
-                            isApplyingConfirm ? (
-                                <div className="flex items-center gap-2 animate-fade-in">
-                                    <span className="text-sm font-medium mr-2">{t('dashboard.billManagement.applyConfirmTitle')}</span>
-                                    <button
-                                        onClick={() => setIsApplyingConfirm(false)}
-                                        className="btn-secondary h-9"
-                                    >
-                                        No
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            setIsApplyingConfirm(false);
-                                            onApply();
-                                        }}
-                                        disabled={isApplying || billDetails?.orderProducts?.length === 0}
-                                        className="btn-primary h-9 bg-success hover:bg-success/90"
-                                    >
-                                        Yes, Apply
-                                    </button>
-                                </div>
-                            ) : (
-                                <button
-                                    onClick={() => setIsApplyingConfirm(true)}
-                                    disabled={isApplying || billDetails?.orderProducts?.length === 0}
-                                    className="btn-primary flex items-center gap-2"
-                                >
-                                    <CheckCircle2 className="h-4 w-4" />
-                                    {t('dashboard.billManagement.apply')}
-                                </button>
-                            )
-                        )}
-                    </div>
                 </div>
             </div>
         </div>
