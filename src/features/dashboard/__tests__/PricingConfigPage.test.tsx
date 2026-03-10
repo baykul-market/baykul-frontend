@@ -110,4 +110,85 @@ describe('PricingConfigPage', () => {
             });
         });
     });
+
+    it('allows inline editing of an exchange rate', async () => {
+        (useAuthStore as unknown as any).mockReturnValue({ role: 'ADMIN' });
+
+        (configApi.getConfig as any).mockResolvedValue({
+            deliveryPercentage: 0.1,
+            markupPercentage: 0.1,
+            currency: 'RUB',
+        });
+        (configApi.getExchangeRates as any).mockResolvedValue([
+            { currencyFrom: 'EUR', currencyTo: 'RUB', rate: 105 },
+        ]);
+        (configApi.createOrUpdateExchangeRate as any).mockResolvedValue({ success: true });
+
+        renderWithRouter(<PricingConfigPage />);
+
+        await waitFor(() => {
+            expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
+        });
+
+        // Click the edit button (pencil icon)
+        const editBtn = screen.getByTitle('Edit');
+        fireEvent.click(editBtn);
+
+        // An input should appear with the current rate
+        const rateInput = screen.getByDisplayValue('105');
+        expect(rateInput).toBeInTheDocument();
+
+        // Change the rate value
+        fireEvent.change(rateInput, { target: { value: '110' } });
+
+        // Click save
+        const saveBtn = screen.getByTitle('Save');
+        fireEvent.click(saveBtn);
+
+        await waitFor(() => {
+            expect(configApi.createOrUpdateExchangeRate).toHaveBeenCalledWith({
+                currencyFrom: 'EUR',
+                currencyTo: 'RUB',
+                rate: 110,
+                bothDirections: false,
+                replaceExisting: true,
+            });
+        });
+    });
+    it('deletes a rate via confirm modal', async () => {
+        (useAuthStore as unknown as any).mockReturnValue({ role: 'ADMIN' });
+
+        (configApi.getConfig as any).mockResolvedValue({
+            deliveryPercentage: 0.1,
+            markupPercentage: 0.1,
+            currency: 'RUB',
+        });
+        (configApi.getExchangeRates as any).mockResolvedValue([
+            { currencyFrom: 'EUR', currencyTo: 'RUB', rate: 105 },
+        ]);
+        (configApi.deleteExchangeRate as any).mockResolvedValue({ success: true });
+
+        renderWithRouter(<PricingConfigPage />);
+
+        await waitFor(() => {
+            expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
+        });
+
+        // Click the delete (trash) button to open the modal
+        const deleteBtn = screen.getByTitle('Delete');
+        fireEvent.click(deleteBtn);
+
+        // The ConfirmModal title should appear
+        await waitFor(() => {
+            expect(screen.getByText('Delete Exchange Rate')).toBeInTheDocument();
+        });
+
+        // Confirm deletion — the button inside the modal reads 'Delete'
+        const confirmBtns = screen.getAllByText('Delete');
+        fireEvent.click(confirmBtns[confirmBtns.length - 1]);
+
+        await waitFor(() => {
+            expect(configApi.deleteExchangeRate).toHaveBeenCalledWith('EUR_RUB');
+        });
+    });
 });

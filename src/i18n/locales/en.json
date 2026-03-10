@@ -16,7 +16,12 @@
     "orders": "Orders",
     "cart": "Cart",
     "profile": "Profile",
-    "pageSize": "Items per page"
+    "pageSize": "Items per page",
+    "save": "Save Changes",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "refresh": "Refresh"
   },
   "nav": {
     "brandFull": "Baykul Auto Parts",
@@ -539,16 +544,25 @@
     "subtitle": "Manage global pricing rules and currency exchange rates.",
     "global": {
       "title": "Global Rules",
+      "description": "Default percentage markups applied to orders",
       "deliveryPercentage": "Delivery Percentage",
+      "deliveryDesc": "Added on top of delivery cost",
       "markupPercentage": "Markup Percentage",
-      "systemCurrency": "Default System Currency"
+      "markupDesc": "Applied to product base price",
+      "systemCurrency": "Default System Currency",
+      "currencyDesc": "Primary currency for the system"
     },
     "rates": {
       "title": "Exchange Rates",
+      "description": "Currency conversion rates for price calculation",
       "addNew": "Add New Rate",
-      "rateValue": "Rate (e.g. 105)",
+      "from": "From",
+      "to": "To",
+      "rateValue": "Rate",
+      "ratePlaceholder": "e.g. 105",
       "bothDirections": "Create reverse rate automatically (1/x)",
-      "noRates": "No exchange rates configured."
+      "noRates": "No exchange rates configured.",
+      "addFirst": "Add your first rate below."
     },
     "errors": {
       "fetchFailed": "Failed to fetch pricing config",
@@ -557,11 +571,13 @@
     },
     "success": {
       "configSaved": "Configuration saved successfully",
-      "rateSaved": "Rate added successfully",
+      "rateSaved": "Rate updated successfully",
       "rateDeleted": "Rate deleted"
     },
     "confirm": {
-      "deleteRate": "Are you sure you want to delete this rate?"
+      "deleteRate": "Are you sure you want to delete this rate?",
+      "deleteRateTitle": "Delete Exchange Rate",
+      "deleteRateMessage": "Are you sure you want to delete the rate {{from}} → {{to}}? This cannot be undone."
     }
   }
 }
