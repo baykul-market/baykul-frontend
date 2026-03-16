@@ -1,45 +1,81 @@
-# Baykul Frontend
+# Baykul Auto Parts Marketplace - Frontend
 
-This is the frontend application for the Baykul Auto Parts Marketplace.
+A modern, high-performance frontend for the Baykul Auto Parts Marketplace, built with React 19 and Tailwind CSS 4.
 
-## Features Implemented
+## 🚀 Tech Stack
 
-- **Authentication**: Login and Registration (connected to backend `api/auth`).
-- **Product Catalog**: Search and browse products (Mock API).
-- **Cart**: Add/Remove items, view total, checkout (Mock API).
-- **Orders**: View order history (Mock API).
-- **UI**: Responsive design using Tailwind CSS and Shadcn-inspired components.
+- **Core**: [React 19](https://react.dev/) + [Vite 7](https://vitejs.dev/)
+- **State Management**: [Zustand](https://github.com/pmndrs/zustand)
+- **Data Fetching**: [TanStack Query v5](https://tanstack.com/query/latest)
+- **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
+- **Internationalization**: [i18next](https://www.i18next.com/) (English & Russian support)
+- **Forms**: [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/)
+- **Routing**: [React Router 7](https://reactrouter.com/)
+- **Testing**: [Vitest](https://vitest.dev/)
 
-## Getting Started
+## ✨ Key Features
 
-1.  **Install Dependencies**:
-    ```bash
-    npm install
+- **🌐 Multi-language Support**: Full localization for English and Russian.
+- **🔐 Authentication**: Secure JWT-based login and registration.
+- **📦 Product Catalog**: Advanced search, filtering, and product details.
+- **🛒 Shopping Cart**: Persistent cart management with real-time updates.
+- **📄 Order Management**: Comprehensive order history and status tracking.
+- **🛠️ Admin Dashboard**:
+  - **Pricing Config**: Dynamic markup and currency controls.
+  - **Order Tracking**: Manage and update customer orders.
+- **👤 Profile Management**: User settings and balance tracking.
+- **📱 Responsive Design**: Premium, mobile-first UI with dark mode support.
+
+## 🛠️ Getting Started
+
+### Prerequisites
+
+- **Node.js**: v20 or newer
+- **npm**: v10 or newer
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/baykul-sa/baykul-frontend.git
+cd baykul-frontend
+
+# Install dependencies
+npm install
+```
+
+### Development
+
+1.  **Configure Environment**:
+    Create a `.env` file in the root:
+    ```env
+    VITE_API_BASE_URL=http://localhost:8080/api/v1
     ```
 
-2.  **Run Development Server**:
+2.  **Start Dev Server**:
     ```bash
     npm run dev
     ```
 
-3.  **Build**:
-    ```bash
-    npm run build
-    ```
+### Testing
 
-## Configuration
+```bash
+# Run unit tests
+npm run test
 
-The application expects the backend API to be available.
-Create a `.env` file in the root directory:
-
-```env
-VITE_API_BASE_URL=http://localhost:8080/api/v1
+# Run tests with UI
+npm run test:ui
 ```
 
-## Mocking Strategy
+## 🚢 Deployment
 
-Currently, `Product`, `Cart`, and `Order` features use Mock APIs (`src/api/product.ts`, `src/api/cart.ts`, `src/api/order.ts`) to simulate backend behavior, as those endpoints were not fully available in the initial backend implementation.
+The application is containerized using **Docker** and deployed via **GitHub Actions**.
 
-To switch to real API:
-1. Update the API files to use `api.get` / `api.post` instead of mock data.
-2. Ensure backend endpoints match the expected interfaces.
+- **Proxy Configuration**: In production, Nginx acts as a reverse proxy, forwarding `/api/` requests to the backend service.
+- **CI/CD**: Automatic builds and deployments to Beget VPS on every push to `main`.
+
+For detailed deployment instructions, see the [**Deployment Guide**](./DEPLOYMENT_GUIDE.md).
+
+## 📄 License
+
+This project is licensed under the [MIT License](./LICENSE).
