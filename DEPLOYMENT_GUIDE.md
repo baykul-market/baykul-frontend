@@ -22,25 +22,18 @@ GitHub Actions needs a secure way to talk to your server.
     - On your Beget VPS, append it to `/root/.ssh/authorized_keys`.
 3.  **Save Private Key**: You will need the private key content for GitHub Secrets (Step 4).
 
-## 3. GitHub Personal Access Token (PAT)
+## 3. GitHub Actions Permissions (GITHUB_TOKEN)
 
-Required to push/pull Docker images from the GitHub Container Registry (GHCR). It is recommended to use **Fine-grained personal access tokens**.
+The workflow is configured to securely use the built-in `GITHUB_TOKEN` to push/pull Docker images from the GitHub Container Registry (GHCR). You do not need to create a custom Personal Access Token (PAT).
 
-1.  Go to **GitHub Settings** -> **Developer settings** -> **Personal access tokens** -> **Fine-grained tokens**.
-2.  Click **Generate new token**.
-3.  **Token name**: "GHCR Deploy Token".
-4.  **Resource owner**: Select your Organization.
-5.  **Repository access**: "Only select repositories" -> Select `baykul-frontend`.
-6.  **Permissions**:
-    - **Permissions** -> **Organization permissions** -> **Packages** (or **User permissions** -> **Packages** for personal accounts): Select **Read and write**.
-    - **Permissions** -> **Repository permissions**: (Note: `Metadata` is usually granted by default as Read-only).
-7.  **Generate token** and copy it immediately.
+The necessary permissions are specified within the `.github/workflows/deploy.yml` file:
+```yaml
+permissions:
+  contents: read
+  packages: write
+```
 
-> [!TIP]
-> **Why it's not in Repository permissions**: According to GitHub's [Permissions required for fine-grained personal access tokens](https://docs.github.com/en/rest/authentication/permissions-required-for-fine-grained-personal-access-tokens) documentation, `Packages` is managed strictly as an **Organization permission** (or **User permission**), not within the individual repository's permissions list.
-
-> [!TIP]
-> **For GitHub Organizations**: Ensure the Organization allows Fine-grained tokens (check **Organization Settings** -> **Personal access tokens** -> **Settings**). If you prefer **Tokens (classic)**, ensure you select the `write:packages` scope.
+## 4. GitHub Secrets
 
 In your GitHub repository (or Organization settings), go to **Settings** -> **Secrets and variables** -> **Actions** and add these **Secrets**:
 
@@ -49,7 +42,6 @@ In your GitHub repository (or Organization settings), go to **Settings** -> **Se
 | `HOST_PROD` | The IP address or domain of your Beget VPS. |
 | `USERNAME` | Your SSH username (usually `root`). |
 | `SSH_KEY` | The **Private** SSH key content from Step 2. |
-| `GHCR_PAT` | The GitHub Personal Access Token from Step 3. |
 
 > [!NOTE]
 > **Organization Secrets**: If you have multiple repositories in the same organization, you can add these secrets at the **Organization level** and select "All repositories" or specific ones to share them easily.
@@ -86,5 +78,5 @@ When using a GitHub Organization, you might need to verify package permissions:
 ## Troubleshooting
 
 - **Check Logs**: If a deploy fails, check the "Actions" tab in GitHub for specific error messages.
-- **Permission Denied (GHCR)**: If you get "403 Forbidden" when pulling the image on the server, double-check that the `GHCR_PAT` is valid and has `read:packages` (included in `write:packages`) and that the user associated with the token has access to the Organization.
+- **Permission Denied (GHCR)**: If you get "403 Forbidden" when pulling the image on the server, double-check that the `GITHUB_TOKEN` permissions are properly applied in the workflow file (`packages: write`) and review the Organization Package Permissions section to ensure the repository has Write access.
 - **Manual Container Check**: On your server, run `docker ps` to see if the container is running or `docker logs baykul-frontend-prod` to see application logs.
