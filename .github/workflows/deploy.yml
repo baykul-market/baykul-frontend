@@ -1,0 +1,92 @@
+name: Robust Beget Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  quality-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Build check
+        run: npm run build
+      - name: Run Tests
+        run: npm run test
+
+  build-and-push:
+    needs: quality-checks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PAT }}
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: type=sha,format=short
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    env:
+      TARGET_HOST: ${{ secrets.HOST_PROD }}
+      CONTAINER_NAME: baykul-frontend-prod
+      PORT: 80
+    steps:
+      - name: Get Short SHA
+        run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ env.TARGET_HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          envs: REGISTRY,IMAGE_NAME,SHORT_SHA,CONTAINER_NAME,PORT,GHCR_PAT
+          script: |
+            echo "$GHCR_PAT" | docker login $REGISTRY -u ${{ github.actor }} --password-stdin
+            
+            FULL_IMAGE_NAME=$(echo "$REGISTRY/$IMAGE_NAME:sha-$SHORT_SHA" | tr '[:upper:]' '[:lower:]')
+            
+            docker pull $FULL_IMAGE_NAME
+            
+            docker stop $CONTAINER_NAME || true
+            docker rm $CONTAINER_NAME || true
+            
+            docker run -d --name $CONTAINER_NAME -p $PORT:80 --restart always $FULL_IMAGE_NAME
+            
+            docker image prune -af --filter "until=24h"

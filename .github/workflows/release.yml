@@ -1,0 +1,65 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_bump:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - prerelease
+      preid:
+        description: 'Prerelease identifier (alpha, beta, rc)'
+        required: false
+        default: 'alpha'
+        type: string
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GHCR_PAT }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+      - name: Bump version
+        id: version
+        run: |
+          if [[ "${{ github.event.inputs.version_bump }}" == "prerelease" ]]; then
+            NEW_VER=$(npm version prerelease --preid=${{ github.event.inputs.preid }})
+          else
+            NEW_VER=$(npm version ${{ github.event.inputs.version_bump }})
+          fi
+          echo "new_version=${NEW_VER#v}" >> $GITHUB_OUTPUT
+
+      - name: Push changes and tags
+        run: |
+          git push origin main --follow-tags
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.new_version }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
