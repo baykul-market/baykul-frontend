@@ -88,15 +88,8 @@ jobs:
             
             docker pull $FULL_IMAGE_NAME
             
-            # Stop the potential old container name to prevent port conflicts
-            docker stop baykul-frontend || true
-            docker rm baykul-frontend || true
-
             docker stop $CONTAINER_NAME || true
             docker rm $CONTAINER_NAME || true
-            
-            # Give docker a few seconds to release the port
-            sleep 3
             
             docker run -d --name $CONTAINER_NAME -p $FRONTEND_PORT:80 --restart always $FULL_IMAGE_NAME
             
