@@ -63,8 +63,11 @@ The deployment is fully automated via `.github/workflows/deploy.yml`.
 3.  **Deploy**: 
     - SSHs into your Beget VPS.
     - Pulls the new image.
-    - Restarts the container (named `baykul-frontend-prod`) on **port 80**.
+    - Restarts the container (named `baykul-frontend-prod`) on **port 3030** (mapped to container port 80).
     - Cleans up old Docker images to save space.
+
+> [!IMPORTANT]
+> The host server must have its own Nginx configured to proxy traffic to the container.
 
 ## 6. Organization Package Permissions
 
