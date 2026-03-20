@@ -70,7 +70,7 @@ jobs:
     env:
       TARGET_HOST: ${{ secrets.HOST_PROD }}
       CONTAINER_NAME: baykul-frontend-prod
-      FRONTEND_PORT: ${{ vars.FRONTEND_PORT || '3000' }}
+      FRONTEND_PORT: ${{ vars.FRONTEND_PORT || '3030' }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Get Short SHA
