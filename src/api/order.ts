@@ -37,6 +37,8 @@ export interface OrderProduct {
   status: OrderProductStatus;
   part: Part;
   partsCount: number;
+  price: number;
+  currency: string;
   order?: {
     id: string;
     number: number;
