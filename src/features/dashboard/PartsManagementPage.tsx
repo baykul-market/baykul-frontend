@@ -181,7 +181,8 @@ export default function PartsManagementPage() {
                   {parts.map((p) => (
                     <tr
                       key={p.id}
-                      className="hover:bg-secondary/20 transition-colors"
+                      onClick={() => navigate(`/dashboard/parts/${p.id}`)}
+                      className="hover:bg-secondary/20 transition-colors cursor-pointer"
                     >
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
@@ -206,9 +207,16 @@ export default function PartsManagementPage() {
                         </div>
                       </td>
                       <td className="px-5 py-4">
-                         <span className="font-medium text-sm">
-                           {p.price} {p.currency}
-                         </span>
+                        <div className="space-y-0.5">
+                          <span className="font-medium text-sm">
+                            {p.realPrice != null ? p.realPrice : p.price} {p.realCurrency || p.currency}
+                          </span>
+                          {p.realPrice != null && (
+                            <p className="text-xs text-muted-foreground">
+                              Calc: {p.price} {p.currency}
+                            </p>
+                          )}
+                        </div>
                       </td>
                       <td className="px-5 py-4">
                         <div className="flex items-center justify-end gap-1">

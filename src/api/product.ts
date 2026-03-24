@@ -13,6 +13,8 @@ export interface Part {
   returnPart: number | null;
   price: number;
   currency: string;
+  realPrice: number | null;
+  realCurrency: string | null;
   brand: string;
 }
 

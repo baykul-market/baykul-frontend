@@ -16,7 +16,7 @@ vi.mock('../../../api/product', () => ({
   productApi: {
     getAll: vi.fn().mockResolvedValue({ 
       content: [
-        { id: '1', name: 'Test Part', article: '123', brand: 'Test Brand', price: 100, currency: 'EUR', minCount: 1, storageCount: 5 }
+        { id: '1', name: 'Test Part', article: '123', brand: 'Test Brand', price: 100, currency: 'EUR', realPrice: 85.50, realCurrency: 'USD', minCount: 1, storageCount: 5 }
       ], 
       totalPages: 1, 
       last: true 
@@ -41,9 +41,26 @@ describe('PartsManagementPage', () => {
     
     expect(screen.getByText(/Parts Management/i)).toBeInTheDocument();
     
-    // Check if the part from the mocked getAll is rendered (might need to wait for useQuery if it was async, but mockResolvedValue resolves immediately, yet React Query is async)
     const partName = await screen.findByText('Test Part');
     expect(partName).toBeInTheDocument();
+  });
+
+  it('displays realPrice and realCurrency when available', async () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <PartsManagementPage />
+        </BrowserRouter>
+      </QueryClientProvider>
+    );
+
+    // realPrice should be displayed as the primary price
+    const realPrice = await screen.findByText(/85.5 USD/);
+    expect(realPrice).toBeInTheDocument();
+
+    // Calculated price should be shown as secondary info
+    const calcPrice = await screen.findByText(/Calc: 100 EUR/);
+    expect(calcPrice).toBeInTheDocument();
   });
 
   it('opens add part modal on button click', async () => {
