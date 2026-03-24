@@ -111,13 +111,12 @@ export default function CreateBillPage() {
 
     // Create bill mutation
     const createMutation = useMutation({
-        mutationFn: billApi.create,
+        mutationFn: (data: any) => billApi.create(data, { customErrorToast: t('dashboard.billManagement.createError') }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['bills'] });
             toast.success(t('dashboard.billManagement.createSuccess'));
             navigate('/dashboard/bills');
         },
-        onError: () => toast.error(t('dashboard.billManagement.createError')),
     });
 
     const handleSubmit = () => {

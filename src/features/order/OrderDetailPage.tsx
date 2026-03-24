@@ -13,7 +13,7 @@ export default function OrderDetailPage() {
   const queryClient = useQueryClient();
 
   const payMutation = useMutation({
-    mutationFn: (id: string) => orderApi.payOrder(id),
+    mutationFn: (id: string) => orderApi.payOrder(id, { customErrorToast: t('orders.payError', 'Payment failed') }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['order', orderId] });
       queryClient.invalidateQueries({ queryKey: ['orders'] });

@@ -17,7 +17,7 @@ export default function RegisterPage() {
   });
 
   const mutation = useMutation({
-    mutationFn: authApi.register,
+    mutationFn: (data: RegisterInput) => authApi.register(data, { skipErrorToast: true }),
     onSuccess: () => {
       toast.success(t('auth.register.success'));
       navigate('/login');

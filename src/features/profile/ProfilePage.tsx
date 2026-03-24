@@ -348,7 +348,7 @@ function EditTab({ onSuccess }: { onSuccess: () => void }) {
         throw new Error(t('profile.edit.noChanges'));
       }
 
-      await userProfileApi.updateProfile(payload);
+      await userProfileApi.updateProfile(payload, { skipErrorToast: true });
       const updated = await userProfileApi.getProfile();
       return updated;
     },

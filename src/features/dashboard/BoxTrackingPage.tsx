@@ -31,12 +31,11 @@ export default function BoxTrackingPage() {
 
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: OrderProductStatus }) =>
-      orderApi.updateOrderProduct(id, { status }),
+      orderApi.updateOrderProduct(id, { status }, { customErrorToast: t('dashboard.boxTracking.updateError') }),
     onSuccess: () => {
       toast.success(t('dashboard.boxTracking.updateSuccess'));
       queryClient.invalidateQueries({ queryKey: ['box-tracking'] });
     },
-    onError: () => toast.error(t('dashboard.boxTracking.updateError')),
   });
 
   const handleSearch = (e: React.FormEvent) => {

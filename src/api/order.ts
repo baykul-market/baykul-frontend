@@ -1,4 +1,5 @@
 import { api } from './client';
+import type { AxiosRequestConfig } from 'axios';
 import type { PageResponse } from './types';
 import type { Part } from './product';
 
@@ -102,14 +103,15 @@ export const orderApi = {
     return order;
   },
 
-  createOrder: async (): Promise<CreateOrderResponse> => {
-    const response = await api.post<CreateOrderResponse>('/order/user/create');
+  createOrder: async (config?: AxiosRequestConfig): Promise<CreateOrderResponse> => {
+    const response = await api.post<CreateOrderResponse>('/order/user/create', null, config);
     return response.data;
   },
 
-  payOrder: async (id: string): Promise<void> => {
+  payOrder: async (id: string, config?: AxiosRequestConfig): Promise<void> => {
     await api.post('/order/user/pay', null, {
-      params: { id },
+      ...config,
+      params: { id, ...config?.params },
     });
   },
 
@@ -143,21 +145,24 @@ export const orderApi = {
     return order;
   },
 
-  updateOrder: async (id: string, data: Partial<Order>): Promise<void> => {
+  updateOrder: async (id: string, data: Partial<Order>, config?: AxiosRequestConfig): Promise<void> => {
     await api.patch('/order', data, {
-      params: { id },
+      ...config,
+      params: { id, ...config?.params },
     });
   },
 
-  updateOrderProduct: async (id: string, data: Partial<OrderProduct>): Promise<void> => {
+  updateOrderProduct: async (id: string, data: Partial<OrderProduct>, config?: AxiosRequestConfig): Promise<void> => {
     await api.patch('/order/product', data, {
-      params: { id },
+      ...config,
+      params: { id, ...config?.params },
     });
   },
 
-  completeOrder: async (id: string): Promise<void> => {
+  completeOrder: async (id: string, config?: AxiosRequestConfig): Promise<void> => {
     await api.post('/order/complete', null, {
-      params: { id },
+      ...config,
+      params: { id, ...config?.params },
     });
   },
 

@@ -1,4 +1,5 @@
 import { api } from './client';
+import type { AxiosRequestConfig } from 'axios';
 import type { Part } from './product';
 
 export interface CartProduct {
@@ -28,23 +29,26 @@ export const cartApi = {
     return response.data;
   },
 
-  addToCart: async (partId: string): Promise<{ add_cart: string; id?: string; storage_empty?: string; error?: string }> => {
+  addToCart: async (partId: string, config?: AxiosRequestConfig): Promise<{ add_cart: string; id?: string; storage_empty?: string; error?: string }> => {
     const response = await api.post('/cart/user/add', null, {
-      params: { partId },
+      ...config,
+      params: { partId, ...config?.params },
     });
     return response.data;
   },
 
-  updateCartProduct: async (cartProductId: string, partsCount: number): Promise<{ update_cart: string }> => {
+  updateCartProduct: async (cartProductId: string, partsCount: number, config?: AxiosRequestConfig): Promise<{ update_cart: string }> => {
     const response = await api.patch('/cart/user/update', { partsCount }, {
-      params: { id: cartProductId },
+      ...config,
+      params: { id: cartProductId, ...config?.params },
     });
     return response.data;
   },
 
-  removeFromCart: async (cartProductId: string): Promise<{ delete_cart_product: string }> => {
+  removeFromCart: async (cartProductId: string, config?: AxiosRequestConfig): Promise<{ delete_cart_product: string }> => {
     const response = await api.delete('/cart/user/product', {
-      params: { id: cartProductId },
+      ...config,
+      params: { id: cartProductId, ...config?.params },
     });
     return response.data;
   },

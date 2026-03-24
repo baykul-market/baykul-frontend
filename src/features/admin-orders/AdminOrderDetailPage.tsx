@@ -62,43 +62,32 @@ export default function AdminOrderDetailPage() {
     const updateStatusMutation = useMutation({
         mutationFn: (newStatus: OrderStatus) =>
             newStatus === OrderStatus.COMPLETED
-                ? orderApi.completeOrder(orderId!)
-                : orderApi.updateOrder(orderId!, { status: newStatus }),
+                ? orderApi.completeOrder(orderId!, { customErrorToast: t('dashboard.orderManagement.updateError', 'Failed to update order status') })
+                : orderApi.updateOrder(orderId!, { status: newStatus }, { customErrorToast: t('dashboard.orderManagement.updateError', 'Failed to update order status') }),
         onSuccess: () => {
             toast.success(t('dashboard.orderManagement.updateSuccess', 'Order status updated successfully'));
             queryClient.invalidateQueries({ queryKey: ['admin-order-details', orderId] });
             queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
         },
-        onError: () => {
-            toast.error(t('dashboard.orderManagement.updateError', 'Failed to update order status'));
-        }
     });
 
     const updateProductStatusMutation = useMutation({
         mutationFn: ({ id, status }: { id: string, status: OrderProductStatus }) =>
-            orderApi.updateOrderProduct(id, { status }),
+            orderApi.updateOrderProduct(id, { status }, { customErrorToast: t('dashboard.orderManagement.productUpdateError', 'Failed to update product status') }),
         onSuccess: () => {
             toast.success(t('dashboard.orderManagement.productUpdateSuccess', 'Product status updated successfully'));
             queryClient.invalidateQueries({ queryKey: ['admin-order-details', orderId] });
         },
-        onError: (err: any) => {
-            const msg = err?.response?.data?.error || t('dashboard.orderManagement.productUpdateError', 'Failed to update product status');
-            toast.error(msg);
-        }
     });
 
     const updateProductDataMutation = useMutation({
         mutationFn: ({ id, number }: { id: string, number: number }) =>
-            orderApi.updateOrderProduct(id, { number }),
+            orderApi.updateOrderProduct(id, { number }, { customErrorToast: t('dashboard.orderManagement.productUpdateError', 'Failed to update product') }),
         onSuccess: () => {
             toast.success(t('dashboard.orderManagement.productUpdateSuccess', 'Product updated successfully'));
             queryClient.invalidateQueries({ queryKey: ['admin-order-details', orderId] });
             setEditingBoxId(null);
         },
-        onError: (err: any) => {
-            const msg = err?.response?.data?.error || t('dashboard.orderManagement.productUpdateError', 'Failed to update product');
-            toast.error(msg);
-        }
     });
 
     const [editingBoxId, setEditingBoxId] = useState<string | null>(null);

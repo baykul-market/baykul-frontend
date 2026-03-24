@@ -16,7 +16,7 @@ export default function OrderHistoryPage() {
   });
 
   const payMutation = useMutation({
-    mutationFn: (id: string) => orderApi.payOrder(id),
+    mutationFn: (id: string) => orderApi.payOrder(id, { customErrorToast: t('orders.payError', 'Payment failed') }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
     },
