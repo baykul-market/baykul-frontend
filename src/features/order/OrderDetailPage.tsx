@@ -56,7 +56,7 @@ export default function OrderDetailPage() {
   const dateLocale = i18n.language === 'ru' ? 'ru-RU' : 'en-US';
   const statusConfig = getStatusConfig(order.status, t);
   const totalPrice = getOrderTotal(order);
-  const currency = order.orderProducts?.[0]?.part?.currency ?? 'EUR';
+  const currency = order.orderProducts?.[0]?.currency ?? 'EUR';
   const currencySymbol = getCurrencySymbol(currency);
 
   return (
@@ -132,10 +132,10 @@ export default function OrderDetailPage() {
 
                   <div className="text-right">
                     <p className="font-medium">
-                      {currencySymbol}{(op.part.price * op.partsCount).toFixed(2)}
+                      {currencySymbol}{(op.price * op.partsCount).toFixed(2)}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {op.partsCount} x {currencySymbol}{op.part.price.toFixed(2)}
+                      {op.partsCount} x {currencySymbol}{op.price.toFixed(2)}
                     </p>
                   </div>
                 </div>
@@ -202,7 +202,7 @@ export default function OrderDetailPage() {
 function getOrderTotal(order: Order): number {
   if (!order.orderProducts) return 0;
   return order.orderProducts.reduce(
-    (sum, op) => sum + op.part.price * op.partsCount,
+    (sum, op) => sum + op.price * op.partsCount,
     0
   );
 }

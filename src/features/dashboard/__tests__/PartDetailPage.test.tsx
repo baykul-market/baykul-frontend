@@ -76,12 +76,12 @@ describe('PartDetailPage', () => {
 
     await screen.findAllByText('Test Engine Part');
 
-    // Check that input fields exist with the part's values
-    const priceInput = screen.getByDisplayValue('150');
-    expect(priceInput).toBeInTheDocument();
+    // Check that input fields exist with the part's real values
+    const realPriceInput = screen.getByDisplayValue('120');
+    expect(realPriceInput).toBeInTheDocument();
 
-    const currencyInput = screen.getByDisplayValue('EUR');
-    expect(currencyInput).toBeInTheDocument();
+    const realCurrencyInput = screen.getByRole('combobox');
+    expect(realCurrencyInput).toHaveValue('USD');
   });
 
   it('shows save button', async () => {
@@ -93,11 +93,11 @@ describe('PartDetailPage', () => {
     expect(saveButton).toBeInTheDocument();
   });
 
-  it('shows real price in sidebar when available', async () => {
+  it('shows calculated price in sidebar', async () => {
     renderWithRouter('1');
 
     await screen.findAllByText('Test Engine Part');
 
-    expect(screen.getByText('120 USD')).toBeInTheDocument();
+    expect(screen.getByText('150 EUR')).toBeInTheDocument();
   });
 });

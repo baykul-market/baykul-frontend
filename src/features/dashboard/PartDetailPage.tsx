@@ -10,6 +10,8 @@ import {
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
+import { Currency } from '../../api/types';
+import { getCurrencySymbol } from '../../lib/currency';
 
 export default function PartDetailPage() {
   const { t } = useTranslation();
@@ -23,6 +25,8 @@ export default function PartDetailPage() {
     return null;
   }
 
+  const currencyOptions: Currency[] = ['RUB', 'EUR', 'USD', 'BYN'];
+
   const { data: part, isLoading, error } = useQuery({
     queryKey: ['part-detail', partId],
     queryFn: () => productApi.getById(partId!),
@@ -30,16 +34,16 @@ export default function PartDetailPage() {
   });
 
   // Editable state – initialized once part loads
-  const [price, setPrice] = useState<string | null>(null);
-  const [currency, setCurrency] = useState<string | null>(null);
+  const [realPrice, setRealPrice] = useState<string | null>(null);
+  const [realCurrency, setRealCurrency] = useState<Currency | null>(null);
   const [storageCount, setStorageCount] = useState<string | null>(null);
   const [minCount, setMinCount] = useState<string | null>(null);
   const [returnPart, setReturnPart] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Derive effective values (use local state if user has edited, otherwise use fetched data)
-  const effectivePrice = price ?? part?.price?.toString() ?? '0';
-  const effectiveCurrency = currency ?? part?.currency ?? 'EUR';
+  const effectiveRealPrice = realPrice ?? part?.realPrice?.toString() ?? '0';
+  const effectiveRealCurrency = realCurrency ?? (part?.realCurrency as Currency) ?? 'EUR';
   const effectiveStorageCount = storageCount ?? part?.storageCount?.toString() ?? '0';
   const effectiveMinCount = minCount ?? part?.minCount?.toString() ?? '1';
   const effectiveReturnPart = returnPart ?? part?.returnPart?.toString() ?? '';
@@ -52,8 +56,8 @@ export default function PartDetailPage() {
       queryClient.invalidateQueries({ queryKey: ['admin-parts'] });
       queryClient.invalidateQueries({ queryKey: ['admin-parts-search'] });
       // Reset local state so it re-syncs with fetched data
-      setPrice(null);
-      setCurrency(null);
+      setRealPrice(null);
+      setRealCurrency(null);
       setStorageCount(null);
       setMinCount(null);
       setReturnPart(null);
@@ -70,8 +74,8 @@ export default function PartDetailPage() {
   const handleSave = () => {
     setErrors({});
     const data: PartUpdateInput = {
-      price: parseFloat(effectivePrice) || 0,
-      currency: effectiveCurrency,
+      price: parseFloat(effectiveRealPrice) || 0,
+      currency: effectiveRealCurrency,
       storageCount: effectiveStorageCount ? parseInt(effectiveStorageCount, 10) : null,
       minCount: parseInt(effectiveMinCount, 10) || 1,
       returnPart: effectiveReturnPart ? parseFloat(effectiveReturnPart) : null,
@@ -160,27 +164,30 @@ export default function PartDetailPage() {
             </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              {/* Price + Currency */}
+              {/* Real Price + Currency */}
               <div>
                 <label className="block text-sm font-medium mb-1.5">
-                  {t('dashboard.partsManagement.price', 'Price')}
+                  {t('dashboard.partsManagement.realPrice', 'Real Price')}
                 </label>
                 <div className="flex gap-2">
                   <input
                     type="number"
                     step="0.01"
                     className="input-base flex-1"
-                    value={effectivePrice}
-                    onChange={(e) => setPrice(e.target.value)}
+                    value={effectiveRealPrice}
+                    onChange={(e) => setRealPrice(e.target.value)}
                   />
-                  <input
-                    type="text"
+                  <select
                     className="input-base w-24"
-                    value={effectiveCurrency}
-                    onChange={(e) => setCurrency(e.target.value)}
-                  />
+                    value={effectiveRealCurrency}
+                    onChange={(e) => setRealCurrency(e.target.value as Currency)}
+                  >
+                    {currencyOptions.map((c) => (
+                        <option key={c} value={c}>{getCurrencySymbol(c)} {c}</option>
+                    ))}
+                  </select>
                 </div>
-                {errors.error_price && <p className="mt-1 text-xs text-destructive">{errors.error_price}</p>}
+                {errors.error_realPrice && <p className="mt-1 text-xs text-destructive">{errors.error_realPrice}</p>}
               </div>
 
               {/* Storage Count */}
@@ -255,13 +262,11 @@ export default function PartDetailPage() {
                 label={t('dashboard.partsManagement.weight', 'Weight')}
                 value={part.weight != null ? `${part.weight} kg` : '—'}
               />
-              {part.realPrice != null && (
-                <InfoRow
-                  icon={<DollarSign className="w-4 h-4" />}
-                  label={t('dashboard.partsManagement.realPrice', 'Real Price')}
-                  value={`${part.realPrice} ${part.realCurrency || ''}`}
-                />
-              )}
+              <InfoRow
+                icon={<DollarSign className="w-4 h-4" />}
+                label={t('dashboard.partsManagement.price', 'Price (Calculated)')}
+                value={`${part.price} ${part.currency || ''}`}
+              />
               <InfoRow
                 icon={<Calendar className="w-4 h-4" />}
                 label={t('common.created', 'Created')}
