@@ -52,6 +52,7 @@ export interface Order {
   updatedTs: string;
   number: number;
   status: OrderStatus;
+  paid?: boolean;
   user?: {
     id: string;
     login: string;
@@ -161,6 +162,27 @@ export const orderApi = {
 
   completeOrder: async (id: string, config?: AxiosRequestConfig): Promise<void> => {
     await api.post('/order/complete', null, {
+      ...config,
+      params: { id, ...config?.params },
+    });
+  },
+
+  confirmOrder: async (id: string, config?: AxiosRequestConfig): Promise<void> => {
+    await api.post('/order/confirm', null, {
+      ...config,
+      params: { id, ...config?.params },
+    });
+  },
+
+  cancelOrder: async (id: string, config?: AxiosRequestConfig): Promise<void> => {
+    await api.post('/order/cancel', null, {
+      ...config,
+      params: { id, ...config?.params },
+    });
+  },
+
+  payOrderAdmin: async (id: string, config?: AxiosRequestConfig): Promise<void> => {
+    await api.post('/order/pay', null, {
       ...config,
       params: { id, ...config?.params },
     });

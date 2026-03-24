@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { ConfirmModal } from '../../components/ConfirmModal';
 import { useTranslation } from 'react-i18next';
 import { orderApi, OrderStatus, OrderProductStatus } from '../../api/order';
-import { Loader2, ArrowLeft, User, CreditCard, Box, CheckCircle2, RotateCw, Clock, XCircle, Pencil } from 'lucide-react';
+import { billApi } from '../../api/bill';
+import { Loader2, ArrowLeft, User, CreditCard, Box, CheckCircle2, RotateCw, Clock, XCircle, Pencil, Receipt } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
@@ -44,7 +45,7 @@ export default function AdminOrderDetailPage() {
 
     const confirmAction = () => {
         if (confirmModalState.type === 'orderCancel') {
-            updateStatusMutation.mutate(OrderStatus.CANCELLED);
+            cancelMutation.mutate();
         } else if (confirmModalState.type === 'productCancel' && confirmModalState.targetId) {
             updateProductStatusMutation.mutate({ id: confirmModalState.targetId, status: OrderProductStatus.CANCELLED });
         } else if (confirmModalState.type === 'productReturn' && confirmModalState.targetId) {
@@ -60,15 +61,52 @@ export default function AdminOrderDetailPage() {
     });
 
     const updateStatusMutation = useMutation({
-        mutationFn: (newStatus: OrderStatus) =>
-            newStatus === OrderStatus.COMPLETED
-                ? orderApi.completeOrder(orderId!, { customErrorToast: t('dashboard.orderManagement.updateError', 'Failed to update order status') })
-                : orderApi.updateOrder(orderId!, { status: newStatus }, { customErrorToast: t('dashboard.orderManagement.updateError', 'Failed to update order status') }),
+        mutationFn: (newStatus: OrderStatus) => {
+            if (newStatus === OrderStatus.COMPLETED) {
+                return orderApi.completeOrder(orderId!, { customErrorToast: t('dashboard.orderManagement.updateError', 'Failed to update order status') });
+            }
+            if (newStatus === OrderStatus.ORDERED && order?.status === OrderStatus.CONFIRMATION_WAITING) {
+                return orderApi.confirmOrder(orderId!, { customErrorToast: t('dashboard.orderManagement.updateError', 'Failed to update order status') });
+            }
+            // Fallback for other potential transitions if needed
+            return orderApi.updateOrder(orderId!, { status: newStatus }, { customErrorToast: t('dashboard.orderManagement.updateError', 'Failed to update order status') });
+        },
         onSuccess: () => {
             toast.success(t('dashboard.orderManagement.updateSuccess', 'Order status updated successfully'));
             queryClient.invalidateQueries({ queryKey: ['admin-order-details', orderId] });
             queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
         },
+    });
+
+    const cancelMutation = useMutation({
+        mutationFn: () => orderApi.cancelOrder(orderId!, { customErrorToast: t('dashboard.orderManagement.cancelError', 'Failed to cancel order') }),
+        onSuccess: () => {
+            toast.success(t('dashboard.orderManagement.cancelSuccess', 'Order cancelled successfully'));
+            queryClient.invalidateQueries({ queryKey: ['admin-order-details', orderId] });
+            queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
+        },
+    });
+
+    const payAdminMutation = useMutation({
+        mutationFn: () => orderApi.payOrderAdmin(orderId!, { customErrorToast: t('dashboard.orderManagement.payError', 'Failed to process payment') }),
+        onSuccess: () => {
+            toast.success(t('dashboard.orderManagement.paySuccess', 'Payment processed successfully'));
+            queryClient.invalidateQueries({ queryKey: ['admin-order-details', orderId] });
+        },
+    });
+
+    const { data: bills, isLoading: isLoadingBills } = useQuery({
+        queryKey: ['admin-order-bills', orderId],
+        queryFn: async () => {
+            const response = await billApi.getAll(0, 100);
+            // Since there is no direct filter by orderId in getAll, we filter manually here if needed.
+            // But usually, orderProducts are linked to bills.
+            // For now, we filter those that have products from this order.
+            return response.content.filter(bill =>
+                bill.orderProducts.some(op => order?.orderProducts.some(oop => oop.id === op.id))
+            );
+        },
+        enabled: !!order,
     });
 
     const updateProductStatusMutation = useMutation({
@@ -158,14 +196,26 @@ export default function AdminOrderDetailPage() {
                 </div>
 
                 {order.status !== OrderStatus.CANCELLED && order.status !== OrderStatus.COMPLETED && (
-                    <button
-                        onClick={handleOrderCancel}
-                        disabled={updateStatusMutation.isPending}
-                        className="btn-outline text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/20"
-                    >
-                        <XCircle className="w-4 h-4" />
-                        {t('common.cancelOrder', 'Cancel Order')}
-                    </button>
+                    <div className="flex gap-2">
+                        {!order.paid && order.status !== OrderStatus.CONFIRMATION_WAITING && (
+                            <button
+                                onClick={() => payAdminMutation.mutate()}
+                                disabled={payAdminMutation.isPending}
+                                className="btn-primary"
+                            >
+                                <CreditCard className="w-4 h-4" />
+                                {t('dashboard.orderManagement.markPaid', 'Mark as Paid')}
+                            </button>
+                        )}
+                        <button
+                            onClick={handleOrderCancel}
+                            disabled={updateStatusMutation.isPending || cancelMutation.isPending}
+                            className="btn-outline text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/20"
+                        >
+                            <XCircle className="w-4 h-4" />
+                            {t('common.cancelOrder', 'Cancel Order')}
+                        </button>
+                    </div>
                 )}
             </div>
 
@@ -412,6 +462,41 @@ export default function AdminOrderDetailPage() {
                         <p className="text-sm text-muted-foreground mt-2">
                             {order.orderProducts?.length || 0} items
                         </p>
+                    </div>
+
+                    {/* Bills Section */}
+                    <div className="card p-6 border-dashed border-2">
+                        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                            <Receipt className="w-4 h-4 text-primary" />
+                            {t('dashboard.orderManagement.bills', 'Bills / Invoices')}
+                        </h2>
+                        {isLoadingBills ? (
+                            <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                        ) : bills && bills.length > 0 ? (
+                            <div className="space-y-3">
+                                {bills.map(bill => (
+                                    <div key={bill.id} className="p-3 bg-secondary/10 rounded-lg flex justify-between items-center border border-border/50">
+                                        <div>
+                                            <p className="font-mono text-sm">#{bill.number}</p>
+                                            <p className={cn(
+                                                "text-[10px] font-bold px-1.5 py-0.5 rounded uppercase mt-1 inline-block",
+                                                bill.status === 'APPLIED' ? "bg-success/20 text-success" : "bg-warning/20 text-warning"
+                                            )}>
+                                                {bill.status}
+                                            </p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="font-semibold">{bill.orderProducts.reduce((sum, p) => sum + p.price, 0).toFixed(2)}</p>
+                                            <p className="text-[10px] text-muted-foreground">{format(new Date(bill.createdTs), 'dd.MM.yyyy')}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-sm text-muted-foreground italic">
+                                {t('dashboard.orderManagement.noBills', 'No bills associated with this order.')}
+                            </p>
+                        )}
                     </div>
                 </div>
 
