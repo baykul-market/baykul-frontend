@@ -1,6 +1,6 @@
 import { useAuthStore } from '../../store/useAuthStore';
 import { Navigate, Link } from 'react-router-dom';
-import { Shield, FileText, Box, Users, ArrowRight, Upload, Search, Package, CircleDollarSign } from 'lucide-react';
+import { Shield, FileText, Box, Users, ArrowRight, Search, Package, CircleDollarSign, Database } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 interface FeatureCard {
@@ -37,15 +37,15 @@ export default function DashboardPage() {
         status: t('dashboard.main.available'),
         link: '/dashboard/users',
       },
+    {
+      title: t('dashboard.main.partsManagement', 'Parts Management'),
+      description: t('dashboard.main.partsManagementDescription', 'Manage parts and upload CSV'),
+      icon: Database,
+      status: t('dashboard.main.available'),
+      link: '/dashboard/parts',
+    },
     ...(isAdmin
       ? [
-        {
-          title: t('dashboard.main.partsUpload'),
-          description: t('dashboard.main.partsUploadDescription'),
-          icon: Upload,
-          status: t('dashboard.main.available'),
-          link: '/dashboard/parts-upload',
-        },
         {
           title: t('dashboard.main.pricingConfig'),
           description: t('dashboard.main.pricingConfigDescription'),

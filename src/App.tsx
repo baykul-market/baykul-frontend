@@ -13,7 +13,8 @@ import UserManagementPage from './features/dashboard/UserManagementPage';
 import OrderManagementPage from './features/dashboard/OrderManagementPage';
 import AdminOrderDetailPage from './features/admin-orders/AdminOrderDetailPage';
 import PricingConfigPage from './features/dashboard/PricingConfigPage';
-import PartsUploadPage from './features/dashboard/PartsUploadPage';
+import PartDetailPage from './features/dashboard/PartDetailPage';
+import PartsManagementPage from './features/dashboard/PartsManagementPage';
 import BoxTrackingPage from './features/dashboard/BoxTrackingPage';
 import BillManagementPage from './features/dashboard/BillManagementPage';
 import CreateBillPage from './features/dashboard/CreateBillPage';
@@ -43,7 +44,8 @@ function App() {
           <Route path="dashboard/orders/:orderId" element={<ProtectedRoute><AdminOrderDetailPage /></ProtectedRoute>} />
           <Route path="dashboard/pricing-config" element={<ProtectedRoute><PricingConfigPage /></ProtectedRoute>} />
           <Route path="dashboard/boxes" element={<ProtectedRoute><BoxTrackingPage /></ProtectedRoute>} />
-          <Route path="dashboard/parts-upload" element={<ProtectedRoute><PartsUploadPage /></ProtectedRoute>} />
+          <Route path="dashboard/parts" element={<ProtectedRoute><PartsManagementPage /></ProtectedRoute>} />
+          <Route path="dashboard/parts/:partId" element={<ProtectedRoute><PartDetailPage /></ProtectedRoute>} />
           <Route path="dashboard/bills" element={<ProtectedRoute><BillManagementPage /></ProtectedRoute>} />
           <Route path="dashboard/bills/create" element={<ProtectedRoute><CreateBillPage /></ProtectedRoute>} />
         </Route>
