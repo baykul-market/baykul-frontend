@@ -1,4 +1,5 @@
 import { api } from './client';
+import type { AxiosRequestConfig } from 'axios';
 import { PageResponse } from './types';
 
 export interface Part {
@@ -40,17 +41,17 @@ export const productApi = {
     return response.data;
   },
 
-  create: async (data: PartCreateInput): Promise<string> => {
-    const response = await api.post<{ id: string }>('/product', data);
+  create: async (data: PartCreateInput, config?: AxiosRequestConfig): Promise<string> => {
+    const response = await api.post<{ id: string }>('/product', data, config);
     return response.data.id;
   },
 
-  update: async (id: string, data: PartUpdateInput): Promise<void> => {
-    await api.patch('/product', data, { params: { id } });
+  update: async (id: string, data: PartUpdateInput, config?: AxiosRequestConfig): Promise<void> => {
+    await api.patch('/product', data, { params: { id }, ...config });
   },
 
-  delete: async (id: string): Promise<void> => {
-    await api.delete('/product', { params: { id } });
+  delete: async (id: string, config?: AxiosRequestConfig): Promise<void> => {
+    await api.delete('/product', { params: { id }, ...config });
   },
 
   search: async (text: string): Promise<Part[]> => {
@@ -74,11 +75,12 @@ export const productApi = {
     return response.data;
   },
 
-  uploadCsv: async (file: File): Promise<{ parsed: string }> => {
+  uploadCsv: async (file: File, config?: AxiosRequestConfig): Promise<{ parsed: string }> => {
     const formData = new FormData();
     formData.append('csvFile', file);
     const response = await api.post<{ parsed: string }>('/product/upload', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
+      ...config,
+      headers: { ...config?.headers, 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
   },

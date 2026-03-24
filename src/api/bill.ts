@@ -1,4 +1,5 @@
 import { api } from './client';
+import type { AxiosRequestConfig } from 'axios';
 import { PageResponse } from './types';
 
 export type BillStatus = 'DRAFT' | 'APPLIED';
@@ -44,32 +45,36 @@ export const billApi = {
     return response.data;
   },
 
-  create: async (data: BillCreateRequest) => {
-    const response = await api.post<{ create_bill: string, id: string }>('/bill/create', data);
+  create: async (data: BillCreateRequest, config?: AxiosRequestConfig) => {
+    const response = await api.post<{ create_bill: string, id: string }>('/bill/create', data, config);
     return response.data;
   },
 
-  apply: async (id: string) => {
-    const response = await api.post<{ apply_bill: string }>(`/bill/apply?id=${id}`);
+  apply: async (id: string, config?: AxiosRequestConfig) => {
+    const response = await api.post<{ apply_bill: string }>(`/bill/apply?id=${id}`, undefined, config);
     return response.data;
   },
 
-  addOrderProduct: async (billId: string, orderProductId: string) => {
+  addOrderProduct: async (billId: string, orderProductId: string, config?: AxiosRequestConfig) => {
     const response = await api.post<{ add_orderProduct: string }>(
-      `/bill/add?billId=${billId}&orderProductId=${orderProductId}`
+      `/bill/add?billId=${billId}&orderProductId=${orderProductId}`,
+      undefined,
+      config
     );
     return response.data;
   },
 
-  removeOrderProduct: async (billId: string, orderProductId: string) => {
+  removeOrderProduct: async (billId: string, orderProductId: string, config?: AxiosRequestConfig) => {
     const response = await api.post<{ remove_orderProduct: string }>(
-      `/bill/remove?billId=${billId}&orderProductId=${orderProductId}`
+      `/bill/remove?billId=${billId}&orderProductId=${orderProductId}`,
+      undefined,
+      config
     );
     return response.data;
   },
 
-  delete: async (id: string) => {
-    const response = await api.delete<{ delete_bill: string }>(`/bill?id=${id}`);
+  delete: async (id: string, config?: AxiosRequestConfig) => {
+    const response = await api.delete<{ delete_bill: string }>(`/bill?id=${id}`, config);
     return response.data;
   },
 };

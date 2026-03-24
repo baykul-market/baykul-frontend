@@ -1,4 +1,5 @@
 import { api } from './client';
+import type { AxiosRequestConfig } from 'axios';
 
 // === Interfaces ===
 
@@ -108,8 +109,8 @@ export const userProfileApi = {
   },
 
   /** PUT /users/profile — update current user's profile */
-  updateProfile: async (data: ProfileUpdateInput): Promise<void> => {
-    await api.patch('/users/profile', data);
+  updateProfile: async (data: ProfileUpdateInput, config?: AxiosRequestConfig): Promise<void> => {
+    await api.patch('/users/profile', data, config);
   },
 
   /** GET /users/profile/balance — get current user's balance */
@@ -183,22 +184,24 @@ export const userAdminApi = {
   },
 
   /** POST /users — create new user */
-  create: async (data: UserCreateInput): Promise<UserCreateResponse> => {
-    const response = await api.post<UserCreateResponse>('/users', data);
+  create: async (data: UserCreateInput, config?: AxiosRequestConfig): Promise<UserCreateResponse> => {
+    const response = await api.post<UserCreateResponse>('/users', data, config);
     return response.data;
   },
 
   /** PATCH /users/id — update user */
-  update: async (id: string, data: UserUpdateInput): Promise<void> => {
+  update: async (id: string, data: UserUpdateInput, config?: AxiosRequestConfig): Promise<void> => {
     await api.patch('/users/id', data, {
-      params: { id },
+      ...config,
+      params: { id, ...config?.params },
     });
   },
 
   /** DELETE /users/id — delete user */
-  delete: async (id: string): Promise<void> => {
+  delete: async (id: string, config?: AxiosRequestConfig): Promise<void> => {
     await api.delete('/users/id', {
-      params: { id },
+      ...config,
+      params: { id, ...config?.params },
     });
   },
 };
@@ -291,7 +294,7 @@ export const balanceAdminApi = {
   },
 
   /** POST /balance/operation — perform balance operation */
-  operation: async (data: BalanceOperationDto): Promise<void> => {
-    await api.post('/balance/operation', data);
+  operation: async (data: BalanceOperationDto, config?: AxiosRequestConfig): Promise<void> => {
+    await api.post('/balance/operation', data, config);
   },
 };

@@ -48,23 +48,21 @@ export default function BillManagementPage() {
 
     // Mutations
     const applyMutation = useMutation({
-        mutationFn: billApi.apply,
+        mutationFn: (id: string) => billApi.apply(id, { customErrorToast: t('dashboard.billManagement.applyError') }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['bills'] });
             toast.success(t('dashboard.billManagement.applySuccess'));
             setSelectedBill(null);
         },
-        onError: () => toast.error(t('dashboard.billManagement.applyError')),
     });
 
     const deleteMutation = useMutation({
-        mutationFn: billApi.delete,
+        mutationFn: (id: string) => billApi.delete(id, { customErrorToast: t('dashboard.billManagement.deleteError') }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['bills'] });
             toast.success(t('dashboard.billManagement.deleteSuccess'));
             setSelectedBill(null);
         },
-        onError: () => toast.error(t('dashboard.billManagement.deleteError')),
     });
 
     const billsList = Array.isArray(data) ? data : data?.content || [];
@@ -315,23 +313,21 @@ function BillDetailsModal({
     });
 
     const removeProductMutation = useMutation({
-        mutationFn: (productId: string) => billApi.removeOrderProduct(bill.id, productId),
+        mutationFn: (productId: string) => (billApi.removeOrderProduct as any)(bill.id, productId, { customErrorToast: t('dashboard.billManagement.removeProductError') }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['bill', bill.id] });
             queryClient.invalidateQueries({ queryKey: ['bills'] });
             toast.success(t('dashboard.billManagement.removeProductSuccess'));
         },
-        onError: () => toast.error(t('dashboard.billManagement.removeProductError')),
     });
 
     const addProductMutation = useMutation({
-        mutationFn: (productId: string) => billApi.addOrderProduct(bill.id, productId),
+        mutationFn: (productId: string) => (billApi.addOrderProduct as any)(bill.id, productId, { customErrorToast: t('dashboard.billManagement.addProductError') || 'Failed to add product' }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['bill', bill.id] });
             queryClient.invalidateQueries({ queryKey: ['bills'] });
             toast.success(t('dashboard.billManagement.addProductSuccess') || 'Product added to bill');
         },
-        onError: () => toast.error(t('dashboard.billManagement.addProductError') || 'Failed to add product'),
     });
 
     const isDraft = bill.status === 'DRAFT';

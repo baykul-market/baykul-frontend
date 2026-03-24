@@ -53,8 +53,8 @@ export default function PricingConfigPage() {
     const fetchData = async () => {
         try {
             const [fetchedConfig, fetchedRates] = await Promise.all([
-                configApi.getConfig(),
-                configApi.getExchangeRates()
+                configApi.getConfig({ customErrorToast: t('pricing.errors.fetchFailed', 'Failed to fetch pricing config') }),
+                configApi.getExchangeRates({ customErrorToast: t('pricing.errors.fetchFailed', 'Failed to fetch pricing config') })
             ]);
             setConfig(fetchedConfig);
             setRates(fetchedRates);
@@ -65,7 +65,6 @@ export default function PricingConfigPage() {
 
             setLoading(false);
         } catch (error) {
-            toast.error(t('pricing.errors.fetchFailed', 'Failed to fetch pricing config'));
             setLoading(false);
         }
     };
@@ -76,11 +75,10 @@ export default function PricingConfigPage() {
             await configApi.updateConfig({
                 markupPercentage: Number(markupPercentage) / 100,
                 systemCurrency: systemCurrency
-            });
+            }, { customErrorToast: t('pricing.errors.saveFailed', 'Failed to save configuration') });
             toast.success(t('pricing.success.configSaved', 'Configuration saved successfully'));
             fetchData();
         } catch (error) {
-            toast.error(t('pricing.errors.saveFailed', 'Failed to save configuration'));
         } finally {
             setSavingConfig(false);
         }
@@ -94,12 +92,11 @@ export default function PricingConfigPage() {
                 minimumSum: Number(newRuleMinSum),
                 markupType: newRuleType,
                 value: newRuleType === 'PERCENTAGE' ? val / 100 : val
-            });
+            }, { customErrorToast: t('pricing.errors.saveFailed', 'Failed to save rule') });
             toast.success(t('pricing.success.ruleSaved', 'Delivery rule saved successfully'));
             resetRuleForm();
             fetchData();
         } catch (error) {
-            toast.error(t('pricing.errors.saveFailed', 'Failed to save rule'));
         } finally {
             setAddingRule(false);
         }
@@ -108,12 +105,11 @@ export default function PricingConfigPage() {
     const handleDeleteRule = async () => {
         if (!deleteRuleTarget?.id) return;
         try {
-            await configApi.deleteDeliveryRule(deleteRuleTarget.id);
+            await configApi.deleteDeliveryRule(deleteRuleTarget.id, { customErrorToast: t('pricing.errors.deleteFailed', 'Failed to delete rule') });
             toast.success(t('pricing.success.ruleDeleted', 'Delivery rule deleted'));
             setDeleteRuleTarget(null);
             fetchData();
         } catch (error) {
-            toast.error(t('pricing.errors.deleteFailed', 'Failed to delete rule'));
         }
     };
 
@@ -132,12 +128,11 @@ export default function PricingConfigPage() {
                 rate: Number(newRateValue),
                 bothDirections: newRateBothDir,
                 replaceExisting: true
-            });
+            }, { customErrorToast: t('pricing.errors.saveFailed', 'Failed to add rate') });
             toast.success(t('pricing.success.rateSaved', 'Rate added successfully'));
             fetchData();
         } catch (error) {
             console.error(error);
-            toast.error(t('pricing.errors.saveFailed', 'Failed to add rate'));
         } finally {
             setAddingRate(false);
         }
@@ -146,13 +141,12 @@ export default function PricingConfigPage() {
     const handleDeleteRate = async () => {
         if (!deleteTarget) return;
         try {
-            await configApi.deleteExchangeRate(`${deleteTarget.currencyFrom}_${deleteTarget.currencyTo}`);
+            await configApi.deleteExchangeRate(`${deleteTarget.currencyFrom}_${deleteTarget.currencyTo}`, { customErrorToast: t('pricing.errors.deleteFailed', 'Failed to delete rate') });
             toast.success(t('pricing.success.rateDeleted', 'Rate deleted'));
             setDeleteTarget(null);
             fetchData();
         } catch (error) {
             console.error(error);
-            toast.error(t('pricing.errors.deleteFailed', 'Failed to delete rate'));
         }
     };
 
@@ -175,13 +169,12 @@ export default function PricingConfigPage() {
                 rate: Number(editRateValue),
                 bothDirections: false,
                 replaceExisting: true
-            });
+            }, { customErrorToast: t('pricing.errors.saveFailed', 'Failed to update rate') });
             toast.success(t('pricing.success.rateSaved', 'Rate updated successfully'));
             setEditingRateKey(null);
             fetchData();
         } catch (error) {
             console.error(error);
-            toast.error(t('pricing.errors.saveFailed', 'Failed to update rate'));
         } finally {
             setSavingRate(false);
         }

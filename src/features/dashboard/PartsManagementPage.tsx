@@ -73,14 +73,13 @@ export default function PartsManagementPage() {
   };
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => productApi.delete(id),
+    mutationFn: (id: string) => productApi.delete(id, { customErrorToast: t('dashboard.partsManagement.deleteError', 'Failed to delete part') }),
     onSuccess: () => {
       toast.success(t('dashboard.partsManagement.deleteSuccess', 'Part deleted successfully'));
       queryClient.invalidateQueries({ queryKey: ['admin-parts'] });
       queryClient.invalidateQueries({ queryKey: ['admin-parts-search'] });
       setDeletePart(null);
     },
-    onError: () => toast.error(t('dashboard.partsManagement.deleteError', 'Failed to delete part')),
   });
 
   const hasMore = !isSearching && (pagedParts?.content?.length ?? 0) === PAGE_SIZE && !pagedParts?.last;
@@ -369,7 +368,7 @@ function PartFormModal({
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const createMutation = useMutation({
-    mutationFn: (data: PartCreateInput) => productApi.create(data),
+    mutationFn: (data: PartCreateInput) => productApi.create(data, { skipErrorToast: true }),
     onSuccess: () => {
       toast.success(t('dashboard.partsManagement.createSuccess', 'Part created successfully'));
       onSuccess();
@@ -384,7 +383,7 @@ function PartFormModal({
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data: PartUpdateInput) => productApi.update(part!.id, data),
+    mutationFn: (data: PartUpdateInput) => productApi.update(part!.id, data, { skipErrorToast: true }),
     onSuccess: () => {
       toast.success(t('dashboard.partsManagement.updateSuccess', 'Part updated successfully'));
       onSuccess();
@@ -539,7 +538,7 @@ function CsvUploadModal({ onClose, onSuccess, t }: { onClose: () => void; onSucc
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const uploadMutation = useMutation({
-    mutationFn: (csvFile: File) => productApi.uploadCsv(csvFile),
+    mutationFn: (csvFile: File) => productApi.uploadCsv(csvFile, { skipErrorToast: true }),
     onSuccess: () => {
       toast.success(t('dashboard.partsUpload.uploadSuccess'));
       setFile(null);

@@ -19,7 +19,7 @@ export default function ProductListPage() {
   });
 
   const addToCartMutation = useMutation({
-    mutationFn: (product: Part) => cartApi.addToCart(product.id),
+    mutationFn: (product: Part) => cartApi.addToCart(product.id, { skipErrorToast: true }),
     onSuccess: () => {
       toast.success(t('products.addedToCart'));
       queryClient.invalidateQueries({ queryKey: ['cart'] });
@@ -135,7 +135,7 @@ function ProductCard({
   return (
     <div className="card-hover group flex flex-col overflow-hidden">
       {/* Image Placeholder */}
-      <div className="relative h-48 flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 dark:from-transparent dark:via-gray-800/20 dark:to-gray-900/20 dark:bg-muted/50">
+      <div className="relative h-48 flex items-center justify-center overflow-hidden bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-transparent dark:via-gray-800/20 dark:to-gray-900/20 dark:bg-muted/50">
         {/* Background Decorative Circles */}
         <div className="absolute top-0 right-0 h-32 w-32 bg-gray-400/10 dark:bg-gray-500/10 blur-3xl rounded-full" />
         <div className="absolute bottom-0 left-0 h-32 w-32 bg-gray-500/10 dark:bg-gray-600/10 blur-3xl rounded-full" />

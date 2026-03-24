@@ -23,20 +23,17 @@ export default function CartPage() {
 
   const updateMutation = useMutation({
     mutationFn: ({ cartProductId, partsCount }: { cartProductId: string; partsCount: number }) =>
-      cartApi.updateCartProduct(cartProductId, partsCount),
+      cartApi.updateCartProduct(cartProductId, partsCount, { customErrorToast: t('cart.updateError') }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cart'] });
-    },
-    onError: () => {
-      toast.error(t('cart.updateError'));
     },
   });
 
   const restoreMutation = useMutation({
     mutationFn: async ({ partId, count }: { partId: string; count: number }) => {
-      const res = await cartApi.addToCart(partId);
+      const res = await cartApi.addToCart(partId, { customErrorToast: t('cart.restoreError') });
       if (res.id && count > 1) {
-        await cartApi.updateCartProduct(res.id, count);
+        await cartApi.updateCartProduct(res.id, count, { customErrorToast: t('cart.restoreError') });
       }
       return res;
     },
@@ -44,14 +41,11 @@ export default function CartPage() {
       queryClient.invalidateQueries({ queryKey: ['cart'] });
       toast.success(t('cart.itemRestored'));
     },
-    onError: () => {
-      toast.error(t('cart.restoreError'));
-    },
   });
 
   const removeMutation = useMutation({
     mutationFn: ({ id }: { id: string; partId: string; count: number }) =>
-      cartApi.removeFromCart(id),
+      cartApi.removeFromCart(id, { customErrorToast: t('cart.removeError') }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['cart'] });
       toast(
@@ -72,14 +66,11 @@ export default function CartPage() {
         { duration: 5000 }
       );
     },
-    onError: () => {
-      toast.error(t('cart.removeError'));
-    },
   });
 
   const checkoutMutation = useMutation({
-    mutationFn: orderApi.createOrder,
-    onSuccess: (data) => {
+    mutationFn: () => (orderApi.createOrder as any)({ skipErrorToast: true }),
+    onSuccess: (data: any) => {
       if (data.create_order === 'true') {
         toast.success(t('cart.orderSuccess'));
         queryClient.invalidateQueries({ queryKey: ['cart'] });

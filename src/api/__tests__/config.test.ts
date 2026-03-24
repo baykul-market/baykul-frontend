@@ -27,7 +27,7 @@ describe('configApi', () => {
 
             const result = await configApi.getConfig();
 
-            expect(api.get).toHaveBeenCalledWith('/price-config');
+            expect(api.get).toHaveBeenCalledWith('/price-config', undefined);
             expect(result).toEqual(mockData);
         });
 
@@ -37,7 +37,7 @@ describe('configApi', () => {
 
             await configApi.updateConfig(mockData);
 
-            expect(api.put).toHaveBeenCalledWith('/price-config/base', mockData);
+            expect(api.put).toHaveBeenCalledWith('/price-config/base', mockData, undefined);
         });
 
         it('saves delivery rule', async () => {
@@ -46,7 +46,7 @@ describe('configApi', () => {
 
             await configApi.saveDeliveryRule(mockData);
 
-            expect(api.post).toHaveBeenCalledWith('/price-config/delivery-rule', mockData);
+            expect(api.post).toHaveBeenCalledWith('/price-config/delivery-rule', mockData, undefined);
         });
 
         it('deletes delivery rule', async () => {
@@ -66,7 +66,7 @@ describe('configApi', () => {
 
             const result = await configApi.getExchangeRates();
 
-            expect(api.get).toHaveBeenCalledWith('/currency-exchange');
+            expect(api.get).toHaveBeenCalledWith('/currency-exchange', undefined);
             expect(result).toEqual(mockData);
         });
 
@@ -76,7 +76,15 @@ describe('configApi', () => {
 
             await configApi.createOrUpdateExchangeRate(mockData);
 
-            expect(api.post).toHaveBeenCalledWith('/currency-exchange', mockData);
+            expect(api.post).toHaveBeenCalledWith('/currency-exchange', mockData, undefined);
+        });
+
+        it('deletes exchange rate', async () => {
+            (api.delete as any).mockResolvedValueOnce({ data: { success: true } });
+
+            await configApi.deleteExchangeRate('EUR_RUB');
+
+            expect(api.delete).toHaveBeenCalledWith('/currency-exchange/EUR_RUB', undefined);
         });
     });
 });

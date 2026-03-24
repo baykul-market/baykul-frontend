@@ -1,4 +1,5 @@
 import { api } from './client';
+import type { AxiosRequestConfig } from 'axios';
 import { z } from 'zod';
 import type { UserFull } from './user';
 
@@ -26,11 +27,11 @@ export const registerSchema = z.object({
 export type RegisterInput = z.infer<typeof registerSchema>;
 
 export const authApi = {
-  login: async (data: LoginInput) => {
-    const response = await api.post('/auth/login', data);
+  login: async (data: LoginInput, config?: AxiosRequestConfig) => {
+    const response = await api.post('/auth/login', data, config);
     return response.data;
   },
-  register: async (data: RegisterInput) => {
+  register: async (data: RegisterInput, config?: AxiosRequestConfig) => {
     const response = await api.post('/users/registration', {
       login: data.login,
       password: data.password,
@@ -41,7 +42,7 @@ export const authApi = {
         surname: data.surname,
         patronymic: data.patronymic || null,
       },
-    });
+    }, config);
     return response.data;
   },
   logout: async (refreshToken: string) => {

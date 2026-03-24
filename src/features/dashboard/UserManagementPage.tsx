@@ -136,23 +136,21 @@ export default function UserManagementPage() {
   ];
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => userAdminApi.delete(id),
+    mutationFn: (id: string) => userAdminApi.delete(id, { customErrorToast: t('dashboard.userManagement.deleteError') }),
     onSuccess: () => {
       toast.success(t('dashboard.userManagement.deleteSuccess'));
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       setDeleteUser(null);
     },
-    onError: () => toast.error(t('dashboard.userManagement.deleteError')),
   });
 
   const toggleBlockMutation = useMutation({
     mutationFn: ({ id, blocked }: { id: string; blocked: boolean }) =>
-      userAdminApi.update(id, { blocked }),
+      userAdminApi.update(id, { blocked }, { customErrorToast: t('dashboard.userManagement.updateError') }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       toast.success(t('dashboard.userManagement.updateSuccess'));
     },
-    onError: () => toast.error(t('dashboard.userManagement.updateError')),
   });
 
   const roleIcon = (role: string) => {
@@ -676,7 +674,7 @@ function UserFormModal({
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const createMutation = useMutation({
-    mutationFn: (data: UserCreateInput) => userAdminApi.create(data),
+    mutationFn: (data: UserCreateInput) => userAdminApi.create(data, { customErrorToast: t('dashboard.userManagement.createError') }),
     onSuccess: () => {
       toast.success(t('dashboard.userManagement.createSuccess'));
       onSuccess();
@@ -685,12 +683,11 @@ function UserFormModal({
       if (error.response?.status === 409 || error.response?.status === 400) {
         setErrors(error.response.data ?? {});
       }
-      toast.error(t('dashboard.userManagement.createError'));
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data: UserUpdateInput) => userAdminApi.update(user!.id, data),
+    mutationFn: (data: UserUpdateInput) => userAdminApi.update(user!.id, data, { customErrorToast: t('dashboard.userManagement.updateError') }),
     onSuccess: () => {
       toast.success(t('dashboard.userManagement.updateSuccess'));
       onSuccess();
@@ -699,7 +696,6 @@ function UserFormModal({
       if (error.response?.status === 409 || error.response?.status === 400) {
         setErrors(error.response.data ?? {});
       }
-      toast.error(t('dashboard.userManagement.updateError'));
     },
   });
 
@@ -1117,17 +1113,13 @@ function BalanceModal({
   });
 
   const operationMutation = useMutation({
-    mutationFn: (data: BalanceOperationDto) => balanceAdminApi.operation(data),
+    mutationFn: (data: BalanceOperationDto) => balanceAdminApi.operation(data, { customErrorToast: t('dashboard.balance.operationError') }),
     onSuccess: () => {
       toast.success(t('dashboard.balance.operationSuccess'));
       queryClient.invalidateQueries({ queryKey: ['admin-balance', user.id] });
       setShowOperationForm(false);
       setAmount('');
       setDescription('');
-    },
-    onError: (error: any) => {
-      const msg = error?.response?.data?.error || t('dashboard.balance.operationError');
-      toast.error(msg);
     },
   });
 

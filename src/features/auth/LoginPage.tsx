@@ -19,7 +19,7 @@ export default function LoginPage() {
 
   const mutation = useMutation({
     mutationFn: async (data: LoginInput) => {
-      const response = await authApi.login(data);
+      const response = await authApi.login(data, { customErrorToast: t('auth.login.error') });
       const { accessToken, refreshToken } = response;
 
       // Store tokens immediately so the interceptor can attach them to subsequent requests
@@ -40,7 +40,6 @@ export default function LoginPage() {
       navigate('/products');
     },
     onError: (error) => {
-      toast.error(t('auth.login.error'));
       console.error(error);
     },
   });

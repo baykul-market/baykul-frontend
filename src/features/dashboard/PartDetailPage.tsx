@@ -49,7 +49,7 @@ export default function PartDetailPage() {
   const effectiveReturnPart = returnPart ?? part?.returnPart?.toString() ?? '';
 
   const updateMutation = useMutation({
-    mutationFn: (data: PartUpdateInput) => productApi.update(partId!, data),
+    mutationFn: (data: PartUpdateInput) => productApi.update(partId!, data, { skipErrorToast: true }),
     onSuccess: () => {
       toast.success(t('dashboard.partsManagement.updateSuccess', 'Part updated successfully'));
       queryClient.invalidateQueries({ queryKey: ['part-detail', partId] });
