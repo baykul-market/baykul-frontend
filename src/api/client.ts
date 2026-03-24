@@ -1,5 +1,7 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/useAuthStore';
+import toast from 'react-hot-toast';
+import i18n from '../i18n/i18n';
 
 const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
 
@@ -37,9 +39,17 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         useAuthStore.getState().logout();
+        toast.error(i18n.t('common.sessionExpired', 'Session expired. Please login again.'));
         return Promise.reject(refreshError);
       }
     }
+
+    // Show toast for other errors
+    const data = error.response?.data;
+    const serverMessage = typeof data === 'string' ? data : (data?.message || data?.error);
+    const message = serverMessage || error.message || i18n.t('common.error', 'An error occurred');
+    toast.error(message);
+    
     return Promise.reject(error);
   }
 );
