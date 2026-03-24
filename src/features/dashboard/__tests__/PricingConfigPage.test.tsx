@@ -109,10 +109,13 @@ describe('PricingConfigPage', () => {
         fireEvent.click(btn);
 
         await waitFor(() => {
-            expect(configApi.updateConfig).toHaveBeenCalledWith({
-                markupPercentage: 0.1,
-                systemCurrency: 'RUB'
-            });
+            expect(configApi.updateConfig).toHaveBeenCalledWith(
+                {
+                    markupPercentage: 0.1,
+                    systemCurrency: 'RUB'
+                },
+                expect.anything()
+            );
         });
     });
 
@@ -151,13 +154,16 @@ describe('PricingConfigPage', () => {
         fireEvent.click(saveBtn);
 
         await waitFor(() => {
-            expect(configApi.createOrUpdateExchangeRate).toHaveBeenCalledWith({
-                currencyFrom: 'EUR',
-                currencyTo: 'RUB',
-                rate: 110,
-                bothDirections: false,
-                replaceExisting: true,
-            });
+            expect(configApi.createOrUpdateExchangeRate).toHaveBeenCalledWith(
+                {
+                    currencyFrom: 'EUR',
+                    currencyTo: 'RUB',
+                    rate: 110,
+                    bothDirections: false,
+                    replaceExisting: true,
+                },
+                expect.anything()
+            );
         });
     });
     it('deletes a rate via confirm modal', async () => {
@@ -193,7 +199,7 @@ describe('PricingConfigPage', () => {
         fireEvent.click(confirmBtns[confirmBtns.length - 1]);
 
         await waitFor(() => {
-            expect(configApi.deleteExchangeRate).toHaveBeenCalledWith('EUR_RUB');
+            expect(configApi.deleteExchangeRate).toHaveBeenCalledWith('EUR_RUB', expect.anything());
         });
     });
 });
