@@ -63,34 +63,34 @@ export default function AdminOrderDetailPage() {
     const updateStatusMutation = useMutation({
         mutationFn: (newStatus: OrderStatus) => {
             if (newStatus === OrderStatus.COMPLETED) {
-                return orderApi.completeOrder(orderId!, { customErrorToast: t('dashboard.orderManagement.updateError', 'Failed to update order status') });
+                return orderApi.completeOrder(orderId!, { customErrorToast: t('dashboard.orderManagement.updateError') });
             }
             if (newStatus === OrderStatus.ORDERED && order?.status === OrderStatus.CONFIRMATION_WAITING) {
-                return orderApi.confirmOrder(orderId!, { customErrorToast: t('dashboard.orderManagement.updateError', 'Failed to update order status') });
+                return orderApi.confirmOrder(orderId!, { customErrorToast: t('dashboard.orderManagement.updateError') });
             }
             // Fallback for other potential transitions if needed
-            return orderApi.updateOrder(orderId!, { status: newStatus }, { customErrorToast: t('dashboard.orderManagement.updateError', 'Failed to update order status') });
+            return orderApi.updateOrder(orderId!, { status: newStatus }, { customErrorToast: t('dashboard.orderManagement.updateError') });
         },
         onSuccess: () => {
-            toast.success(t('dashboard.orderManagement.updateSuccess', 'Order status updated successfully'));
+            toast.success(t('dashboard.orderManagement.updateSuccess'));
             queryClient.invalidateQueries({ queryKey: ['admin-order-details', orderId] });
             queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
         },
     });
 
     const cancelMutation = useMutation({
-        mutationFn: () => orderApi.cancelOrder(orderId!, { customErrorToast: t('dashboard.orderManagement.cancelError', 'Failed to cancel order') }),
+        mutationFn: () => orderApi.cancelOrder(orderId!, { customErrorToast: t('dashboard.orderManagement.cancelError') }),
         onSuccess: () => {
-            toast.success(t('dashboard.orderManagement.cancelSuccess', 'Order cancelled successfully'));
+            toast.success(t('dashboard.orderManagement.cancelSuccess'));
             queryClient.invalidateQueries({ queryKey: ['admin-order-details', orderId] });
             queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
         },
     });
 
     const payAdminMutation = useMutation({
-        mutationFn: () => orderApi.payOrderAdmin(orderId!, { customErrorToast: t('dashboard.orderManagement.payError', 'Failed to process payment') }),
+        mutationFn: () => orderApi.payOrderAdmin(orderId!, { customErrorToast: t('dashboard.orderManagement.payError') }),
         onSuccess: () => {
-            toast.success(t('dashboard.orderManagement.paySuccess', 'Payment processed successfully'));
+            toast.success(t('dashboard.orderManagement.paySuccess'));
             queryClient.invalidateQueries({ queryKey: ['admin-order-details', orderId] });
         },
     });
@@ -111,18 +111,18 @@ export default function AdminOrderDetailPage() {
 
     const updateProductStatusMutation = useMutation({
         mutationFn: ({ id, status }: { id: string, status: OrderProductStatus }) =>
-            orderApi.updateOrderProduct(id, { status }, { customErrorToast: t('dashboard.orderManagement.productUpdateError', 'Failed to update product status') }),
+            orderApi.updateOrderProduct(id, { status }, { customErrorToast: t('dashboard.orderManagement.productUpdateError') }),
         onSuccess: () => {
-            toast.success(t('dashboard.orderManagement.productUpdateSuccess', 'Product status updated successfully'));
+            toast.success(t('dashboard.orderManagement.productUpdateSuccess'));
             queryClient.invalidateQueries({ queryKey: ['admin-order-details', orderId] });
         },
     });
 
     const updateProductDataMutation = useMutation({
         mutationFn: ({ id, number }: { id: string, number: number }) =>
-            orderApi.updateOrderProduct(id, { number }, { customErrorToast: t('dashboard.orderManagement.productUpdateError', 'Failed to update product') }),
+            orderApi.updateOrderProduct(id, { number }, { customErrorToast: t('dashboard.orderManagement.productUpdateError') }),
         onSuccess: () => {
-            toast.success(t('dashboard.orderManagement.productUpdateSuccess', 'Product updated successfully'));
+            toast.success(t('dashboard.orderManagement.productUpdateSuccess'));
             queryClient.invalidateQueries({ queryKey: ['admin-order-details', orderId] });
             setEditingBoxId(null);
         },
@@ -135,7 +135,7 @@ export default function AdminOrderDetailPage() {
         return (
             <div className="flex flex-col items-center justify-center py-16 gap-3">
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                <p className="text-sm text-muted-foreground">{t('orders.loadingOrder', 'Loading order details...')}</p>
+                <p className="text-sm text-muted-foreground">{t('orders.loadingOrder')}</p>
             </div>
         );
     }
@@ -145,14 +145,14 @@ export default function AdminOrderDetailPage() {
             <div className="flex flex-col items-center justify-center py-20 gap-5 text-center animate-fade-in">
                 <XCircle className="h-16 w-16 text-destructive/20" />
                 <div>
-                    <h2 className="text-2xl font-bold tracking-tight mb-2">Order Not Found</h2>
+                    <h2 className="text-2xl font-bold tracking-tight mb-2">{t('orders.notFoundTitle')}</h2>
                     <p className="text-muted-foreground max-w-sm">
-                        The order you are looking for does not exist or has been removed.
+                        {t('orders.notFoundSubtitle')}
                     </p>
                 </div>
                 <button onClick={() => navigate('/dashboard/orders')} className="btn-secondary mt-2">
                     <ArrowLeft className="w-4 h-4 mr-2" />
-                    Back to Orders
+                    {t('dashboard.orderManagement.backToOrders')}
                 </button>
             </div>
         );
@@ -179,7 +179,7 @@ export default function AdminOrderDetailPage() {
                     className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                     <ArrowLeft className="w-4 h-4 mr-1" />
-                    {t('dashboard.orderManagement.backToOrders', 'Back to Orders')}
+                    {t('dashboard.orderManagement.backToOrders')}
                 </button>
             </div>
 
@@ -187,7 +187,7 @@ export default function AdminOrderDetailPage() {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-                        {t('dashboard.orderManagement.orderDetails', 'Order Details')} #{order.number}
+                        {t('dashboard.orderManagement.orderDetails')} #{order.number}
                     </h1>
                     <p className="text-muted-foreground mt-1 flex items-center gap-2">
                         <Clock className="w-4 h-4" />
@@ -204,7 +204,7 @@ export default function AdminOrderDetailPage() {
                                 className="btn-primary"
                             >
                                 <CreditCard className="w-4 h-4" />
-                                {t('dashboard.orderManagement.markPaid', 'Mark as Paid')}
+                                {t('dashboard.orderManagement.markPaid')}
                             </button>
                         )}
                         <button
@@ -213,7 +213,7 @@ export default function AdminOrderDetailPage() {
                             className="btn-outline text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/20"
                         >
                             <XCircle className="w-4 h-4" />
-                            {t('common.cancelOrder', 'Cancel Order')}
+                            {t('dashboard.orderManagement.cancelOrderTitle')}
                         </button>
                     </div>
                 )}
@@ -228,7 +228,7 @@ export default function AdminOrderDetailPage() {
                     <div className="card p-6">
                         <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
                             <RotateCw className="w-5 h-5 text-primary" />
-                            {t('dashboard.orderManagement.orderStatus', 'Order Status')}
+                            {t('dashboard.orderManagement.orderStatus')}
                         </h2>
 
                         {order.status === OrderStatus.CANCELLED ? (
@@ -258,7 +258,7 @@ export default function AdminOrderDetailPage() {
                                                                 "bg-background border-muted-foreground text-muted-foreground",
                                                         (isNext && ((order.status === OrderStatus.CONFIRMATION_WAITING && status === OrderStatus.ORDERED) || (order.status === OrderStatus.READY_FOR_PICKUP && status === OrderStatus.COMPLETED))) ? "hover:scale-110 hover:border-primary cursor-pointer shadow-md" : "cursor-not-allowed opacity-80"
                                                     )}
-                                                    title={isNext ? `Move to ${status}` : ''}
+                                                    title={isNext ? t('dashboard.orderManagement.updateBoxTo', { status: t(`status.order.${status}`) }) : ''}
                                                 >
                                                     {isCompleted ? <CheckCircle2 className="w-4 h-4" /> : index + 1}
                                                 </button>
@@ -280,7 +280,7 @@ export default function AdminOrderDetailPage() {
                     <div className="card p-6">
                         <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
                             <Box className="w-5 h-5 text-primary" />
-                            {t('dashboard.orderManagement.products', 'Products')}
+                            {t('dashboard.orderManagement.products')}
                         </h2>
 
                         <div className="space-y-8">
@@ -304,13 +304,13 @@ export default function AdminOrderDetailPage() {
                                                         value={editingBoxNumber}
                                                         onChange={e => setEditingBoxNumber(e.target.value)}
                                                         className="border rounded px-2 py-1 w-24 text-sm bg-background text-foreground"
-                                                        placeholder="≥100000"
+                                                        placeholder={t('dashboard.orderManagement.boxNumberPlaceholder', '≥100000')}
                                                     />
                                                     <button
                                                         onClick={() => {
                                                             const num = parseInt(editingBoxNumber, 10);
                                                             if (isNaN(num) || num < 100000) {
-                                                                toast.error(t('dashboard.orderManagement.boxNumberValidation', 'Box number must be >= 100000'));
+                                                                toast.error(t('dashboard.orderManagement.boxNumberValidation'));
                                                                 return;
                                                             }
                                                             updateProductDataMutation.mutate({ id: product.id, number: num });
@@ -330,9 +330,9 @@ export default function AdminOrderDetailPage() {
                                             ) : (
                                                 <div className="flex items-center justify-end gap-2 mt-1">
                                                     <p className="text-sm text-muted-foreground flex items-center gap-1">
-                                                        <span>Box #</span>
+                                                        <span>{t('dashboard.orderManagement.boxNumber')}</span>
                                                         <span className={cn(product.number ? "font-medium text-foreground" : "italic")}>
-                                                            {product.number ? product.number : t('dashboard.orderManagement.boxNotSet', 'Not set')}
+                                                            {product.number ? product.number : t('dashboard.orderManagement.boxNotSet')}
                                                         </span>
                                                     </p>
                                                     <button
@@ -341,7 +341,7 @@ export default function AdminOrderDetailPage() {
                                                             setEditingBoxNumber(product.number ? String(product.number) : '');
                                                         }}
                                                         className="text-muted-foreground hover:text-primary transition-colors hover:bg-primary/10 p-1.5 rounded-md"
-                                                        title={t('common.edit', 'Edit')}
+                                                        title={t('common.edit')}
                                                     >
                                                         <Pencil className="w-4 h-4" />
                                                     </button>
@@ -389,7 +389,7 @@ export default function AdminOrderDetailPage() {
                                                                         "bg-background text-muted-foreground border-border",
                                                                 isNext ? "hover:bg-primary/20 hover:text-primary hover:border-primary/50 cursor-pointer shadow-sm scale-105" : "cursor-not-allowed opacity-70"
                                                             )}
-                                                            title={isNext ? `Update box to ${status}` : ''}
+                                                            title={isNext ? t('dashboard.orderManagement.updateBoxTo', { status: t(`status.product.${status}`) }) : ''}
                                                         >
                                                             {isCompleted && <CheckCircle2 className="w-3 h-3" />}
                                                             {!isCompleted && !isCurrent && <div className="w-1.5 h-1.5 rounded-full bg-current opacity-50"></div>}
@@ -404,7 +404,7 @@ export default function AdminOrderDetailPage() {
                                                         onClick={() => handleProductCancel(product.id)}
                                                         className="text-xs text-destructive hover:underline flex items-center gap-1"
                                                     >
-                                                        <XCircle className="w-3 h-3" /> Cancel Box
+                                                        <XCircle className="w-3 h-3" /> {t('dashboard.orderManagement.cancelBox')}
                                                     </button>
                                                 )}
                                                 {product.status !== OrderProductStatus.CREATED && product.status !== OrderProductStatus.TO_ORDER && (
@@ -412,7 +412,7 @@ export default function AdminOrderDetailPage() {
                                                         onClick={() => handleProductReturn(product.id)}
                                                         className="text-xs text-destructive hover:underline flex items-center gap-1"
                                                     >
-                                                        <RotateCw className="w-3 h-3" /> Mark Returned
+                                                        <RotateCw className="w-3 h-3" /> {t('dashboard.orderManagement.markReturned')}
                                                     </button>
                                                 )}
                                             </div>
@@ -429,22 +429,22 @@ export default function AdminOrderDetailPage() {
                     <div className="card p-6">
                         <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                             <User className="w-4 h-4 text-primary" />
-                            {t('dashboard.orderManagement.customerInfo', 'Customer Info')}
+                            {t('dashboard.orderManagement.customerInfo')}
                         </h2>
                         <div className="space-y-3 text-sm">
                             <div>
-                                <span className="text-muted-foreground block text-xs uppercase tracking-wider mb-1">Login</span>
+                                <span className="text-muted-foreground block text-xs uppercase tracking-wider mb-1">{t('common.login')}</span>
                                 <span className="font-medium">{order.user?.login}</span>
                             </div>
                             {order.user?.email && (
                                 <div>
-                                    <span className="text-muted-foreground block text-xs uppercase tracking-wider mb-1">Email</span>
+                                    <span className="text-muted-foreground block text-xs uppercase tracking-wider mb-1">{t('common.email')}</span>
                                     <span className="font-medium">{order.user.email}</span>
                                 </div>
                             )}
                             {order.user?.profile && (
                                 <div>
-                                    <span className="text-muted-foreground block text-xs uppercase tracking-wider mb-1">Full Name</span>
+                                    <span className="text-muted-foreground block text-xs uppercase tracking-wider mb-1">{t('nav.myProfile')}</span>
                                     <span className="font-medium">{order.user.profile.name} {order.user.profile.surname}</span>
                                 </div>
                             )}
@@ -454,13 +454,13 @@ export default function AdminOrderDetailPage() {
                     <div className="card p-6 border-primary/20 bg-primary/5">
                         <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                             <CreditCard className="w-4 h-4 text-primary" />
-                            Order Total
+                            {t('dashboard.orderManagement.orderTotal')}
                         </h2>
                         <div className="text-3xl font-bold text-primary">
                             {order.orderProducts?.reduce((sum, op) => sum + (op.part.price * op.partsCount), 0).toFixed(2)} {order.orderProducts?.[0]?.part?.currency || 'EUR'}
                         </div>
                         <p className="text-sm text-muted-foreground mt-2">
-                            {order.orderProducts?.length || 0} items
+                            {t('dashboard.orderManagement.items', { count: order.orderProducts?.length || 0 })}
                         </p>
                     </div>
 
@@ -468,7 +468,7 @@ export default function AdminOrderDetailPage() {
                     <div className="card p-6 border-dashed border-2">
                         <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                             <Receipt className="w-4 h-4 text-primary" />
-                            {t('dashboard.orderManagement.bills', 'Bills / Invoices')}
+                            {t('dashboard.orderManagement.bills')}
                         </h2>
                         {isLoadingBills ? (
                             <Loader2 className="w-4 h-4 animate-spin text-primary" />
@@ -482,7 +482,7 @@ export default function AdminOrderDetailPage() {
                                                 "text-[10px] font-bold px-1.5 py-0.5 rounded uppercase mt-1 inline-block",
                                                 bill.status === 'APPLIED' ? "bg-success/20 text-success" : "bg-warning/20 text-warning"
                                             )}>
-                                                {bill.status}
+                                                {t(`status.bill.${bill.status}`)}
                                             </p>
                                         </div>
                                         <div className="text-right">
@@ -494,7 +494,7 @@ export default function AdminOrderDetailPage() {
                             </div>
                         ) : (
                             <p className="text-sm text-muted-foreground italic">
-                                {t('dashboard.orderManagement.noBills', 'No bills associated with this order.')}
+                                {t('dashboard.orderManagement.noBills')}
                             </p>
                         )}
                     </div>
@@ -507,18 +507,18 @@ export default function AdminOrderDetailPage() {
                 onClose={closeConfirmModal}
                 onConfirm={confirmAction}
                 title={
-                    confirmModalState.type === 'orderCancel' ? t('dashboard.orderManagement.cancelOrderTitle', 'Cancel Order') :
-                        confirmModalState.type === 'productCancel' ? t('dashboard.orderManagement.cancelProductTitle', 'Cancel Product') :
-                            t('dashboard.orderManagement.returnProductTitle', 'Return Product')
+                    confirmModalState.type === 'orderCancel' ? t('dashboard.orderManagement.cancelOrderTitle') :
+                        confirmModalState.type === 'productCancel' ? t('dashboard.orderManagement.cancelProductTitle') :
+                            t('dashboard.orderManagement.returnProductTitle')
                 }
                 message={
-                    confirmModalState.type === 'orderCancel' ? t('dashboard.orderManagement.cancelOrderMsg', 'Are you sure you want to cancel this order?') :
-                        confirmModalState.type === 'productCancel' ? t('dashboard.orderManagement.cancelProductMsg', 'Are you sure you want to cancel this product?') :
-                            t('dashboard.orderManagement.returnProductMsg', 'Are you sure you want to mark this product as returned?')
+                    confirmModalState.type === 'orderCancel' ? t('dashboard.orderManagement.cancelOrderMsg') :
+                        confirmModalState.type === 'productCancel' ? t('dashboard.orderManagement.cancelProductMsg') :
+                            t('dashboard.orderManagement.returnProductMsg')
                 }
                 isDestructive={true}
-                confirmText={t('common.confirm', 'Confirm')}
-                cancelText={t('common.cancel', 'Cancel')}
+                confirmText={t('common.confirm')}
+                cancelText={t('common.cancel')}
             />
         </div >
     );
