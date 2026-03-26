@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { ConfirmModal } from '../../components/ConfirmModal';
 import { useTranslation } from 'react-i18next';
 import { orderApi, OrderStatus, OrderProductStatus } from '../../api/order';
-import { billApi } from '../../api/bill';
-import { Loader2, ArrowLeft, User, CreditCard, Box, CheckCircle2, RotateCw, Clock, XCircle, Pencil, Receipt } from 'lucide-react';
+// import { billApi } from '../../api/bill';
+import { Loader2, ArrowLeft, User, CreditCard, Box, CheckCircle2, RotateCw, Clock, XCircle, Pencil/*, Receipt*/ } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
@@ -95,6 +95,7 @@ export default function AdminOrderDetailPage() {
         },
     });
 
+    /*
     const { data: bills, isLoading: isLoadingBills } = useQuery({
         queryKey: ['admin-order-bills', orderId],
         queryFn: async () => {
@@ -108,6 +109,7 @@ export default function AdminOrderDetailPage() {
         },
         enabled: !!order,
     });
+    */
 
     const updateProductStatusMutation = useMutation({
         mutationFn: ({ id, status }: { id: string, status: OrderProductStatus }) =>
@@ -464,8 +466,8 @@ export default function AdminOrderDetailPage() {
                         </p>
                     </div>
 
-                    {/* Bills Section */}
-                    <div className="card p-6 border-dashed border-2">
+                    {/* Bills Section hidden for now */}
+                    {/* <div className="card p-6 border-dashed border-2">
                         <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                             <Receipt className="w-4 h-4 text-primary" />
                             {t('dashboard.orderManagement.bills')}
@@ -497,7 +499,7 @@ export default function AdminOrderDetailPage() {
                                 {t('dashboard.orderManagement.noBills')}
                             </p>
                         )}
-                    </div>
+                    </div> */}
                 </div>
 
             </div>
