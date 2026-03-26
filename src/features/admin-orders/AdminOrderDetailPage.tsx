@@ -9,6 +9,7 @@ import { Loader2, ArrowLeft, User, CreditCard, Box, CheckCircle2, RotateCw, Cloc
 import { cn } from '../../lib/utils';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
+import { getCurrencySymbol } from '../../lib/currency';
 
 const ORDER_STATUS_FLOW = [
     OrderStatus.PAYMENT_WAITING,
@@ -297,7 +298,7 @@ export default function AdminOrderDetailPage() {
                                         </div>
                                         <div className="text-right">
                                             <p className="font-medium text-lg">
-                                                {product.partsCount} x {product.part.price} {product.part.currency}
+                                                {product.partsCount} x {product.price.toFixed(2)} {getCurrencySymbol(product.currency)}
                                             </p>
                                             {editingBoxId === product.id ? (
                                                 <div className="flex items-center gap-2 mt-2 justify-end">
@@ -459,7 +460,7 @@ export default function AdminOrderDetailPage() {
                             {t('dashboard.orderManagement.orderTotal')}
                         </h2>
                         <div className="text-3xl font-bold text-primary">
-                            {order.orderProducts?.reduce((sum, op) => sum + (op.part.price * op.partsCount), 0).toFixed(2)} {order.orderProducts?.[0]?.part?.currency || 'EUR'}
+                            {order.orderProducts?.reduce((sum, op) => sum + (op.price * op.partsCount), 0).toFixed(2)} {getCurrencySymbol(order.orderProducts?.[0]?.currency || 'EUR')}
                         </div>
                         <p className="text-sm text-muted-foreground mt-2">
                             {t('dashboard.orderManagement.items', { count: order.orderProducts?.length || 0 })}

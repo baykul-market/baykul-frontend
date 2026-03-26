@@ -7,7 +7,7 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
     RUB: '₽',
     EUR: '€',
     USD: '$',
-    BYN: 'BYN',
+    BYN: 'ƃ',
 };
 
 /**
