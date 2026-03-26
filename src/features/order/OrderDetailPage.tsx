@@ -2,7 +2,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { orderApi, Order, OrderStatus } from '../../api/order';
-import { Loader2, ArrowLeft, Package, Clock, CheckCircle2, XCircle, RotateCw, CreditCard, Box, MapPin } from 'lucide-react';
+import { Loader2, ArrowLeft, Package, Clock, CheckCircle2, XCircle, RotateCw, CreditCard, Box, MapPin, AlertCircle } from 'lucide-react';
 import i18n from '../../i18n/i18n';
 import { getCurrencySymbol } from '../../lib/currency';
 
@@ -71,15 +71,30 @@ export default function OrderDetailPage() {
           {t('orders.backToHistory')}
         </button>
       </div>
+      
 
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+          <h1 className="text-3xl font-bold tracking-tight flex flex-wrap items-center gap-x-4 gap-y-2">
             {t('orders.orderNumber', { number: order.number })}
-            <span className={`badge ${statusConfig.badgeClass} text-base px-3 py-1 font-medium`}>
-              {statusConfig.label}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className={`badge ${statusConfig.badgeClass} text-base px-3 py-1 font-medium`}>
+                {statusConfig.label}
+              </span>
+              {!order.paid && order.status !== OrderStatus.COMPLETED && order.status !== OrderStatus.CANCELLED && (
+                <span className="badge bg-warning/10 text-warning border-warning/20 text-base px-3 py-1 font-medium flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4" />
+                  {t('orders.paymentRequiredTitle')}
+                </span>
+              )}
+              {order.paid && (
+                <span className="badge bg-success/10 text-success border-success/20 text-base px-3 py-1 font-medium flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4" />
+                  {t('orders.orderPaidTitle')}
+                </span>
+              )}
+            </div>
           </h1>
           <p className="text-muted-foreground mt-1 flex items-center gap-2">
             <Clock className="w-4 h-4" />
@@ -165,19 +180,26 @@ export default function OrderDetailPage() {
               </div>
             </div>
 
-            {order.status === OrderStatus.PAYMENT_WAITING && (
+            {!order.paid && order.status !== OrderStatus.COMPLETED && order.status !== OrderStatus.CANCELLED && (
               <button
-                className="btn-primary w-full mt-4"
+                className="btn-primary w-full mt-4 py-2.5 font-bold shadow-lg shadow-primary/10 flex items-center justify-center gap-2"
                 disabled={payMutation.isPending}
                 onClick={() => payMutation.mutate(order.id)}
               >
                 {payMutation.isPending ? (
-                  <Loader2 className="w-4 h-4 animate-spin mr-2 inline" />
+                  <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
-                  <CreditCard className="w-4 h-4 mr-2 inline" />
+                  <CreditCard className="w-4 h-4" />
                 )}
                 {t('orders.payNow')}
               </button>
+            )}
+            
+            {order.paid && (
+              <div className="mt-4 p-3 bg-success/10 border border-success/20 rounded-lg flex items-center gap-2 text-success text-sm font-medium">
+                <CheckCircle2 className="w-4 h-4" />
+                {t('orders.orderPaidTitle')}
+              </div>
             )}
           </div>
 
@@ -198,6 +220,7 @@ export default function OrderDetailPage() {
     </div>
   );
 }
+
 
 function getOrderTotal(order: Order): number {
   if (!order.orderProducts) return 0;
