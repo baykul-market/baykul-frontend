@@ -27,7 +27,6 @@ export default function CreateBillPage() {
     const queryClient = useQueryClient();
 
     // Bill form state
-    const [billNumber, setBillNumber] = useState('');
 
     // Filter state
     const [numberFilter, setNumberFilter] = useState('');
@@ -120,16 +119,11 @@ export default function CreateBillPage() {
     });
 
     const handleSubmit = () => {
-        if (!billNumber || isNaN(Number(billNumber)) || Number(billNumber) < 10000) {
-            toast.error(t('dashboard.billManagement.enterBillNumber'));
-            return;
-        }
         if (selectedIds.size === 0) {
             toast.error(t('dashboard.billManagement.selectAtLeastOne') || 'Select at least one product');
             return;
         }
         createMutation.mutate({
-            number: Number(billNumber),
             orderProducts: Array.from(selectedIds).map(id => ({ id })),
         });
     };
@@ -159,25 +153,15 @@ export default function CreateBillPage() {
                 </div>
             </div>
 
-            {/* Bill Number + Create Button */}
+            {/* Create Button */}
             <div className="card p-4">
-                <div className="flex items-end gap-4 flex-wrap">
-                    <div className="space-y-2 flex-1 min-w-[200px] max-w-xs">
-                        <label className="text-sm font-medium">
-                            {t('dashboard.billManagement.billNumber')}
-                        </label>
-                        <input
-                            type="number"
-                            value={billNumber}
-                            onChange={(e) => setBillNumber(e.target.value)}
-                            className="input w-full"
-                            placeholder={t('dashboard.billManagement.enterBillNumber')}
-                            min="10000"
-                        />
-                    </div>
+                <div className="flex items-end justify-between gap-4 flex-wrap">
+                    <p className="text-sm text-muted-foreground flex-1">
+                        {t('dashboard.billManagement.createBillSubtitle') || 'Select order products to include in the new bill'}
+                    </p>
                     <button
                         onClick={handleSubmit}
-                        disabled={createMutation.isPending || !billNumber || Number(billNumber) < 10000 || selectedIds.size === 0}
+                        disabled={createMutation.isPending || selectedIds.size === 0}
                         className="btn-primary h-10"
                     >
                         <FileText className="h-4 w-4 mr-2" />
