@@ -23,7 +23,7 @@ export interface Bill {
 }
 
 export interface BillCreateRequest {
-  number: number;
+  number?: number;
   orderProducts: { id: string }[];
 }
 

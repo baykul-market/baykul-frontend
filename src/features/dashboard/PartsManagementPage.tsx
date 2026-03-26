@@ -10,12 +10,12 @@ import {
 } from '../../api/product';
 import {
   Package, Plus, Pencil, Trash2, CheckCircle, AlertCircle, X, Search,
-  Loader2, ChevronLeft, ChevronRight, Upload, FileText, Download, Info, Database
+  Loader2, Upload, FileText, Download, Info, Database
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 
-const PAGE_SIZE = 20;
+
 
 const CSV_HEADERS = 'article;name;weight;min_count;storage_count;return_part;price;brand';
 const CSV_EXAMPLE = '2405947;Engine Oil LL01 5W30;150.4;3;5;3.01;7862.43;rolls royce';
@@ -26,7 +26,7 @@ export default function PartsManagementPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const [page, setPage] = useState(0);
+
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [editPart, setEditPart] = useState<Part | null>(null);
@@ -42,30 +42,22 @@ export default function PartsManagementPage() {
 
   const isSearching = activeSearch.trim().length > 0;
 
-  const { data: pagedParts, isLoading: isLoadingPaged } = useQuery({
-    queryKey: ['admin-parts', page],
-    queryFn: () => productApi.getAll(page, PAGE_SIZE),
-    enabled: !isSearching,
-  });
-
-  const { data: searchResults, isLoading: isLoadingSearch, isFetching: isFetchingSearch } = useQuery({
+  const { data: searchResults, isLoading, isFetching } = useQuery({
     queryKey: ['admin-parts-search', activeSearch],
     queryFn: () => productApi.search(activeSearch),
     enabled: isSearching,
   });
 
-  const parts = isSearching ? searchResults : pagedParts?.content;
-  const isLoading = isSearching ? (isLoadingSearch || isFetchingSearch) : isLoadingPaged;
+  const parts = searchResults ?? [];
+  const isLoadingResults = isLoading || isFetching;
 
   const handleSearch = () => {
     setActiveSearch(searchTerm.trim());
-    setPage(0);
   };
 
   const handleClearSearch = () => {
     setSearchTerm('');
     setActiveSearch('');
-    setPage(0);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -76,13 +68,10 @@ export default function PartsManagementPage() {
     mutationFn: (id: string) => productApi.delete(id, { customErrorToast: t('dashboard.partsManagement.deleteError', 'Failed to delete part') }),
     onSuccess: () => {
       toast.success(t('dashboard.partsManagement.deleteSuccess', 'Part deleted successfully'));
-      queryClient.invalidateQueries({ queryKey: ['admin-parts'] });
       queryClient.invalidateQueries({ queryKey: ['admin-parts-search'] });
       setDeletePart(null);
     },
   });
-
-  const hasMore = !isSearching && (pagedParts?.content?.length ?? 0) === PAGE_SIZE && !pagedParts?.last;
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 animate-slide-up">
@@ -148,14 +137,28 @@ export default function PartsManagementPage() {
       </div>
 
       {/* Parts List */}
-      {isLoading ? (
+      {!isSearching ? (
+        <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+            <Search className="h-8 w-8 text-muted-foreground" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold mb-1">
+              {t('dashboard.partsManagement.searchPromptTitle', 'Search for Parts')}
+            </h3>
+            <p className="text-muted-foreground text-sm max-w-sm">
+              {t('dashboard.partsManagement.searchPromptSubtitle', 'Enter an article number, name, or brand to find parts.')}
+            </p>
+          </div>
+        </div>
+      ) : isLoadingResults ? (
         <div className="flex flex-col items-center justify-center py-16 gap-3">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
           <p className="text-sm text-muted-foreground">
             {t('dashboard.partsManagement.loadingParts', 'Loading parts...')}
           </p>
         </div>
-      ) : parts && parts.length > 0 ? (
+      ) : parts.length > 0 ? (
         <>
           <div className="card overflow-hidden">
             <div className="overflow-x-auto">
@@ -242,31 +245,9 @@ export default function PartsManagementPage() {
             </div>
           </div>
 
-          {!isSearching && (
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                {t('common.page', { page: page + 1 })}
-              </p>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setPage((p) => Math.max(0, p - 1))}
-                  disabled={page === 0}
-                  className="btn-secondary px-3 py-2"
-                >
-                  <ChevronLeft className="w-4 h-4 mr-1" />
-                  {t('common.previous')}
-                </button>
-                <button
-                  onClick={() => setPage((p) => p + 1)}
-                  disabled={!hasMore}
-                  className="btn-secondary px-3 py-2"
-                >
-                  {t('common.next')}
-                  <ChevronRight className="w-4 h-4 ml-1" />
-                </button>
-              </div>
-            </div>
-          )}
+          <p className="text-sm text-muted-foreground">
+            {parts.length} {t('dashboard.partsManagement.resultsFound', 'results found')}
+          </p>
         </>
       ) : (
         <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
