@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { orderApi, Order, OrderStatus } from '../../api/order';
-import { Loader2, Package, Clock, CheckCircle2, XCircle, ArrowRight, RotateCw, CreditCard } from 'lucide-react';
+import { Loader2, Package, Clock, CheckCircle2, XCircle, ArrowRight, RotateCw, CreditCard, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../i18n/i18n';
@@ -111,13 +111,27 @@ export default function OrderHistoryPage() {
 
                 {/* Right: Status & Price */}
                 <div className="flex items-center gap-4 sm:flex-col sm:items-end sm:gap-2">
-                  <span className={`badge ${statusConfig.badgeClass}`}>
-                    {statusConfig.label}
-                  </span>
+                  <div className="flex flex-wrap gap-2 justify-end">
+                    <span className={`badge ${statusConfig.badgeClass}`}>
+                      {statusConfig.label}
+                    </span>
+                    {!order.paid && order.status !== OrderStatus.COMPLETED && order.status !== OrderStatus.CANCELLED && (
+                      <span className="badge bg-warning/10 text-warning border-warning/20 font-medium flex items-center gap-1.5">
+                        <AlertCircle className="w-3.5 h-3.5" />
+                        {t('orders.paymentRequiredTitle')}
+                      </span>
+                    )}
+                    {order.paid && (
+                      <span className="badge bg-success/10 text-success border-success/20 font-medium flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        {t('orders.orderPaidTitle')}
+                      </span>
+                    )}
+                  </div>
                   <span className="font-bold text-lg">
                     {currencySymbol}{totalPrice.toFixed(2)}
                   </span>
-                  {order.status === OrderStatus.PAYMENT_WAITING && (
+                  {!order.paid && order.status !== OrderStatus.COMPLETED && order.status !== OrderStatus.CANCELLED && (
                     <button
                       className="btn-primary py-1 px-3 text-sm h-8 mt-2 w-full sm:w-auto"
                       disabled={payMutation.isPending && payMutation.variables === order.id}

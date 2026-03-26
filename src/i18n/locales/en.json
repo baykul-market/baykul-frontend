@@ -159,7 +159,11 @@
     "subtotal": "Subtotal",
     "shipping": "Shipping",
     "total": "Total",
-    "shippingDetails": "Shipping Details"
+    "shippingDetails": "Shipping Details",
+    "paymentRequiredTitle": "Payment Required",
+    "paymentRequiredSubtitle": "This order has not been paid yet. Please complete the payment to proceed.",
+    "orderPaidTitle": "Order Paid",
+    "orderPaidSubtitle": "Thank you! Your payment has been received and is being processed."
   },
   "profile": {
     "blocked": "Blocked",

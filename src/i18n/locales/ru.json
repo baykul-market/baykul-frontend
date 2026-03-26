@@ -182,7 +182,11 @@
     "subtotal": "Подытог",
     "shipping": "Доставка",
     "total": "Итого",
-    "shippingDetails": "Детали доставки"
+    "shippingDetails": "Детали доставки",
+    "paymentRequiredTitle": "Требуется оплата",
+    "paymentRequiredSubtitle": "Этот заказ еще не оплачен. Пожалуйста, завершите оплату, чтобы продолжить.",
+    "orderPaidTitle": "Заказ оплачен",
+    "orderPaidSubtitle": "Спасибо! Ваш платеж получен и обрабатывается."
   },
   "profile": {
     "blocked": "Заблокирован",
