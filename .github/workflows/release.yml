@@ -1,4 +1,4 @@
-name: Create Release
+name: Create Release PR
 
 on:
   workflow_dispatch:
@@ -21,16 +21,16 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
-  release:
+  release-pr:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          token: ${{ secrets.RELEASE_TOKEN }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
@@ -38,29 +38,25 @@ jobs:
           node-version: '24'
           cache: 'npm'
 
-      - name: Configure Git
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-
-      - name: Bump version
+      - name: Bump version (No Tag)
         id: version
         run: |
           if [[ "${{ github.event.inputs.version_bump }}" == "prerelease" ]]; then
-            NEW_VER=$(npm version prerelease --preid=${{ github.event.inputs.preid }})
+            NEW_VER=$(npm version prerelease --preid=${{ github.event.inputs.preid }} --no-git-tag-version)
           else
-            NEW_VER=$(npm version ${{ github.event.inputs.version_bump }})
+            NEW_VER=$(npm version ${{ github.event.inputs.version_bump }} --no-git-tag-version)
           fi
           echo "new_version=${NEW_VER#v}" >> $GITHUB_OUTPUT
 
-      - name: Push changes and tags
-        run: |
-          git push origin main --follow-tags
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
         with:
-          tag_name: v${{ steps.version.outputs.new_version }}
-          generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.RELEASE_PAT }} 
+          commit-message: "chore(release): bump version to v${{ steps.version.outputs.new_version }}"
+          title: "Release v${{ steps.version.outputs.new_version }}"
+          body: |
+            Automated version bump for release v${{ steps.version.outputs.new_version }}.
+            
+            ⚠️ **Note:** The GitHub Release and Git Tag will be generated automatically by a separate workflow when this PR is merged into `main`.
+          branch: "release/v${{ steps.version.outputs.new_version }}"
+          base: main
