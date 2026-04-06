@@ -87,7 +87,7 @@ export default function PartsManagementPage() {
             </h1>
           </div>
           <p className="text-muted-foreground text-sm">
-            {t('dashboard.partsManagement.subtitle', 'Manage parts inventory, upload CSV, and edit part details.')}
+            {t('dashboard.partsManagement.subtitle', 'Manage parts inventory, upload CSV/TXT, and edit part details.')}
           </p>
         </div>
         <div className="flex items-center gap-3 self-start">
@@ -96,7 +96,7 @@ export default function PartsManagementPage() {
             className="btn-secondary"
           >
             <Upload className="w-4 h-4 mr-2" />
-            {t('dashboard.partsManagement.uploadCsv', 'Upload CSV')}
+            {t('dashboard.partsManagement.uploadCsv', 'Upload CSV/TXT')}
           </button>
           <button
             onClick={() => setCreateModalOpen(true)}
@@ -261,7 +261,7 @@ export default function PartsManagementPage() {
                 : t('dashboard.partsManagement.noParts', 'No Parts Available')}
             </h3>
             <p className="text-muted-foreground text-sm max-w-sm">
-              {t('dashboard.partsManagement.noPartsSubtitle', 'Add parts manually or upload from a CSV file.')}
+              {t('dashboard.partsManagement.noPartsSubtitle', 'Add parts manually or upload from a CSV/TXT file.')}
             </p>
           </div>
           <button
@@ -550,7 +550,9 @@ function CsvUploadModal({ onClose, onSuccess, t }: { onClose: () => void; onSucc
   }, []);
 
   const validateFile = (f: File): boolean => {
-    if (!f.name.endsWith('.csv')) {
+    const isCsv = f.name.toLowerCase().endsWith('.csv');
+    const isTxt = f.name.toLowerCase().endsWith('.txt');
+    if (!isCsv && !isTxt) {
       toast.error(t('dashboard.partsUpload.invalidFileType'));
       return false;
     }
@@ -655,7 +657,7 @@ function CsvUploadModal({ onClose, onSuccess, t }: { onClose: () => void; onSucc
               dragActive ? 'border-primary bg-primary/5' : file ? 'border-border bg-secondary/20' : 'border-border hover:border-primary/50 hover:bg-secondary/30'
             }`}
           >
-            <input ref={fileInputRef} type="file" accept=".csv" onChange={handleFileChange} className="hidden" />
+            <input ref={fileInputRef} type="file" accept=".csv,.txt" onChange={handleFileChange} className="hidden" />
             {!file ? (
               <div className="space-y-3">
                 <div className="flex justify-center">
