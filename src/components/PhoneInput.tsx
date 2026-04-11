@@ -9,21 +9,21 @@ export interface CountryCode {
 }
 
 const COUNTRY_CODES: CountryCode[] = [
+  { code: 'RU', dial: '+7', maxLocal: 10 },
+  { code: 'KZ', dial: '+77', maxLocal: 9 },
   { code: 'BY', dial: '+375', maxLocal: 9 },
-  { code: 'RU', dial: '+7',   maxLocal: 10 },
-  { code: 'KZ', dial: '+77',  maxLocal: 9 },
   { code: 'UA', dial: '+380', maxLocal: 9 },
   { code: 'UZ', dial: '+998', maxLocal: 9 },
   { code: 'KG', dial: '+996', maxLocal: 9 },
   { code: 'TJ', dial: '+992', maxLocal: 9 },
   { code: 'TM', dial: '+993', maxLocal: 8 },
-  { code: 'TR', dial: '+90',  maxLocal: 10 },
-  { code: 'US', dial: '+1',   maxLocal: 10 },
-  { code: 'GB', dial: '+44',  maxLocal: 10 },
-  { code: 'DE', dial: '+49',  maxLocal: 11 },
-  { code: 'CN', dial: '+86',  maxLocal: 11 },
+  { code: 'TR', dial: '+90', maxLocal: 10 },
+  { code: 'US', dial: '+1', maxLocal: 10 },
+  { code: 'GB', dial: '+44', maxLocal: 10 },
+  { code: 'DE', dial: '+49', maxLocal: 11 },
+  { code: 'CN', dial: '+86', maxLocal: 11 },
   { code: 'AE', dial: '+971', maxLocal: 9 },
-  { code: 'PL', dial: '+48',  maxLocal: 9 },
+  { code: 'PL', dial: '+48', maxLocal: 9 },
 ];
 
 function FlagImg({ code, className }: { code: string; className?: string }) {
