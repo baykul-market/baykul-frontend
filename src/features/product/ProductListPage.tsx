@@ -196,7 +196,7 @@ function ProductCard({
               <Box className="h-3 w-3" />
               {t('products.article')}
             </span>
-            <span className="font-mono text-xs bg-muted px-2 py-0.5 rounded-md">{product.article}</span>
+            <span className="font-mono text-sm bg-muted px-2 py-0.5 rounded-md">{product.article}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="flex items-center gap-1.5">
@@ -220,7 +220,7 @@ function ProductCard({
 
         {/* Footer */}
         <div className="flex items-center justify-between pt-4 border-t">
-          <span className="text-xl font-bold">
+          <span className="text-lg font-bold">
             {getCurrencySymbol(product.currency)}
             {product.price.toFixed(2)}
           </span>
