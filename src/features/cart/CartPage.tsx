@@ -5,6 +5,7 @@ import { Trash2, Loader2, ArrowRight, ShoppingCart, ArrowLeft, Package, Tag, Plu
 import toast from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { formatPrice } from '../../lib/currency';
 
 export default function CartPage() {
   const { t } = useTranslation();
@@ -127,7 +128,6 @@ export default function CartPage() {
   );
   const itemCount = cartProducts.reduce((sum, cp) => sum + cp.partsCount, 0);
   const currency = cartProducts[0]?.part.currency ?? 'EUR';
-  const currencySymbol = currency === 'EUR' ? '\u20AC' : currency === 'USD' ? '$' : currency;
 
   return (
     <div className="max-w-5xl mx-auto animate-fade-in">
@@ -169,7 +169,7 @@ export default function CartPage() {
                 </div>
                 <div className="flex items-center gap-3 mt-2.5">
                   <span className="text-sm text-muted-foreground">
-                    {currencySymbol}{item.part.price.toFixed(2)}
+                    {formatPrice(item.part.price, item.part.currency)}
                   </span>
                   <div className="inline-flex items-center gap-1.5 rounded-md border px-1">
                     <button
@@ -200,7 +200,7 @@ export default function CartPage() {
               {/* Price & Actions */}
               <div className="flex flex-col items-end gap-2 flex-shrink-0">
                 <span className="font-bold text-base">
-                  {currencySymbol}{(item.part.price * item.partsCount).toFixed(2)}
+                  {formatPrice(item.part.price * item.partsCount, item.part.currency)}
                 </span>
                 <button
                   onClick={() => removeMutation.mutate({ id: item.id, partId: item.part.id, count: item.partsCount })}
@@ -224,7 +224,7 @@ export default function CartPage() {
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">{t('cart.subtotal', { count: itemCount })}</span>
-                <span className="font-medium">{currencySymbol}{totalPrice.toFixed(2)}</span>
+                <span className="font-medium">{formatPrice(totalPrice, currency)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">{t('cart.shipping')}</span>
@@ -236,7 +236,7 @@ export default function CartPage() {
 
             <div className="flex justify-between items-baseline mb-6">
               <span className="text-base font-semibold">{t('cart.total')}</span>
-              <span className="text-2xl font-bold">{currencySymbol}{totalPrice.toFixed(2)}</span>
+              <span className="text-2xl font-bold">{formatPrice(totalPrice, currency)}</span>
             </div>
 
             <button

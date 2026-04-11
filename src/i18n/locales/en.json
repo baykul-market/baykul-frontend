@@ -626,8 +626,8 @@
       "percentage": "Percentage (%)",
       "fixed": "Fixed Sum",
       "value": "Value",
-      "markupPercentage": "Markup Percentage",
-      "markupDesc": "Applied to product base price",
+      "markupPercentage": "Default Markup for New Users",
+      "markupDesc": "Applied to product base price for new accounts",
       "systemCurrency": "Default System Currency",
       "currencyDesc": "Primary currency for the system"
     },

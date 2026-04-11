@@ -213,14 +213,14 @@ export default function MultiArticleSearchPage() {
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
+                            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border whitespace-nowrap ${
                               hasStock 
                                 ? 'bg-success/10 text-success border-success/20' 
                                 : 'bg-warning/10 text-warning border-warning/20'
                             }`}>
                               {hasStock 
                                 ? t('products.units', { count: product.storageCount ?? 0 }) 
-                                : t('products.outOfStock')}
+                                : t('products.orderFromSupplier')}
                             </span>
                           </td>
                           <td className="px-6 py-4">
@@ -234,7 +234,7 @@ export default function MultiArticleSearchPage() {
                               onClick={() => addToCartMutation.mutate(product)}
                               disabled={addToCartMutation.isPending}
                               className="btn-primary p-2 h-9 w-9 rounded-xl shadow-sm hover:shadow-primary/20 active:scale-95 transition-all"
-                              title={t('products.add')}
+                              title={hasStock ? t('products.add') : t('products.order')}
                             >
                               {addToCartMutation.isPending ? (
                                 <Loader2 className="w-4 h-4 animate-spin" />

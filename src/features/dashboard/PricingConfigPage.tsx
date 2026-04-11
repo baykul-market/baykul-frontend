@@ -315,9 +315,9 @@ export default function PricingConfigPage() {
                         <div className="sm:w-56 shrink-0">
                             <label className="text-sm font-medium flex items-center gap-2">
                                 <Percent size={14} className="text-muted-foreground" />
-                                {t('pricing.global.markupPercentage', 'Markup Percentage')}
+                                {t('pricing.global.markupPercentage', 'Default Markup for New Users')}
                             </label>
-                            <p className="text-xs text-muted-foreground mt-0.5">{t('pricing.global.markupDesc', 'Applied to product base price')}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{t('pricing.global.markupDesc', 'Applied to product base price for new accounts')}</p>
                         </div>
                         <div className="flex-1 max-w-xs">
                             <div className="flex items-center bg-background border rounded-lg px-3 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all">
