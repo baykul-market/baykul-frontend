@@ -103,7 +103,22 @@
     "extendedDelivery": "Extended Delivery",
     "soldOut": "Sold Out",
     "addedToCart": "Added to cart",
-    "failedToAdd": "Failed to add to cart"
+    "failedToAdd": "Failed to add to cart",
+    "multiSearch": {
+      "title": "Search by Multiple Articles",
+      "subtitle": "Enter article numbers (one per line) to find parts in bulk.",
+      "inputPlaceholder": "Enter article numbers here...",
+      "searchButton": "Search Parts",
+      "resultsTitle": "Search Results",
+      "backToProducts": "Back to Product List",
+      "noArticlesEntered": "Please enter at least one article number",
+      "articleColumn": "Article",
+      "nameColumn": "Part Name",
+      "brandColumn": "Brand",
+      "stockColumn": "Stock",
+      "priceColumn": "Price",
+      "actionColumn": "Action"
+    }
   },
   "cart": {
     "title": "Shopping Cart",

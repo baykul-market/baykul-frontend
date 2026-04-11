@@ -4,6 +4,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './features/auth/LoginPage';
 import RegisterPage from './features/auth/RegisterPage';
 import ProductListPage from './features/product/ProductListPage';
+import MultiArticleSearchPage from './features/product/MultiArticleSearchPage';
 import CartPage from './features/cart/CartPage';
 import OrderHistoryPage from './features/order/OrderHistoryPage';
 import OrderDetailPage from './features/order/OrderDetailPage';
@@ -34,6 +35,7 @@ function App() {
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
           <Route path="products" element={<ProtectedRoute><ProductListPage /></ProtectedRoute>} />
+          <Route path="products/multi-search" element={<ProtectedRoute><MultiArticleSearchPage /></ProtectedRoute>} />
           <Route path="cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>} />
           <Route path="orders" element={<ProtectedRoute><OrderHistoryPage /></ProtectedRoute>} />
           <Route path="orders/:orderId" element={<ProtectedRoute><OrderDetailPage /></ProtectedRoute>} />

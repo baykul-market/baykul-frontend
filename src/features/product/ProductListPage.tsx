@@ -3,9 +3,10 @@ import { useQuery } from '@tanstack/react-query';
 import { productApi, Part } from '../../api/product';
 import { cartApi } from '../../api/cart';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, ShoppingCart, Loader2, Package, Tag, Weight, Box } from 'lucide-react';
+import { Search, ShoppingCart, Loader2, Package, Tag, Weight, Box, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { getCurrencySymbol } from '../../lib/currency';
 
 export default function ProductListPage() {
@@ -43,17 +44,26 @@ export default function ProductListPage() {
           </p>
 
           {/* Search Bar */}
-          <div className="relative max-w-xl">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-              <Search className="w-5 h-5 text-muted-foreground" />
+          <div className="flex flex-col sm:flex-row gap-3 max-w-xl">
+            <div className="relative flex-1">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                <Search className="w-5 h-5 text-muted-foreground" />
+              </div>
+              <input
+                type="search"
+                className="input-base pl-11 pr-4 py-3 text-base shadow-sm"
+                placeholder={t('products.searchPlaceholder')}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
-            <input
-              type="search"
-              className="input-base pl-11 pr-4 py-3 text-base shadow-sm"
-              placeholder={t('products.searchPlaceholder')}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+            <Link
+              to="/products/multi-search"
+              className="btn-secondary h-12 px-6 whitespace-nowrap shadow-sm group"
+            >
+              <FileText className="w-5 h-5 group-hover:text-primary transition-colors" />
+              <span>{t('products.multiSearch.title')}</span>
+            </Link>
           </div>
         </div>
       </div>
