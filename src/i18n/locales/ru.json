@@ -114,7 +114,22 @@
     "extendedDelivery": "Увеличенный срок доставки",
     "soldOut": "Распродано",
     "addedToCart": "Добавлено в корзину",
-    "failedToAdd": "Не удалось добавить в корзину"
+    "failedToAdd": "Не удалось добавить в корзину",
+    "multiSearch": {
+      "title": "Поиск по нескольким артикулам",
+      "subtitle": "Введите артикулы (по одному в строке) для массового поиска запчастей.",
+      "inputPlaceholder": "Введите артикулы здесь...",
+      "searchButton": "Найти запчасти",
+      "resultsTitle": "Результаты поиска",
+      "backToProducts": "Вернуться к списку товаров",
+      "noArticlesEntered": "Пожалуйста, введите хотя бы один артикул",
+      "articleColumn": "Артикул",
+      "nameColumn": "Название",
+      "brandColumn": "Бренд",
+      "stockColumn": "Сток",
+      "priceColumn": "Цена",
+      "actionColumn": "Действие"
+    }
   },
   "cart": {
     "title": "Корзина",

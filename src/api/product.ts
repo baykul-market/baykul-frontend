@@ -75,6 +75,11 @@ export const productApi = {
     return response.data;
   },
 
+  searchByArticles: async (articles: string[]): Promise<Part[]> => {
+    const response = await api.post<{ parts: Part[] }>('/product/search/articles', { articles });
+    return response.data.parts;
+  },
+
   uploadCsv: async (file: File, config?: AxiosRequestConfig): Promise<{ parsed: string }> => {
     const formData = new FormData();
     formData.append('csvFile', file);
