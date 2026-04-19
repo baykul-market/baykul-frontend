@@ -74,7 +74,7 @@
       "createAccount": "Create Account",
       "haveAccount": "Already have an account?",
       "signIn": "Sign in",
-      "success": "Registration successful! Please login.",
+      "success": "Registration successful! Your account is waiting for approval.",
       "error": "Registration failed."
     }
   },
