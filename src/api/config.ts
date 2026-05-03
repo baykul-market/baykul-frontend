@@ -7,6 +7,7 @@ export interface DeliveryCostConfigDto {
     minimumSum: number;
     markupType: 'PERCENTAGE' | 'SUM';
     value: number;
+    userId?: string | null;
 }
 
 export interface PriceConfigDto {
@@ -36,8 +37,14 @@ export const configApi = {
     saveDeliveryRule: (data: DeliveryCostConfigDto, config?: AxiosRequestConfig) =>
         api.post('/price-config/delivery-rule', data, config).then(res => res.data),
 
+    updateDeliveryRule: (data: DeliveryCostConfigDto, config?: AxiosRequestConfig) =>
+        api.put('/price-config/delivery-rule', data, config).then(res => res.data),
+
     deleteDeliveryRule: (id: string, config?: AxiosRequestConfig) =>
         api.delete('/price-config/delivery-rule', { ...config, params: { id, ...config?.params } }).then(res => res.data),
+
+    getDeliveryRulesByUser: (userId: string, config?: AxiosRequestConfig) =>
+        api.get<DeliveryCostConfigDto[]>(`/price-config/delivery-rule/user/${userId}`, config).then(res => res.data),
 
     // Currency Exchange Endpoints
     getExchangeRates: (config?: AxiosRequestConfig) => api.get<CurrencyExchangeDto[]>('/currency-exchange', config).then(res => res.data),

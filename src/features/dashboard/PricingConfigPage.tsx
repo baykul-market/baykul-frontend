@@ -85,13 +85,29 @@ export default function PricingConfigPage() {
     };
 
     const handleSaveRule = async () => {
+        const minNum = Number(newRuleMinSum);
+        const valNum = Number(newRuleValue);
+
+        if (minNum < 0) {
+            toast.error(t('pricing.errors.minSumNegative', 'Minimum sum must be 0 or greater.'));
+            return;
+        }
+        if (valNum < 0) {
+            toast.error(t('pricing.errors.valueNegative', 'Value must be 0 or greater.'));
+            return;
+        }
+
+        if (deliveryRules.some(r => r.minimumSum === minNum)) {
+            toast.error(t('pricing.errors.duplicateMinSum', 'A rule with this minimum sum already exists.'));
+            return;
+        }
+
         setAddingRule(true);
         try {
-            const val = Number(newRuleValue);
             await configApi.saveDeliveryRule({
-                minimumSum: Number(newRuleMinSum),
+                minimumSum: minNum,
                 markupType: newRuleType,
-                value: newRuleType === 'PERCENTAGE' ? val / 100 : val
+                value: newRuleType === 'PERCENTAGE' ? valNum / 100 : valNum
             }, { customErrorToast: t('pricing.errors.saveFailed', 'Failed to save rule') });
             toast.success(t('pricing.success.ruleSaved', 'Delivery rule saved successfully'));
             resetRuleForm();
