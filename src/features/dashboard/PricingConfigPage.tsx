@@ -21,6 +21,9 @@ export default function PricingConfigPage() {
     const [deliveryRules, setDeliveryRules] = useState<DeliveryCostConfigDto[]>([]);
     const [markupPercentage, setMarkupPercentage] = useState<string>('0');
     const [systemCurrency, setSystemCurrency] = useState<Currency>('RUB');
+    const [deliveryCurrency, setDeliveryCurrency] = useState<Currency>('EUR');
+    const [roundingScale, setRoundingScale] = useState<number>(2);
+    const [roundingMode, setRoundingMode] = useState<PriceConfigDto['roundingMode']>('CEILING');
 
     // Rule Form
     const [newRuleMinSum, setNewRuleMinSum] = useState<string>('0');
@@ -62,6 +65,9 @@ export default function PricingConfigPage() {
             setDeliveryRules(fetchedConfig.deliveryCostConfigs || []);
             setMarkupPercentage(String((fetchedConfig.markupPercentage || 0) * 100));
             setSystemCurrency(fetchedConfig.systemCurrency);
+            setDeliveryCurrency(fetchedConfig.deliveryCurrency);
+            setRoundingScale(fetchedConfig.roundingScale);
+            setRoundingMode(fetchedConfig.roundingMode);
 
             setLoading(false);
         } catch (error) {
@@ -74,7 +80,10 @@ export default function PricingConfigPage() {
         try {
             await configApi.updateConfig({
                 markupPercentage: Number(markupPercentage) / 100,
-                systemCurrency: systemCurrency
+                systemCurrency: systemCurrency,
+                deliveryCurrency: deliveryCurrency,
+                roundingScale: roundingScale,
+                roundingMode: roundingMode
             }, { customErrorToast: t('pricing.errors.saveFailed', 'Failed to save configuration') });
             toast.success(t('pricing.success.configSaved', 'Configuration saved successfully'));
             fetchData();
@@ -351,7 +360,7 @@ export default function PricingConfigPage() {
                     </div>
 
                     {/* Row 3: Default Currency */}
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 py-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 py-4 border-b border-dashed">
                         <div className="sm:w-56 shrink-0">
                             <label className="text-sm font-medium flex items-center gap-2">
                                 <DollarSign size={14} className="text-muted-foreground" />
@@ -369,6 +378,68 @@ export default function PricingConfigPage() {
                                     <option key={c} value={c}>{getCurrencySymbol(c)} {c}</option>
                                 ))}
                             </select>
+                        </div>
+                    </div>
+
+                    {/* Row 4: Delivery Currency */}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 py-4 border-b border-dashed">
+                        <div className="sm:w-56 shrink-0">
+                            <label className="text-sm font-medium flex items-center gap-2">
+                                <DollarSign size={14} className="text-muted-foreground" />
+                                {t('pricing.global.deliveryCurrency', 'Delivery Currency')}
+                            </label>
+                            <p className="text-xs text-muted-foreground mt-0.5">{t('pricing.global.deliveryCurrencyDesc', 'Currency for incoming delivery costs')}</p>
+                        </div>
+                        <div className="flex-1 max-w-xs">
+                            <select
+                                value={deliveryCurrency}
+                                onChange={(e) => setDeliveryCurrency(e.target.value as Currency)}
+                                className="w-full bg-background border rounded-lg px-3 py-2.5 text-foreground text-sm focus:ring-2 focus:border-primary outline-none transition-all"
+                            >
+                                {currencyOptions.map((c) => (
+                                    <option key={c} value={c}>{getCurrencySymbol(c)} {c}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    {/* Row 5: Rounding Configuration */}
+                    <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-6 py-4">
+                        <div className="sm:w-56 shrink-0">
+                            <label className="text-sm font-medium flex items-center gap-2">
+                                <ListOrdered size={14} className="text-muted-foreground" />
+                                {t('pricing.global.rounding', 'Price Rounding')}
+                            </label>
+                            <p className="text-xs text-muted-foreground mt-0.5">{t('pricing.global.roundingDesc', 'Final price precision and strategy')}</p>
+                        </div>
+                        <div className="flex-1 max-w-xs space-y-3">
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-bold text-muted-foreground uppercase">{t('pricing.global.roundingScale', 'Rounding Scale')}</label>
+                                <input
+                                    type="number"
+                                    value={roundingScale}
+                                    onChange={(e) => setRoundingScale(Number(e.target.value))}
+                                    className="w-full bg-background border rounded-lg px-3 py-2 text-foreground text-sm focus:ring-2 focus:border-primary outline-none transition-all"
+                                />
+                                <p className="text-[10px] text-muted-foreground italic">
+                                    {t('pricing.global.roundingScaleHint', '2 = Cents, 0 = Whole, -2 = Hundreds')}
+                                </p>
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-bold text-muted-foreground uppercase">{t('pricing.global.roundingMode', 'Rounding Mode')}</label>
+                                <select
+                                    value={roundingMode}
+                                    onChange={(e) => setRoundingMode(e.target.value as PriceConfigDto['roundingMode'])}
+                                    className="w-full bg-background border rounded-lg px-3 py-2 text-foreground text-sm focus:ring-2 focus:border-primary outline-none transition-all"
+                                >
+                                    <option value="CEILING">{t('pricing.global.modes.ceiling', 'CEILING (Always Up)')}</option>
+                                    <option value="FLOOR">{t('pricing.global.modes.floor', 'FLOOR (Always Down)')}</option>
+                                    <option value="HALF_UP">{t('pricing.global.modes.halfUp', 'HALF_UP (Standard)')}</option>
+                                    <option value="HALF_EVEN">{t('pricing.global.modes.halfEven', 'HALF_EVEN (Bankers)')}</option>
+                                    <option value="UP">{t('pricing.global.modes.up', 'UP')}</option>
+                                    <option value="DOWN">{t('pricing.global.modes.down', 'DOWN')}</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 

@@ -136,7 +136,7 @@ export interface UserCreateInput {
   role?: 'USER' | 'MANAGER' | 'ADMIN';
   blocked?: boolean;
   canPayLater?: boolean;
-  markupPercentage?: number;
+  markupPercentage?: number | null;
   profile?: {
     name?: string;
     surname?: string;
@@ -151,7 +151,7 @@ export interface UserUpdateInput {
   password?: string;
   blocked?: boolean;
   canPayLater?: boolean;
-  markupPercentage?: number;
+  markupPercentage?: number | null;
   profile?: {
     name?: string;
     surname?: string;

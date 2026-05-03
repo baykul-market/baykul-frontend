@@ -57,6 +57,9 @@ describe('PricingConfigPage', () => {
         (configApi.getConfig as any).mockResolvedValueOnce({
             markupPercentage: 0.2,
             systemCurrency: 'RUB',
+            deliveryCurrency: 'EUR',
+            roundingScale: 2,
+            roundingMode: 'CEILING',
             deliveryCostConfigs: [
                 { id: 'rule-1', minimumSum: 0, markupType: 'PERCENTAGE', value: 0.15 }
             ]
@@ -94,6 +97,9 @@ describe('PricingConfigPage', () => {
         (configApi.getConfig as any).mockResolvedValue({
             markupPercentage: 0.1,
             systemCurrency: 'RUB',
+            deliveryCurrency: 'EUR',
+            roundingScale: 2,
+            roundingMode: 'CEILING',
             deliveryCostConfigs: [],
         });
         (configApi.getExchangeRates as any).mockResolvedValue([]);
@@ -112,7 +118,10 @@ describe('PricingConfigPage', () => {
             expect(configApi.updateConfig).toHaveBeenCalledWith(
                 {
                     markupPercentage: 0.1,
-                    systemCurrency: 'RUB'
+                    systemCurrency: 'RUB',
+                    deliveryCurrency: 'EUR',
+                    roundingScale: 2,
+                    roundingMode: 'CEILING'
                 },
                 expect.anything()
             );
@@ -125,6 +134,9 @@ describe('PricingConfigPage', () => {
         (configApi.getConfig as any).mockResolvedValue({
             markupPercentage: 0.1,
             systemCurrency: 'RUB',
+            deliveryCurrency: 'EUR',
+            roundingScale: 2,
+            roundingMode: 'CEILING',
             deliveryCostConfigs: [],
         });
         (configApi.getExchangeRates as any).mockResolvedValue([
@@ -172,6 +184,9 @@ describe('PricingConfigPage', () => {
         (configApi.getConfig as any).mockResolvedValue({
             markupPercentage: 0.1,
             systemCurrency: 'RUB',
+            deliveryCurrency: 'EUR',
+            roundingScale: 2,
+            roundingMode: 'CEILING',
             deliveryCostConfigs: [],
         });
         (configApi.getExchangeRates as any).mockResolvedValue([

@@ -674,6 +674,11 @@ function UserFormModal({
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const { data: config } = useQuery({
+    queryKey: ['price-config'],
+    queryFn: () => configApi.getConfig(),
+  });
+
   const createMutation = useMutation({
     mutationFn: (data: UserCreateInput) => userAdminApi.create(data, { customErrorToast: t('dashboard.userManagement.createError') }),
     onSuccess: () => {
@@ -728,8 +733,8 @@ function UserFormModal({
         data.phoneNumber = phoneNumber || undefined;
       if (blocked !== user.blocked) data.blocked = blocked;
       if (canPayLater !== (user.canPayLater ?? false)) data.canPayLater = canPayLater;
-      const numMarkup = markupPercentage === '' ? undefined : parseFloat(markupPercentage) / 100;
-      if (numMarkup !== user.markupPercentage) data.markupPercentage = numMarkup;
+      const numMarkup = markupPercentage === '' ? null : parseFloat(markupPercentage) / 100;
+      if (numMarkup !== (user.markupPercentage ?? null)) data.markupPercentage = numMarkup;
 
       if (
         name !== (user.profile?.name ?? '') ||
@@ -749,7 +754,7 @@ function UserFormModal({
         role,
         blocked,
         canPayLater,
-        markupPercentage: markupPercentage === '' ? undefined : parseFloat(markupPercentage) / 100,
+        markupPercentage: markupPercentage === '' ? null : parseFloat(markupPercentage) / 100,
         profile: profileData,
       });
     }
@@ -1004,8 +1009,11 @@ function UserFormModal({
               className="input-base"
               value={markupPercentage}
               onChange={(e) => setMarkupPercentage(e.target.value)}
-              placeholder="e.g. 10"
+              placeholder={config ? `${t('common.inherited', 'Inherited')}: ${config.markupPercentage * 100}%` : 'e.g. 10'}
             />
+            <p className="text-[10px] text-muted-foreground mt-1 uppercase font-bold tracking-wide">
+              {t('dashboard.userManagement.markupPercentageHint', 'Leave empty to use global configuration')}
+            </p>
           </div>
 
           {/* Individual Tariffs */}
@@ -1585,7 +1593,7 @@ function UserDeliveryTariffs({ userId, t }: { userId: string; t: (key: string, o
             <div key={rule.id} className="flex items-center justify-between p-2.5 bg-background border rounded-lg group">
               <div className="flex flex-col">
                 <span className="text-sm font-medium">
-                  {rule.markupType === 'PERCENTAGE' ? `${rule.value * 100}%` : `${rule.value} (Fixed)`}
+                  {rule.markupType === 'PERCENTAGE' ? `${rule.value * 100}%` : `${rule.value} (${t('pricing.global.fixed', 'Fixed')})`}
                 </span>
                 <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wide mt-0.5">
                   {t('pricing.global.minSum', 'Min Cost')}: {rule.minimumSum}
