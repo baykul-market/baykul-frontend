@@ -21,7 +21,7 @@ export default function PricingConfigPage() {
     const [deliveryRules, setDeliveryRules] = useState<DeliveryCostConfigDto[]>([]);
     const [markupPercentage, setMarkupPercentage] = useState<string>('0');
     const [systemCurrency, setSystemCurrency] = useState<Currency>('RUB');
-    const [deliveryCurrency, setDeliveryCurrency] = useState<Currency>('EUR');
+    const [deliveryCurrency, setDeliveryCurrency] = useState<Currency | null>(null);
     const [roundingScale, setRoundingScale] = useState<number>(2);
     const [roundingMode, setRoundingMode] = useState<PriceConfigDto['roundingMode']>('CEILING');
 
@@ -65,7 +65,7 @@ export default function PricingConfigPage() {
             setDeliveryRules(fetchedConfig.deliveryCostConfigs || []);
             setMarkupPercentage(String((fetchedConfig.markupPercentage || 0) * 100));
             setSystemCurrency(fetchedConfig.systemCurrency);
-            setDeliveryCurrency(fetchedConfig.deliveryCurrency);
+            setDeliveryCurrency(fetchedConfig.deliveryCurrency || null);
             setRoundingScale(fetchedConfig.roundingScale);
             setRoundingMode(fetchedConfig.roundingMode);
 
@@ -262,10 +262,10 @@ export default function PricingConfigPage() {
                                     <div key={rule.id} className="flex items-center justify-between p-3 bg-background border rounded-lg group hover:bg-secondary/10 transition-colors">
                                         <div className="flex flex-col">
                                             <span className="text-sm font-medium">
-                                                {rule.markupType === 'PERCENTAGE' ? `${rule.value * 100}%` : `${rule.value} ${getCurrencySymbol(systemCurrency)}`}
+                                                {rule.markupType === 'PERCENTAGE' ? `${rule.value * 100}%` : `${rule.value} ${getCurrencySymbol(deliveryCurrency || systemCurrency)}`}
                                             </span>
                                             <span className="text-xs text-muted-foreground">
-                                                {t('pricing.global.minSum', 'Minimal cost of the box')}: {rule.minimumSum} {getCurrencySymbol(systemCurrency)}
+                                                {t('pricing.global.minSum', 'Minimal cost of the box')}: {rule.minimumSum} {getCurrencySymbol(deliveryCurrency || systemCurrency)}
                                             </span>
                                         </div>
                                         <button
@@ -285,20 +285,23 @@ export default function PricingConfigPage() {
                             <h4 className="text-xs font-semibold mb-3 uppercase tracking-wider text-muted-foreground">
                                 {t('pricing.global.addRule', 'Add New Delivery Rule')}
                             </h4>
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                            <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_1fr_auto] gap-3 items-end">
                                 <div>
-                                    <label className="text-[10px] font-bold text-muted-foreground mb-1 block uppercase">
+                                    <label className="text-[10px] font-bold text-muted-foreground mb-1 block uppercase truncate">
                                         {t('pricing.global.minSum', 'Min Cost')}
                                     </label>
-                                    <input
-                                        type="number"
-                                        value={newRuleMinSum}
-                                        onChange={(e) => setNewRuleMinSum(e.target.value)}
-                                        className="w-full py-1.5 bg-background border rounded-md text-sm px-2 outline-none focus:ring-1 focus:ring-primary h-9"
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type="number"
+                                            value={newRuleMinSum}
+                                            onChange={(e) => setNewRuleMinSum(e.target.value)}
+                                            className="w-full py-1.5 bg-background border rounded-md text-sm pl-2 pr-6 outline-none focus:ring-1 focus:ring-primary h-9"
+                                        />
+                                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground">{getCurrencySymbol(deliveryCurrency || systemCurrency)}</span>
+                                    </div>
                                 </div>
                                 <div>
-                                    <label className="text-[10px] font-bold text-muted-foreground mb-1 block uppercase">
+                                    <label className="text-[10px] font-bold text-muted-foreground mb-1 block uppercase truncate">
                                         {t('pricing.global.markupType', 'Type')}
                                     </label>
                                     <select
@@ -310,27 +313,30 @@ export default function PricingConfigPage() {
                                         <option value="SUM">{t('pricing.global.fixed', 'Fixed Sum')}</option>
                                     </select>
                                 </div>
-                                <div className="flex gap-2">
-                                    <div className="flex-1">
-                                        <label className="text-[10px] font-bold text-muted-foreground mb-1 block uppercase">
-                                            {t('pricing.global.value', 'Value')}
-                                        </label>
+                                <div>
+                                    <label className="text-[10px] font-bold text-muted-foreground mb-1 block uppercase truncate">
+                                        {t('pricing.global.value', 'Value')}
+                                    </label>
+                                    <div className="relative">
                                         <input
                                             type="number"
                                             step="0.01"
                                             value={newRuleValue}
                                             onChange={(e) => setNewRuleValue(e.target.value)}
-                                            className="w-full py-1.5 bg-background border rounded-md text-sm px-2 outline-none focus:ring-1 focus:ring-primary h-9"
+                                            className="w-full py-1.5 bg-background border rounded-md text-sm pl-2 pr-6 outline-none focus:ring-1 focus:ring-primary h-9"
                                         />
+                                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground">
+                                            {newRuleType === 'PERCENTAGE' ? '%' : getCurrencySymbol(deliveryCurrency || systemCurrency)}
+                                        </span>
                                     </div>
-                                    <button
-                                        onClick={handleSaveRule}
-                                        disabled={addingRule}
-                                        className="btn-primary h-9 px-3 self-end"
-                                    >
-                                        {addingRule ? <RefreshCw size={14} className="animate-spin" /> : <Plus size={14} />}
-                                    </button>
                                 </div>
+                                <button
+                                    onClick={handleSaveRule}
+                                    disabled={addingRule}
+                                    className="btn-primary h-9 px-4 shrink-0"
+                                >
+                                    {addingRule ? <RefreshCw size={14} className="animate-spin" /> : <Plus size={14} />}
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -392,10 +398,11 @@ export default function PricingConfigPage() {
                         </div>
                         <div className="flex-1 max-w-xs">
                             <select
-                                value={deliveryCurrency}
-                                onChange={(e) => setDeliveryCurrency(e.target.value as Currency)}
+                                value={deliveryCurrency || ''}
+                                onChange={(e) => setDeliveryCurrency(e.target.value ? e.target.value as Currency : null)}
                                 className="w-full bg-background border rounded-lg px-3 py-2.5 text-foreground text-sm focus:ring-2 focus:border-primary outline-none transition-all"
                             >
+                                <option value="">{t('common.inherited', 'Inherited')} ({getCurrencySymbol(systemCurrency)} {systemCurrency})</option>
                                 {currencyOptions.map((c) => (
                                     <option key={c} value={c}>{getCurrencySymbol(c)} {c}</option>
                                 ))}

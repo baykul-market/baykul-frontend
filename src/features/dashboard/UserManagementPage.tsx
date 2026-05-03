@@ -12,6 +12,8 @@ import {
   type BalanceOperationDto,
 } from '../../api/user';
 import { configApi, type DeliveryCostConfigDto } from '../../api/config';
+import { type Currency } from '../../api/types';
+import { getCurrencySymbol } from '../../lib/currency';
 import {
   Users,
   Plus,
@@ -40,6 +42,8 @@ import {
   History,
   ChevronDown,
   ChevronUp,
+  Settings,
+  Check,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useTranslation } from 'react-i18next';
@@ -766,7 +770,7 @@ function UserFormModal({
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative w-full max-w-lg card p-0 animate-slide-up max-h-[90vh] overflow-y-auto">
+      <div className="relative w-full max-w-5xl card p-0 animate-slide-up max-h-[95vh] overflow-hidden flex flex-col">
         {/* Modal Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b">
           <h2 className="text-lg font-semibold">
@@ -784,7 +788,7 @@ function UserFormModal({
         </div>
 
         {/* Modal Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto flex-1">
           {/* Profile */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
@@ -1018,9 +1022,16 @@ function UserFormModal({
 
           {/* Individual Tariffs */}
           {isEdit && user && (
-            <div className="pt-4 border-t mt-4">
-              <h3 className="text-sm font-semibold mb-3">{t('dashboard.userManagement.individualTariffs', 'Individual Delivery Tariffs')}</h3>
-              <UserDeliveryTariffs userId={user.id} t={t} />
+            <div className="pt-6 border-t mt-6">
+              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                <Settings className="w-4 h-4 text-primary" />
+                {t('dashboard.userManagement.individualTariffs', 'Individual Delivery Tariffs')}
+              </h3>
+              <UserDeliveryTariffs
+                userId={user.id}
+                t={t}
+                deliveryCurrency={config?.deliveryCurrency || config?.systemCurrency || 'EUR'}
+              />
             </div>
           )}
 
@@ -1464,7 +1475,15 @@ function BalanceModal({
 
 // ─── User Delivery Tariffs Component ──────────────────────────────
 
-function UserDeliveryTariffs({ userId, t }: { userId: string; t: (key: string, opts?: any) => string }) {
+function UserDeliveryTariffs({
+  userId,
+  t,
+  deliveryCurrency
+}: {
+  userId: string;
+  t: (key: string, opts?: any) => string;
+  deliveryCurrency: Currency;
+}) {
   const [rules, setRules] = useState<DeliveryCostConfigDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editingRule, setEditingRule] = useState<DeliveryCostConfigDto | null>(null);
@@ -1593,10 +1612,12 @@ function UserDeliveryTariffs({ userId, t }: { userId: string; t: (key: string, o
             <div key={rule.id} className="flex items-center justify-between p-2.5 bg-background border rounded-lg group">
               <div className="flex flex-col">
                 <span className="text-sm font-medium">
-                  {rule.markupType === 'PERCENTAGE' ? `${rule.value * 100}%` : `${rule.value} (${t('pricing.global.fixed', 'Fixed')})`}
+                  {rule.markupType === 'PERCENTAGE'
+                    ? `${rule.value * 100}%`
+                    : `${rule.value} ${getCurrencySymbol(deliveryCurrency)} (${t('pricing.global.fixed', 'Fixed')})`}
                 </span>
                 <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wide mt-0.5">
-                  {t('pricing.global.minSum', 'Min Cost')}: {rule.minimumSum}
+                  {t('pricing.global.minSum', 'Min Cost')}: {rule.minimumSum} {getCurrencySymbol(deliveryCurrency)}
                 </span>
               </div>
               <div className="flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
@@ -1613,35 +1634,76 @@ function UserDeliveryTariffs({ userId, t }: { userId: string; t: (key: string, o
       )}
 
       {isFormOpen && (
-        <div className="p-3 bg-secondary/20 rounded-lg border border-dashed space-y-3 mt-2">
-          <h5 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-            {editingRule ? t('common.edit', 'Edit') : t('common.add', 'Add')} {t('pricing.global.deliveryRules', 'Delivery Rule')}
-          </h5>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-            <div>
-              <label className="text-[10px] font-bold text-muted-foreground mb-1 block uppercase">{t('pricing.global.minSum', 'Min Cost')}</label>
-              <input type="number" value={minSum} onChange={e => setMinSum(e.target.value)} className="w-full py-1.5 bg-background border rounded-md text-xs px-2 outline-none focus:ring-1 focus:ring-primary h-8" />
+        <div className="p-4 bg-secondary/20 rounded-xl border border-primary/20 space-y-4 mt-2 animate-in fade-in slide-in-from-top-1">
+          <div className="flex items-center justify-between border-b border-primary/10 pb-2 mb-2">
+            <h5 className="text-[10px] font-bold uppercase tracking-wider text-primary">
+              {editingRule ? t('common.edit', 'Edit') : t('common.add', 'Add')} {t('pricing.global.deliveryRules', 'Delivery Rule')}
+            </h5>
+            {editingRule && (
+              <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded uppercase font-bold">ID: {editingRule.id?.slice(0, 8)}</span>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_1fr_auto] gap-3 items-end">
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-muted-foreground uppercase px-1 truncate block">{t('pricing.global.minSum', 'Min Cost')}</label>
+              <div className="relative">
+                <input
+                  type="number"
+                  value={minSum}
+                  onChange={e => setMinSum(e.target.value)}
+                  className="w-full py-2 bg-background border rounded-lg text-sm pl-3 pr-8 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all h-9"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground">{getCurrencySymbol(deliveryCurrency)}</span>
+              </div>
             </div>
-            <div>
-              <label className="text-[10px] font-bold text-muted-foreground mb-1 block uppercase">{t('pricing.global.markupType', 'Type')}</label>
-              <select value={markupType} onChange={e => setMarkupType(e.target.value as 'PERCENTAGE' | 'SUM')} className="w-full py-1.5 bg-background border rounded-md text-xs px-2 outline-none focus:ring-1 focus:ring-primary h-8">
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-muted-foreground uppercase px-1 truncate block">{t('pricing.global.markupType', 'Type')}</label>
+              <select
+                value={markupType}
+                onChange={e => setMarkupType(e.target.value as 'PERCENTAGE' | 'SUM')}
+                className="w-full py-2 bg-background border rounded-lg text-sm px-3 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all h-9"
+              >
                 <option value="PERCENTAGE">{t('pricing.global.percentage', 'Percentage (%)')}</option>
                 <option value="SUM">{t('pricing.global.fixed', 'Fixed Sum')}</option>
               </select>
             </div>
-            <div>
-              <label className="text-[10px] font-bold text-muted-foreground mb-1 block uppercase">{t('pricing.global.value', 'Value')}</label>
-              <input type="number" step="0.01" value={value} onChange={e => setValue(e.target.value)} className="w-full py-1.5 bg-background border rounded-md text-xs px-2 outline-none focus:ring-1 focus:ring-primary h-8" />
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-muted-foreground uppercase px-1 truncate block">{t('pricing.global.value', 'Value')}</label>
+              <div className="relative">
+                <input
+                  type="number"
+                  step="0.01"
+                  value={value}
+                  onChange={e => setValue(e.target.value)}
+                  className="w-full py-2 bg-background border rounded-lg text-sm pl-3 pr-8 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all h-9"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground">
+                  {markupType === 'PERCENTAGE' ? '%' : getCurrencySymbol(deliveryCurrency)}
+                </span>
+              </div>
             </div>
-          </div>
-          <div className="flex justify-end gap-2 pt-2 border-t border-dashed mt-3">
-            <button type="button" onClick={handleCloseForm} className="btn-ghost text-xs px-2 py-1 h-auto">
-              {t('common.cancel', 'Cancel')}
-            </button>
-            <button type="button" onClick={handleSave} disabled={isSaving} className="btn-primary text-xs px-3 py-1 h-auto">
-              {isSaving && <Loader2 className="w-3 h-3 animate-spin mr-1" />}
-              {t('common.save', 'Save')}
-            </button>
+
+            <div className="flex gap-2 pb-0.5">
+              <button
+                type="button"
+                onClick={handleCloseForm}
+                className="p-2 rounded-lg text-muted-foreground hover:bg-secondary transition-colors"
+                title={t('common.cancel', 'Cancel')}
+              >
+                <X className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={isSaving}
+                className="btn-primary h-9 px-4 rounded-lg shadow-sm shrink-0"
+              >
+                {isSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -13,7 +13,7 @@ export interface DeliveryCostConfigDto {
 export interface PriceConfigDto {
     markupPercentage: number;
     systemCurrency: Currency;
-    deliveryCurrency: Currency;
+    deliveryCurrency: Currency | null;
     roundingScale: number;
     roundingMode: 'UP' | 'DOWN' | 'CEILING' | 'FLOOR' | 'HALF_UP' | 'HALF_DOWN' | 'HALF_EVEN' | 'UNNECESSARY';
     deliveryCostConfigs: DeliveryCostConfigDto[];
