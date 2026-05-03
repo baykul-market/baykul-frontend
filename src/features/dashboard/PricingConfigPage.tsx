@@ -21,6 +21,9 @@ export default function PricingConfigPage() {
     const [deliveryRules, setDeliveryRules] = useState<DeliveryCostConfigDto[]>([]);
     const [markupPercentage, setMarkupPercentage] = useState<string>('0');
     const [systemCurrency, setSystemCurrency] = useState<Currency>('RUB');
+    const [deliveryCurrency, setDeliveryCurrency] = useState<Currency | null>(null);
+    const [roundingScale, setRoundingScale] = useState<number>(2);
+    const [roundingMode, setRoundingMode] = useState<PriceConfigDto['roundingMode']>('CEILING');
 
     // Rule Form
     const [newRuleMinSum, setNewRuleMinSum] = useState<string>('0');
@@ -62,6 +65,9 @@ export default function PricingConfigPage() {
             setDeliveryRules(fetchedConfig.deliveryCostConfigs || []);
             setMarkupPercentage(String((fetchedConfig.markupPercentage || 0) * 100));
             setSystemCurrency(fetchedConfig.systemCurrency);
+            setDeliveryCurrency(fetchedConfig.deliveryCurrency || null);
+            setRoundingScale(fetchedConfig.roundingScale);
+            setRoundingMode(fetchedConfig.roundingMode);
 
             setLoading(false);
         } catch (error) {
@@ -74,7 +80,10 @@ export default function PricingConfigPage() {
         try {
             await configApi.updateConfig({
                 markupPercentage: Number(markupPercentage) / 100,
-                systemCurrency: systemCurrency
+                systemCurrency: systemCurrency,
+                deliveryCurrency: deliveryCurrency,
+                roundingScale: roundingScale,
+                roundingMode: roundingMode
             }, { customErrorToast: t('pricing.errors.saveFailed', 'Failed to save configuration') });
             toast.success(t('pricing.success.configSaved', 'Configuration saved successfully'));
             fetchData();
@@ -85,13 +94,29 @@ export default function PricingConfigPage() {
     };
 
     const handleSaveRule = async () => {
+        const minNum = Number(newRuleMinSum);
+        const valNum = Number(newRuleValue);
+
+        if (minNum < 0) {
+            toast.error(t('pricing.errors.minSumNegative', 'Minimum sum must be 0 or greater.'));
+            return;
+        }
+        if (valNum < 0) {
+            toast.error(t('pricing.errors.valueNegative', 'Value must be 0 or greater.'));
+            return;
+        }
+
+        if (deliveryRules.some(r => r.minimumSum === minNum)) {
+            toast.error(t('pricing.errors.duplicateMinSum', 'A rule with this minimum sum already exists.'));
+            return;
+        }
+
         setAddingRule(true);
         try {
-            const val = Number(newRuleValue);
             await configApi.saveDeliveryRule({
-                minimumSum: Number(newRuleMinSum),
+                minimumSum: minNum,
                 markupType: newRuleType,
-                value: newRuleType === 'PERCENTAGE' ? val / 100 : val
+                value: newRuleType === 'PERCENTAGE' ? valNum / 100 : valNum
             }, { customErrorToast: t('pricing.errors.saveFailed', 'Failed to save rule') });
             toast.success(t('pricing.success.ruleSaved', 'Delivery rule saved successfully'));
             resetRuleForm();
@@ -237,10 +262,10 @@ export default function PricingConfigPage() {
                                     <div key={rule.id} className="flex items-center justify-between p-3 bg-background border rounded-lg group hover:bg-secondary/10 transition-colors">
                                         <div className="flex flex-col">
                                             <span className="text-sm font-medium">
-                                                {rule.markupType === 'PERCENTAGE' ? `${rule.value * 100}%` : `${rule.value} ${getCurrencySymbol(systemCurrency)}`}
+                                                {rule.markupType === 'PERCENTAGE' ? `${rule.value * 100}%` : `${rule.value} ${getCurrencySymbol(deliveryCurrency || systemCurrency)}`}
                                             </span>
                                             <span className="text-xs text-muted-foreground">
-                                                {t('pricing.global.minSum', 'Minimal cost of the box')}: {rule.minimumSum} {getCurrencySymbol(systemCurrency)}
+                                                {t('pricing.global.minSum', 'Minimal cost of the box')}: {rule.minimumSum} {getCurrencySymbol(deliveryCurrency || systemCurrency)}
                                             </span>
                                         </div>
                                         <button
@@ -260,20 +285,23 @@ export default function PricingConfigPage() {
                             <h4 className="text-xs font-semibold mb-3 uppercase tracking-wider text-muted-foreground">
                                 {t('pricing.global.addRule', 'Add New Delivery Rule')}
                             </h4>
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                            <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_1fr_auto] gap-3 items-end">
                                 <div>
-                                    <label className="text-[10px] font-bold text-muted-foreground mb-1 block uppercase">
+                                    <label className="text-[10px] font-bold text-muted-foreground mb-1 block uppercase truncate">
                                         {t('pricing.global.minSum', 'Min Cost')}
                                     </label>
-                                    <input
-                                        type="number"
-                                        value={newRuleMinSum}
-                                        onChange={(e) => setNewRuleMinSum(e.target.value)}
-                                        className="w-full py-1.5 bg-background border rounded-md text-sm px-2 outline-none focus:ring-1 focus:ring-primary h-9"
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type="number"
+                                            value={newRuleMinSum}
+                                            onChange={(e) => setNewRuleMinSum(e.target.value)}
+                                            className="w-full py-1.5 bg-background border rounded-md text-sm pl-2 pr-6 outline-none focus:ring-1 focus:ring-primary h-9"
+                                        />
+                                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground">{getCurrencySymbol(deliveryCurrency || systemCurrency)}</span>
+                                    </div>
                                 </div>
                                 <div>
-                                    <label className="text-[10px] font-bold text-muted-foreground mb-1 block uppercase">
+                                    <label className="text-[10px] font-bold text-muted-foreground mb-1 block uppercase truncate">
                                         {t('pricing.global.markupType', 'Type')}
                                     </label>
                                     <select
@@ -285,27 +313,30 @@ export default function PricingConfigPage() {
                                         <option value="SUM">{t('pricing.global.fixed', 'Fixed Sum')}</option>
                                     </select>
                                 </div>
-                                <div className="flex gap-2">
-                                    <div className="flex-1">
-                                        <label className="text-[10px] font-bold text-muted-foreground mb-1 block uppercase">
-                                            {t('pricing.global.value', 'Value')}
-                                        </label>
+                                <div>
+                                    <label className="text-[10px] font-bold text-muted-foreground mb-1 block uppercase truncate">
+                                        {t('pricing.global.value', 'Value')}
+                                    </label>
+                                    <div className="relative">
                                         <input
                                             type="number"
                                             step="0.01"
                                             value={newRuleValue}
                                             onChange={(e) => setNewRuleValue(e.target.value)}
-                                            className="w-full py-1.5 bg-background border rounded-md text-sm px-2 outline-none focus:ring-1 focus:ring-primary h-9"
+                                            className="w-full py-1.5 bg-background border rounded-md text-sm pl-2 pr-6 outline-none focus:ring-1 focus:ring-primary h-9"
                                         />
+                                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground">
+                                            {newRuleType === 'PERCENTAGE' ? '%' : getCurrencySymbol(deliveryCurrency || systemCurrency)}
+                                        </span>
                                     </div>
-                                    <button
-                                        onClick={handleSaveRule}
-                                        disabled={addingRule}
-                                        className="btn-primary h-9 px-3 self-end"
-                                    >
-                                        {addingRule ? <RefreshCw size={14} className="animate-spin" /> : <Plus size={14} />}
-                                    </button>
                                 </div>
+                                <button
+                                    onClick={handleSaveRule}
+                                    disabled={addingRule}
+                                    className="btn-primary h-9 px-4 shrink-0"
+                                >
+                                    {addingRule ? <RefreshCw size={14} className="animate-spin" /> : <Plus size={14} />}
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -335,7 +366,7 @@ export default function PricingConfigPage() {
                     </div>
 
                     {/* Row 3: Default Currency */}
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 py-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 py-4 border-b border-dashed">
                         <div className="sm:w-56 shrink-0">
                             <label className="text-sm font-medium flex items-center gap-2">
                                 <DollarSign size={14} className="text-muted-foreground" />
@@ -353,6 +384,69 @@ export default function PricingConfigPage() {
                                     <option key={c} value={c}>{getCurrencySymbol(c)} {c}</option>
                                 ))}
                             </select>
+                        </div>
+                    </div>
+
+                    {/* Row 4: Delivery Currency */}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 py-4 border-b border-dashed">
+                        <div className="sm:w-56 shrink-0">
+                            <label className="text-sm font-medium flex items-center gap-2">
+                                <DollarSign size={14} className="text-muted-foreground" />
+                                {t('pricing.global.deliveryCurrency', 'Delivery Currency')}
+                            </label>
+                            <p className="text-xs text-muted-foreground mt-0.5">{t('pricing.global.deliveryCurrencyDesc', 'Currency for incoming delivery costs')}</p>
+                        </div>
+                        <div className="flex-1 max-w-xs">
+                            <select
+                                value={deliveryCurrency || ''}
+                                onChange={(e) => setDeliveryCurrency(e.target.value ? e.target.value as Currency : null)}
+                                className="w-full bg-background border rounded-lg px-3 py-2.5 text-foreground text-sm focus:ring-2 focus:border-primary outline-none transition-all"
+                            >
+                                <option value="">{t('common.inherited', 'Inherited')} ({getCurrencySymbol(systemCurrency)} {systemCurrency})</option>
+                                {currencyOptions.map((c) => (
+                                    <option key={c} value={c}>{getCurrencySymbol(c)} {c}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    {/* Row 5: Rounding Configuration */}
+                    <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-6 py-4">
+                        <div className="sm:w-56 shrink-0">
+                            <label className="text-sm font-medium flex items-center gap-2">
+                                <ListOrdered size={14} className="text-muted-foreground" />
+                                {t('pricing.global.rounding', 'Price Rounding')}
+                            </label>
+                            <p className="text-xs text-muted-foreground mt-0.5">{t('pricing.global.roundingDesc', 'Final price precision and strategy')}</p>
+                        </div>
+                        <div className="flex-1 max-w-xs space-y-3">
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-bold text-muted-foreground uppercase">{t('pricing.global.roundingScale', 'Rounding Scale')}</label>
+                                <input
+                                    type="number"
+                                    value={roundingScale}
+                                    onChange={(e) => setRoundingScale(Number(e.target.value))}
+                                    className="w-full bg-background border rounded-lg px-3 py-2 text-foreground text-sm focus:ring-2 focus:border-primary outline-none transition-all"
+                                />
+                                <p className="text-[10px] text-muted-foreground italic">
+                                    {t('pricing.global.roundingScaleHint', '2 = Cents, 0 = Whole, -2 = Hundreds')}
+                                </p>
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-bold text-muted-foreground uppercase">{t('pricing.global.roundingMode', 'Rounding Mode')}</label>
+                                <select
+                                    value={roundingMode}
+                                    onChange={(e) => setRoundingMode(e.target.value as PriceConfigDto['roundingMode'])}
+                                    className="w-full bg-background border rounded-lg px-3 py-2 text-foreground text-sm focus:ring-2 focus:border-primary outline-none transition-all"
+                                >
+                                    <option value="CEILING">{t('pricing.global.modes.ceiling', 'CEILING (Always Up)')}</option>
+                                    <option value="FLOOR">{t('pricing.global.modes.floor', 'FLOOR (Always Down)')}</option>
+                                    <option value="HALF_UP">{t('pricing.global.modes.halfUp', 'HALF_UP (Standard)')}</option>
+                                    <option value="HALF_EVEN">{t('pricing.global.modes.halfEven', 'HALF_EVEN (Bankers)')}</option>
+                                    <option value="UP">{t('pricing.global.modes.up', 'UP')}</option>
+                                    <option value="DOWN">{t('pricing.global.modes.down', 'DOWN')}</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 

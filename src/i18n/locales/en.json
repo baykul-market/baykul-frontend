@@ -21,7 +21,8 @@
     "add": "Add",
     "edit": "Edit",
     "delete": "Delete",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "inherited": "Inherited"
   },
   "nav": {
     "brandFull": "Baykul Auto Parts",
@@ -470,7 +471,12 @@
       "foundUsers_other": "Found {{count}} users",
       "balance": "Balance",
       "deleteConfirmTitle": "Delete User?",
-      "deleteConfirmMessage": "Are you sure you want to delete user \"{{name}}\"? This action cannot be undone."
+      "deleteConfirmMessage": "Are you sure you want to delete user \"{{name}}\"? This action cannot be undone.",
+      "individualTariffs": "Individual Delivery Tariffs",
+      "markupPercentageHint": "Leave empty to use global configuration",
+      "fallbackAlert": "If a threshold is not covered by a personal rule, the system will fall back to Global Delivery Rules. If no rules match at all, delivery is free.",
+      "personalRules": "Personal Rules",
+      "noPersonalRules": "No personal overrides. This user is currently using the Global Delivery Rules."
     },
     "partsUpload": {
       "title": "Parts Upload",
@@ -629,7 +635,22 @@
       "markupPercentage": "Default Markup for New Users",
       "markupDesc": "Applied to product base price for new accounts",
       "systemCurrency": "Default System Currency",
-      "currencyDesc": "Primary currency for the system"
+      "currencyDesc": "Primary currency for the system",
+      "deliveryCurrency": "Delivery Currency",
+      "deliveryCurrencyDesc": "Currency for incoming delivery costs",
+      "rounding": "Price Rounding",
+      "roundingDesc": "Final price precision and strategy",
+      "roundingScale": "Rounding Scale",
+      "roundingScaleHint": "2 = Cents, 0 = Whole, -2 = Hundreds",
+      "roundingMode": "Rounding Mode",
+      "modes": {
+        "ceiling": "CEILING (Always Up)",
+        "floor": "FLOOR (Always Down)",
+        "halfUp": "HALF_UP (Standard)",
+        "halfEven": "HALF_EVEN (Bankers)",
+        "up": "UP",
+        "down": "DOWN"
+      }
     },
     "rates": {
       "title": "Exchange Rates",
@@ -646,13 +667,17 @@
     "errors": {
       "fetchFailed": "Failed to fetch pricing config",
       "saveFailed": "Failed to save configuration",
-      "deleteFailed": "Failed to delete rate"
+      "deleteFailed": "Failed to delete rate",
+      "minSumNegative": "Minimum sum must be 0 or greater.",
+      "valueNegative": "Value must be 0 or greater.",
+      "duplicateMinSum": "A rule with this minimum sum already exists."
     },
     "success": {
       "configSaved": "Configuration saved successfully",
       "rateSaved": "Rate updated successfully",
       "rateDeleted": "Rate deleted",
       "ruleSaved": "Delivery rule saved successfully",
+      "ruleUpdated": "Delivery rule updated successfully",
       "ruleDeleted": "Delivery rule deleted"
     },
     "confirm": {

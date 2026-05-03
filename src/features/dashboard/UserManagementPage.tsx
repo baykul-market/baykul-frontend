@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -11,6 +11,9 @@ import {
   type UserUpdateInput,
   type BalanceOperationDto,
 } from '../../api/user';
+import { configApi, type DeliveryCostConfigDto } from '../../api/config';
+import { type Currency } from '../../api/types';
+import { getCurrencySymbol } from '../../lib/currency';
 import {
   Users,
   Plus,
@@ -39,6 +42,8 @@ import {
   History,
   ChevronDown,
   ChevronUp,
+  Settings,
+  Check,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useTranslation } from 'react-i18next';
@@ -551,7 +556,7 @@ function MobileUserCard({
   onDelete: () => void;
   onToggleBlock: () => void;
   onBalance: () => void;
-  t: (key: string) => string;
+  t: (key: string, opts?: any) => string;
 }) {
   return (
     <div className="card p-4">
@@ -656,7 +661,7 @@ function UserFormModal({
   user?: UserBasic;
   onClose: () => void;
   onSuccess: () => void;
-  t: (key: string, opts?: Record<string, unknown>) => string;
+  t: (key: string, opts?: any) => string;
 }) {
   const isEdit = !!user;
   const [login, setLogin] = useState(user?.login ?? '');
@@ -672,6 +677,11 @@ function UserFormModal({
   const [patronymic, setPatronymic] = useState(user?.profile?.patronymic ?? '');
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const { data: config } = useQuery({
+    queryKey: ['price-config'],
+    queryFn: () => configApi.getConfig(),
+  });
 
   const createMutation = useMutation({
     mutationFn: (data: UserCreateInput) => userAdminApi.create(data, { customErrorToast: t('dashboard.userManagement.createError') }),
@@ -727,8 +737,8 @@ function UserFormModal({
         data.phoneNumber = phoneNumber || undefined;
       if (blocked !== user.blocked) data.blocked = blocked;
       if (canPayLater !== (user.canPayLater ?? false)) data.canPayLater = canPayLater;
-      const numMarkup = markupPercentage === '' ? undefined : parseFloat(markupPercentage) / 100;
-      if (numMarkup !== user.markupPercentage) data.markupPercentage = numMarkup;
+      const numMarkup = markupPercentage === '' ? null : parseFloat(markupPercentage) / 100;
+      if (numMarkup !== (user.markupPercentage ?? null)) data.markupPercentage = numMarkup;
 
       if (
         name !== (user.profile?.name ?? '') ||
@@ -748,7 +758,7 @@ function UserFormModal({
         role,
         blocked,
         canPayLater,
-        markupPercentage: markupPercentage === '' ? undefined : parseFloat(markupPercentage) / 100,
+        markupPercentage: markupPercentage === '' ? null : parseFloat(markupPercentage) / 100,
         profile: profileData,
       });
     }
@@ -760,7 +770,7 @@ function UserFormModal({
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative w-full max-w-lg card p-0 animate-slide-up max-h-[90vh] overflow-y-auto">
+      <div className="relative w-full max-w-5xl card p-0 animate-slide-up max-h-[95vh] overflow-hidden flex flex-col">
         {/* Modal Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b">
           <h2 className="text-lg font-semibold">
@@ -778,7 +788,7 @@ function UserFormModal({
         </div>
 
         {/* Modal Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto flex-1">
           {/* Profile */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
@@ -1003,9 +1013,27 @@ function UserFormModal({
               className="input-base"
               value={markupPercentage}
               onChange={(e) => setMarkupPercentage(e.target.value)}
-              placeholder="e.g. 10"
+              placeholder={config ? `${t('common.inherited', 'Inherited')}: ${config.markupPercentage * 100}%` : 'e.g. 10'}
             />
+            <p className="text-[10px] text-muted-foreground mt-1 uppercase font-bold tracking-wide">
+              {t('dashboard.userManagement.markupPercentageHint', 'Leave empty to use global configuration')}
+            </p>
           </div>
+
+          {/* Individual Tariffs */}
+          {isEdit && user && (
+            <div className="pt-6 border-t mt-6">
+              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                <Settings className="w-4 h-4 text-primary" />
+                {t('dashboard.userManagement.individualTariffs', 'Individual Delivery Tariffs')}
+              </h3>
+              <UserDeliveryTariffs
+                userId={user.id}
+                t={t}
+                deliveryCurrency={config?.deliveryCurrency || config?.systemCurrency || 'EUR'}
+              />
+            </div>
+          )}
 
           {/* Actions */}
           <div className="flex gap-3 pt-2">
@@ -1441,6 +1469,244 @@ function BalanceModal({
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+// ─── User Delivery Tariffs Component ──────────────────────────────
+
+function UserDeliveryTariffs({
+  userId,
+  t,
+  deliveryCurrency
+}: {
+  userId: string;
+  t: (key: string, opts?: any) => string;
+  deliveryCurrency: Currency;
+}) {
+  const [rules, setRules] = useState<DeliveryCostConfigDto[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [editingRule, setEditingRule] = useState<DeliveryCostConfigDto | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [minSum, setMinSum] = useState('0');
+  const [markupType, setMarkupType] = useState<'PERCENTAGE' | 'SUM'>('PERCENTAGE');
+  const [value, setValue] = useState('0');
+  const [isSaving, setIsSaving] = useState(false);
+
+  const fetchRules = async () => {
+    try {
+      setIsLoading(true);
+      const data = await configApi.getDeliveryRulesByUser(userId);
+      setRules(data);
+    } catch (e) {
+      toast.error(t('pricing.errors.fetchFailed', 'Failed to fetch rules'));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRules();
+  }, [userId]);
+
+  const handleOpenForm = (rule?: DeliveryCostConfigDto) => {
+    if (rule) {
+      setEditingRule(rule);
+      setMinSum(rule.minimumSum.toString());
+      setMarkupType(rule.markupType);
+      setValue(rule.markupType === 'PERCENTAGE' ? (rule.value * 100).toString() : rule.value.toString());
+    } else {
+      setEditingRule(null);
+      setMinSum('0');
+      setMarkupType('PERCENTAGE');
+      setValue('0');
+    }
+    setIsFormOpen(true);
+  };
+
+  const handleCloseForm = () => {
+    setIsFormOpen(false);
+    setEditingRule(null);
+  };
+
+  const handleSave = async () => {
+    try {
+      const minNum = Number(minSum);
+      const valNum = Number(value);
+
+      if (minNum < 0) {
+        toast.error(t('pricing.errors.minSumNegative', 'Minimum sum must be 0 or greater.'));
+        return;
+      }
+      if (valNum < 0) {
+        toast.error(t('pricing.errors.valueNegative', 'Value must be 0 or greater.'));
+        return;
+      }
+
+      if (rules.some(r => r.minimumSum === minNum && r.id !== editingRule?.id)) {
+        toast.error(t('pricing.errors.duplicateMinSum', 'A rule with this minimum sum already exists.'));
+        return;
+      }
+
+      setIsSaving(true);
+      const payload: DeliveryCostConfigDto = {
+        minimumSum: minNum,
+        markupType,
+        value: markupType === 'PERCENTAGE' ? valNum / 100 : valNum,
+        userId
+      };
+
+      if (editingRule?.id) {
+        payload.id = editingRule.id;
+        await configApi.updateDeliveryRule(payload);
+        toast.success(t('pricing.success.ruleUpdated', 'Rule updated successfully'));
+      } else {
+        await configApi.saveDeliveryRule(payload);
+        toast.success(t('pricing.success.ruleSaved', 'Rule saved successfully'));
+      }
+      handleCloseForm();
+      fetchRules();
+    } catch (e) {
+      // Error is caught by global toast typically
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm(t('pricing.confirm.deleteRuleMessage', 'Are you sure you want to delete this delivery rule?'))) return;
+    try {
+      await configApi.deleteDeliveryRule(id);
+      toast.success(t('pricing.success.ruleDeleted', 'Rule deleted'));
+      fetchRules();
+    } catch (e) {
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-primary/10 p-3 rounded-lg flex items-start gap-2">
+        <AlertTriangle className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+        <p className="text-xs text-primary/90 leading-tight">
+          {t('dashboard.userManagement.fallbackAlert', 'If a threshold is not covered by a personal rule, the system will fall back to Global Delivery Rules. If no rules match at all, delivery is free.')}
+        </p>
+      </div>
+
+      <div className="flex justify-between items-center">
+        <h4 className="text-xs font-semibold text-muted-foreground uppercase">{t('dashboard.userManagement.personalRules', 'Personal Rules')}</h4>
+        <button type="button" onClick={() => handleOpenForm()} className="btn-secondary text-xs px-2 py-1 h-auto">
+          <Plus className="w-3 h-3 mr-1" />
+          {t('common.add', 'Add')}
+        </button>
+      </div>
+
+      {isLoading ? (
+        <div className="flex justify-center p-4"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
+      ) : rules.length === 0 ? (
+        <p className="text-xs text-muted-foreground italic bg-secondary/10 p-3 rounded-lg border border-dashed">
+          {t('dashboard.userManagement.noPersonalRules', 'No personal overrides. This user is currently using the Global Delivery Rules.')}
+        </p>
+      ) : (
+        <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+          {rules.map(rule => (
+            <div key={rule.id} className="flex items-center justify-between p-2.5 bg-background border rounded-lg group">
+              <div className="flex flex-col">
+                <span className="text-sm font-medium">
+                  {rule.markupType === 'PERCENTAGE'
+                    ? `${rule.value * 100}%`
+                    : `${rule.value} ${getCurrencySymbol(deliveryCurrency)} (${t('pricing.global.fixed', 'Fixed')})`}
+                </span>
+                <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wide mt-0.5">
+                  {t('pricing.global.minSum', 'Min Cost')}: {rule.minimumSum} {getCurrencySymbol(deliveryCurrency)}
+                </span>
+              </div>
+              <div className="flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                <button type="button" onClick={() => handleOpenForm(rule)} className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors">
+                  <Pencil className="w-3.5 h-3.5" />
+                </button>
+                <button type="button" onClick={() => rule.id && handleDelete(rule.id)} className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors">
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {isFormOpen && (
+        <div className="p-4 bg-secondary/20 rounded-xl border border-primary/20 space-y-4 mt-2 animate-in fade-in slide-in-from-top-1">
+          <div className="flex items-center justify-between border-b border-primary/10 pb-2 mb-2">
+            <h5 className="text-[10px] font-bold uppercase tracking-wider text-primary">
+              {editingRule ? t('common.edit', 'Edit') : t('common.add', 'Add')} {t('pricing.global.deliveryRules', 'Delivery Rule')}
+            </h5>
+            {editingRule && (
+              <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded uppercase font-bold">ID: {editingRule.id?.slice(0, 8)}</span>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_1fr_auto] gap-3 items-end">
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-muted-foreground uppercase px-1 truncate block">{t('pricing.global.minSum', 'Min Cost')}</label>
+              <div className="relative">
+                <input
+                  type="number"
+                  value={minSum}
+                  onChange={e => setMinSum(e.target.value)}
+                  className="w-full py-2 bg-background border rounded-lg text-sm pl-3 pr-8 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all h-9"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground">{getCurrencySymbol(deliveryCurrency)}</span>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-muted-foreground uppercase px-1 truncate block">{t('pricing.global.markupType', 'Type')}</label>
+              <select
+                value={markupType}
+                onChange={e => setMarkupType(e.target.value as 'PERCENTAGE' | 'SUM')}
+                className="w-full py-2 bg-background border rounded-lg text-sm px-3 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all h-9"
+              >
+                <option value="PERCENTAGE">{t('pricing.global.percentage', 'Percentage (%)')}</option>
+                <option value="SUM">{t('pricing.global.fixed', 'Fixed Sum')}</option>
+              </select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-muted-foreground uppercase px-1 truncate block">{t('pricing.global.value', 'Value')}</label>
+              <div className="relative">
+                <input
+                  type="number"
+                  step="0.01"
+                  value={value}
+                  onChange={e => setValue(e.target.value)}
+                  className="w-full py-2 bg-background border rounded-lg text-sm pl-3 pr-8 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all h-9"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground">
+                  {markupType === 'PERCENTAGE' ? '%' : getCurrencySymbol(deliveryCurrency)}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex gap-2 pb-0.5">
+              <button
+                type="button"
+                onClick={handleCloseForm}
+                className="p-2 rounded-lg text-muted-foreground hover:bg-secondary transition-colors"
+                title={t('common.cancel', 'Cancel')}
+              >
+                <X className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={isSaving}
+                className="btn-primary h-9 px-4 rounded-lg shadow-sm shrink-0"
+              >
+                {isSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
