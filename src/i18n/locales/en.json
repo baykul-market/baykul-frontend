@@ -435,7 +435,9 @@
       "orderTotal": "Order Total",
       "items": "{{count}} item",
       "items_other": "{{count}} items",
-      "updateBoxTo": "Update box to {{status}}"
+      "updateBoxTo": "Update box to {{status}}",
+      "confirmOrderAction": "Confirm Order",
+      "confirmOrderInfo": "Confirming this order will automatically check warehouse stock for all items. Missing parts will be marked as 'To Order'."
     },
     "userManagement": {
       "title": "User Management",
