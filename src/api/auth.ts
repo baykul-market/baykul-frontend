@@ -10,18 +10,25 @@ export const loginSchema = z.object({
 
 export type LoginInput = z.infer<typeof loginSchema>;
 
+export const forgotPasswordSchema = z.object({
+  identifier: z.string().min(1, 'Login or Email is required'),
+});
+
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+
+
 export const registerSchema = z.object({
-  login: z.string().min(3, 'Login is required (min 3 chars)'),
-  name: z.string().min(2, 'Name is required'),
-  surname: z.string().min(2, 'Surname is required'),
+  login: z.string().min(3, 'auth.register.validation.loginMin'),
+  name: z.string().min(2, 'auth.register.validation.nameMin'),
+  surname: z.string().min(2, 'auth.register.validation.surnameMin'),
   patronymic: z.string().optional(),
-  email: z.string().email('Invalid email address'),
+  email: z.string().min(1, 'auth.register.validation.emailRequired').email('profile.edit.validation.emailInvalid'),
   phoneNumber: z.string().optional(),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
+  password: z.string().min(8, 'auth.register.validation.passwordMin'),
   confirmPassword: z.string().min(8),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
+  message: 'auth.register.validation.passwordMismatch',
+  path: ['confirmPassword'],
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
@@ -57,4 +64,9 @@ export const authApi = {
     const response = await api.get<UserFull>('/users/profile');
     return response.data;
   },
+  forgotPassword: async (data: ForgotPasswordInput, config?: AxiosRequestConfig) => {
+    const response = await api.post('/auth/forgot-password', data, config);
+    return response.data;
+  },
 };
+

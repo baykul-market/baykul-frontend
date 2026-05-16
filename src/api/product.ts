@@ -31,6 +31,19 @@ export interface PartCreateInput {
   brand: string;
 }
 
+export interface SkippedRow {
+  rowNumber: number;
+  errorMessage: string;
+  rawData: string;
+}
+
+export interface CsvUploadResult {
+  saved: number;
+  updated: number;
+  skipped: number;
+  skippedDetails: SkippedRow[];
+}
+
 export type PartUpdateInput = Partial<PartCreateInput>;
 
 export const productApi = {
@@ -80,10 +93,10 @@ export const productApi = {
     return response.data.parts;
   },
 
-  uploadCsv: async (file: File, config?: AxiosRequestConfig): Promise<{ parsed: string }> => {
+  uploadCsv: async (file: File, config?: AxiosRequestConfig): Promise<CsvUploadResult> => {
     const formData = new FormData();
     formData.append('csvFile', file);
-    const response = await api.post<{ parsed: string }>('/product/upload', formData, {
+    const response = await api.post<CsvUploadResult>('/product/upload', formData, {
       ...config,
       headers: { ...config?.headers, 'Content-Type': 'multipart/form-data' },
     });

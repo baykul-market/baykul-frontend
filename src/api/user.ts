@@ -28,7 +28,7 @@ export interface UserFull {
   createdTs: string;
   updatedTs: string;
   login: string;
-  email: string | null;
+  email: string;
   phoneNumber: string | null;
   role: 'USER' | 'ADMIN' | 'MANAGER';
   blocked: boolean;
@@ -45,7 +45,7 @@ export interface UserBasic {
   createdTs: string;
   updatedTs: string;
   login: string;
-  email: string | null;
+  email: string;
   phoneNumber: string | null;
   role: 'USER' | 'ADMIN' | 'MANAGER';
   blocked: boolean;
@@ -131,7 +131,7 @@ export const userProfileApi = {
 export interface UserCreateInput {
   login: string;
   password: string;
-  email?: string;
+  email: string;
   phoneNumber?: string;
   role?: 'USER' | 'MANAGER' | 'ADMIN';
   blocked?: boolean;

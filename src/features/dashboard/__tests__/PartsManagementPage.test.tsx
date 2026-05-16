@@ -3,6 +3,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import PartsManagementPage from '../PartsManagementPage';
+import { productApi } from '../../../api/product';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string, _opts: any) => typeof _opts === 'string' ? _opts : key }),
@@ -22,6 +23,7 @@ vi.mock('../../../api/product', () => ({
     search: vi.fn().mockResolvedValue([
       { id: '1', name: 'Test Part', article: '123', brand: 'Test Brand', price: 100, currency: 'EUR', realPrice: 85.50, realCurrency: 'USD', minCount: 1, storageCount: 5 }
     ]),
+    uploadCsv: vi.fn(),
   }
 }));
 
@@ -78,6 +80,65 @@ describe('PartsManagementPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/Create Part/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('CSV Upload', () => {
+    it('shows success summary after successful upload', async () => {
+      vi.mocked(productApi.uploadCsv).mockResolvedValue({
+        saved: 5,
+        updated: 2,
+        skipped: 0,
+        skippedDetails: []
+      });
+
+      renderPage();
+      fireEvent.click(screen.getByRole('button', { name: /Upload CSV\/TXT/i }));
+
+      const file = new File(['article;name\n123;Part'], 'test.csv', { type: 'text/csv' });
+      const input = document.querySelector('input[type="file"]');
+      fireEvent.change(input!, { target: { files: [file] } });
+
+      fireEvent.click(screen.getByText('dashboard.partsUpload.uploadButton'));
+
+      await waitFor(() => {
+        const savedCard = screen.getByText('Saved').closest('.card');
+        expect(savedCard).toHaveTextContent('5');
+        
+        const updatedCard = screen.getByText('Updated').closest('.card');
+        expect(updatedCard).toHaveTextContent('2');
+        
+        const skippedCard = screen.getByText('Skipped').closest('.card');
+        expect(skippedCard).toHaveTextContent('0');
+      });
+    });
+
+    it('shows error details after partial success upload (207)', async () => {
+      vi.mocked(productApi.uploadCsv).mockResolvedValue({
+        saved: 1,
+        updated: 0,
+        skipped: 1,
+        skippedDetails: [
+          { rowNumber: 2, errorMessage: 'Missing price', rawData: '124;Broken Part;;' }
+        ]
+      });
+
+      renderPage();
+      fireEvent.click(screen.getByRole('button', { name: /Upload CSV\/TXT/i }));
+
+      const file = new File(['article;name\n123;Part'], 'test.csv', { type: 'text/csv' });
+      const input = document.querySelector('input[type="file"]');
+      fireEvent.change(input!, { target: { files: [file] } });
+
+      fireEvent.click(screen.getByText('dashboard.partsUpload.uploadButton'));
+
+      await waitFor(() => {
+        const savedCard = screen.getByText('Saved').closest('.card');
+        expect(savedCard).toHaveTextContent('1');
+        
+        expect(screen.getByText('Missing price')).toBeInTheDocument();
+        expect(screen.getByText(/124;Broken Part/)).toBeInTheDocument();
+      });
     });
   });
 });
