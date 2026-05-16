@@ -82,7 +82,15 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1.5">{t('auth.login.passwordLabel')}</label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-sm font-medium">{t('auth.login.passwordLabel')}</label>
+                <Link
+                  to="/forgot-password"
+                  className="text-xs font-medium text-primary hover:underline"
+                >
+                  {t('auth.forgotPassword.title')}
+                </Link>
+              </div>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                   <Lock className="h-4 w-4 text-muted-foreground" />

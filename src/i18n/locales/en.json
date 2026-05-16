@@ -78,7 +78,23 @@
       "signIn": "Sign in",
       "success": "Registration successful! Your account is waiting for approval.",
       "error": "Registration failed."
+    },
+    "forgotPassword": {
+      "title": "Forgot Password?",
+      "subtitle": "Enter your login or email to receive a temporary password",
+      "identifierLabel": "Login or Email",
+      "identifierPlaceholder": "Enter your login or email",
+      "sendButton": "Send Temporary Password",
+      "sending": "Sending...",
+      "backToLogin": "Back to login",
+      "successModal": {
+        "title": "Email Sent",
+        "description": "If an account exists with that identifier, a temporary password has been sent to the registered email address.",
+        "button": "Back to Login"
+      },
+      "error": "Failed to request password reset. Please try again."
     }
+
   },
   "products": {
     "heroTitle": "Find the Right Parts",

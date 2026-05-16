@@ -10,6 +10,13 @@ export const loginSchema = z.object({
 
 export type LoginInput = z.infer<typeof loginSchema>;
 
+export const forgotPasswordSchema = z.object({
+  identifier: z.string().min(1, 'Login or Email is required'),
+});
+
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+
+
 export const registerSchema = z.object({
   login: z.string().min(3, 'Login is required (min 3 chars)'),
   name: z.string().min(2, 'Name is required'),
@@ -57,4 +64,9 @@ export const authApi = {
     const response = await api.get<UserFull>('/users/profile');
     return response.data;
   },
+  forgotPassword: async (data: ForgotPasswordInput, config?: AxiosRequestConfig) => {
+    const response = await api.post('/auth/forgot-password', data, config);
+    return response.data;
+  },
 };
+

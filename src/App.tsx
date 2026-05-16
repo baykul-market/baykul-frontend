@@ -3,6 +3,8 @@ import Layout from './components/layout/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './features/auth/LoginPage';
 import RegisterPage from './features/auth/RegisterPage';
+import ForgotPasswordPage from './features/auth/ForgotPasswordPage';
+
 import ProductListPage from './features/product/ProductListPage';
 import MultiArticleSearchPage from './features/product/MultiArticleSearchPage';
 import CartPage from './features/cart/CartPage';
@@ -34,6 +36,8 @@ function App() {
           <Route index element={<RootRedirect />} />
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
+          <Route path="forgot-password" element={<ForgotPasswordPage />} />
+
           <Route path="products" element={<ProtectedRoute><ProductListPage /></ProtectedRoute>} />
           <Route path="products/multi-search" element={<ProtectedRoute><MultiArticleSearchPage /></ProtectedRoute>} />
           <Route path="cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>} />
