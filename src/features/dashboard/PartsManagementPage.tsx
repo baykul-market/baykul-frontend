@@ -314,8 +314,8 @@ export default function PartsManagementPage() {
         <CsvUploadModal
           onClose={() => setUploadModalOpen(false)}
           onSuccess={() => {
-             queryClient.invalidateQueries({ queryKey: ['admin-parts'] });
-             queryClient.invalidateQueries({ queryKey: ['admin-parts-search'] });
+            queryClient.invalidateQueries({ queryKey: ['admin-parts'] });
+            queryClient.invalidateQueries({ queryKey: ['admin-parts-search'] });
           }}
           t={t}
         />
@@ -628,8 +628,8 @@ function CsvUploadModal({ onClose, onSuccess, t }: { onClose: () => void; onSucc
       <div className="relative w-full max-w-2xl card p-0 animate-slide-up max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between px-6 py-4 border-b">
           <div className="flex items-center gap-2 text-lg font-semibold">
-             <Upload className="w-5 h-5 text-primary" />
-             {t('dashboard.partsUpload.title')}
+            <Upload className="w-5 h-5 text-primary" />
+            {t('dashboard.partsUpload.title')}
           </div>
           <button onClick={handleClose} className="p-1.5 rounded-lg text-muted-foreground hover:bg-secondary transition-colors" title={t('common.cancel')}>
             <X className="w-5 h-5" />
@@ -672,9 +672,8 @@ function CsvUploadModal({ onClose, onSuccess, t }: { onClose: () => void; onSucc
                 onDragOver={handleDrag}
                 onDrop={handleDrop}
                 onClick={() => !file && fileInputRef.current?.click()}
-                className={`relative rounded-xl border-2 border-dashed p-8 text-center transition-all cursor-pointer ${
-                  dragActive ? 'border-primary bg-primary/5' : file ? 'border-border bg-secondary/20' : 'border-border hover:border-primary/50 hover:bg-secondary/30'
-                }`}
+                className={`relative rounded-xl border-2 border-dashed p-8 text-center transition-all cursor-pointer ${dragActive ? 'border-primary bg-primary/5' : file ? 'border-border bg-secondary/20' : 'border-border hover:border-primary/50 hover:bg-secondary/30'
+                  }`}
               >
                 <input ref={fileInputRef} type="file" accept=".csv,.txt" onChange={handleFileChange} className="hidden" />
                 {!file ? (
@@ -720,24 +719,28 @@ function CsvUploadModal({ onClose, onSuccess, t }: { onClose: () => void; onSucc
           {uploadResult && (
             <div className="space-y-6 animate-fade-in">
               <div className="grid grid-cols-3 gap-4">
-                <div className="card bg-success/5 border-success/20 p-4 text-center">
+                <div className={`card p-4 text-center ${uploadResult.saved > 0 ? 'bg-success/5 border-success/20' : 'bg-secondary/20 border-border/50'}`}>
                   <div className="flex justify-center mb-2">
-                    <div className="h-10 w-10 rounded-full bg-success/10 text-success flex items-center justify-center">
+                    <div className={`h-10 w-10 rounded-full flex items-center justify-center ${uploadResult.saved > 0 ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}>
                       <CheckCircle className="h-5 w-5" />
                     </div>
                   </div>
-                  <p className="text-2xl font-bold text-success">{uploadResult.saved}</p>
+                  <p className={`text-2xl font-bold ${uploadResult.saved > 0 ? 'text-success' : 'text-muted-foreground'}`}>
+                    {uploadResult.saved}
+                  </p>
                   <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
                     {t('dashboard.partsUpload.saved', 'Saved')}
                   </p>
                 </div>
-                <div className="card bg-info/5 border-info/20 p-4 text-center">
+                <div className={`card p-4 text-center ${uploadResult.updated > 0 ? 'bg-info/5 border-info/20' : 'bg-secondary/20 border-border/50'}`}>
                   <div className="flex justify-center mb-2">
-                    <div className="h-10 w-10 rounded-full bg-info/10 text-info flex items-center justify-center">
+                    <div className={`h-10 w-10 rounded-full flex items-center justify-center ${uploadResult.updated > 0 ? 'bg-info/10 text-info' : 'bg-muted text-muted-foreground'}`}>
                       <RefreshCw className="h-5 w-5" />
                     </div>
                   </div>
-                  <p className="text-2xl font-bold text-info">{uploadResult.updated}</p>
+                  <p className={`text-2xl font-bold ${uploadResult.updated > 0 ? 'text-info' : 'text-muted-foreground'}`}>
+                    {uploadResult.updated}
+                  </p>
                   <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
                     {t('dashboard.partsUpload.updated', 'Updated')}
                   </p>

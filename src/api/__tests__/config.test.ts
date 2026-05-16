@@ -80,11 +80,12 @@ describe('configApi', () => {
         });
 
         it('deletes exchange rate', async () => {
+            const mockId = 'a375a508-4bf3-4c5b-a15c-4909af262725';
             (api.delete as any).mockResolvedValueOnce({ data: { success: true } });
 
-            await configApi.deleteExchangeRate('EUR_RUB');
+            await configApi.deleteExchangeRate(mockId);
 
-            expect(api.delete).toHaveBeenCalledWith('/currency-exchange/EUR_RUB', undefined);
+            expect(api.delete).toHaveBeenCalledWith('/currency-exchange', { params: { id: mockId } });
         });
     });
 });

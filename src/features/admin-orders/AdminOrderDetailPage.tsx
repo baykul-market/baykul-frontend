@@ -4,8 +4,7 @@ import { useState } from 'react';
 import { ConfirmModal } from '../../components/ConfirmModal';
 import { useTranslation } from 'react-i18next';
 import { orderApi, OrderStatus, OrderProductStatus } from '../../api/order';
-// import { billApi } from '../../api/bill';
-import { Loader2, ArrowLeft, User, CreditCard, Box, CheckCircle2, RotateCw, Clock, XCircle, Pencil/*, Receipt*/ } from 'lucide-react';
+import { Loader2, ArrowLeft, User, CreditCard, Box, CheckCircle2, RotateCw, Clock, XCircle, Pencil, Info } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
@@ -210,6 +209,17 @@ export default function AdminOrderDetailPage() {
                                 {t('dashboard.orderManagement.markPaid')}
                             </button>
                         )}
+                        {order.status === OrderStatus.CONFIRMATION_WAITING && (
+                            <button
+                                onClick={() => updateStatusMutation.mutate(OrderStatus.ORDERED)}
+                                disabled={updateStatusMutation.isPending}
+                                className="btn-primary shadow-lg shadow-primary/20 animate-pulse-subtle"
+                                title={t('dashboard.orderManagement.confirmOrderInfo')}
+                            >
+                                <CheckCircle2 className="w-4 h-4" />
+                                {t('dashboard.orderManagement.confirmOrderAction')}
+                            </button>
+                        )}
                         <button
                             onClick={handleOrderCancel}
                             disabled={updateStatusMutation.isPending || cancelMutation.isPending}
@@ -248,29 +258,50 @@ export default function AdminOrderDetailPage() {
                                         const isCompleted = index < currentIndex;
                                         const isCurrent = index === currentIndex;
                                         const isNext = index === currentIndex + 1;
+                                        const isConfirmStep = order.status === OrderStatus.CONFIRMATION_WAITING && status === OrderStatus.ORDERED;
 
                                         return (
                                             <div key={status} className="flex flex-row sm:flex-col items-center gap-3 sm:gap-2 sm:flex-1 relative bg-background sm:bg-transparent">
-                                                <button
-                                                    onClick={() => updateStatusMutation.mutate(status)}
-                                                    disabled={!isNext || updateStatusMutation.isPending || !((order.status === OrderStatus.CONFIRMATION_WAITING && status === OrderStatus.ORDERED) || (order.status === OrderStatus.READY_FOR_PICKUP && status === OrderStatus.COMPLETED))}
-                                                    className={cn(
-                                                        "w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all font-bold text-sm shrink-0",
-                                                        isCompleted ? "bg-success border-success text-success-foreground" :
-                                                            isCurrent ? "bg-primary border-primary text-primary-foreground ring-4 ring-primary/20" :
-                                                                "bg-background border-muted-foreground text-muted-foreground",
-                                                        (isNext && ((order.status === OrderStatus.CONFIRMATION_WAITING && status === OrderStatus.ORDERED) || (order.status === OrderStatus.READY_FOR_PICKUP && status === OrderStatus.COMPLETED))) ? "hover:scale-110 hover:border-primary cursor-pointer shadow-md" : "cursor-not-allowed opacity-80"
+                                                <div className="relative group">
+                                                    <button
+                                                        onClick={() => updateStatusMutation.mutate(status)}
+                                                        disabled={!isNext || updateStatusMutation.isPending || !((order.status === OrderStatus.CONFIRMATION_WAITING && status === OrderStatus.ORDERED) || (order.status === OrderStatus.READY_FOR_PICKUP && status === OrderStatus.COMPLETED))}
+                                                        className={cn(
+                                                            "w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all font-bold text-sm shrink-0",
+                                                            isCompleted ? "bg-success border-success text-success-foreground" :
+                                                                isCurrent ? "bg-primary border-primary text-primary-foreground ring-4 ring-primary/20" :
+                                                                    "bg-background border-muted-foreground text-muted-foreground",
+                                                            (isNext && ((order.status === OrderStatus.CONFIRMATION_WAITING && status === OrderStatus.ORDERED) || (order.status === OrderStatus.READY_FOR_PICKUP && status === OrderStatus.COMPLETED))) ? "hover:scale-110 hover:border-primary cursor-pointer shadow-md" : "cursor-not-allowed opacity-80",
+                                                            isConfirmStep && "animate-pulse shadow-primary/40 border-primary"
+                                                        )}
+                                                        title={(!isConfirmStep && isNext) ? t('dashboard.orderManagement.updateBoxTo', { status: t(`status.order.${status}`) }) : undefined}
+                                                    >
+                                                        {isCompleted ? <CheckCircle2 className="w-4 h-4" /> : index + 1}
+                                                    </button>
+
+                                                    {isConfirmStep && (
+                                                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-foreground text-background px-3 py-1.5 rounded text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none shadow-xl border border-background/20">
+                                                            <div className="flex items-center gap-1.5">
+                                                                <Info className="w-3 h-3 text-primary" />
+                                                                {t('dashboard.orderManagement.confirmOrderInfo')}
+                                                            </div>
+                                                            <div className="absolute bottom-[-4px] left-1/2 -translate-x-1/2 w-2 h-2 bg-foreground rotate-45"></div>
+                                                        </div>
                                                     )}
-                                                    title={isNext ? t('dashboard.orderManagement.updateBoxTo', { status: t(`status.order.${status}`) }) : ''}
-                                                >
-                                                    {isCompleted ? <CheckCircle2 className="w-4 h-4" /> : index + 1}
-                                                </button>
-                                                <span className={cn(
-                                                    "text-[10px] font-medium text-left sm:text-center max-w-[80px]",
-                                                    (isCurrent || isCompleted) ? "text-foreground" : "text-muted-foreground"
-                                                )}>
-                                                    {t(`status.order.${status}`)}
-                                                </span>
+                                                </div>
+                                                <div className="flex flex-col items-start sm:items-center">
+                                                    <span className={cn(
+                                                        "text-[10px] font-medium text-left sm:text-center max-w-[80px]",
+                                                        (isCurrent || isCompleted) ? "text-foreground" : "text-muted-foreground"
+                                                    )}>
+                                                        {t(`status.order.${status}`)}
+                                                    </span>
+                                                    {isConfirmStep && (
+                                                        <span className="badge bg-primary/20 text-primary border-primary/30 text-[8px] py-0 px-1 mt-1 font-bold animate-bounce h-4">
+                                                            {t('common.confirm')}
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
                                         );
                                     })}

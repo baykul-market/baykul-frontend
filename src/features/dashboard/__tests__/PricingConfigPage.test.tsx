@@ -190,7 +190,7 @@ describe('PricingConfigPage', () => {
             deliveryCostConfigs: [],
         });
         (configApi.getExchangeRates as any).mockResolvedValue([
-            { currencyFrom: 'EUR', currencyTo: 'RUB', rate: 105 },
+            { id: 'rate-123', currencyFrom: 'EUR', currencyTo: 'RUB', rate: 105 },
         ]);
         (configApi.deleteExchangeRate as any).mockResolvedValue({ success: true });
 
@@ -214,7 +214,43 @@ describe('PricingConfigPage', () => {
         fireEvent.click(confirmBtns[confirmBtns.length - 1]);
 
         await waitFor(() => {
-            expect(configApi.deleteExchangeRate).toHaveBeenCalledWith('EUR_RUB', expect.anything());
+            expect(configApi.deleteExchangeRate).toHaveBeenCalledWith('rate-123', expect.anything());
         });
+    });
+
+    it('shows error if adding a rate with same from and to currency', async () => {
+        (useAuthStore as unknown as any).mockReturnValue({ role: 'ADMIN' });
+        (configApi.getConfig as any).mockResolvedValue({
+            markupPercentage: 0.1,
+            systemCurrency: 'RUB',
+            deliveryCurrency: 'EUR',
+            roundingScale: 2,
+            roundingMode: 'CEILING',
+            deliveryCostConfigs: [],
+        });
+        (configApi.getExchangeRates as any).mockResolvedValue([]);
+
+        renderWithRouter(<PricingConfigPage />);
+
+        await waitFor(() => {
+            expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
+        });
+
+        // Expand the form
+        const toggleBtn = screen.getByText('Add New Rate');
+        fireEvent.click(toggleBtn);
+
+        // Select same currency for both
+        const fromSelect = screen.getByTestId('rate-from');
+        const toSelect = screen.getByTestId('rate-to');
+
+        fireEvent.change(fromSelect, { target: { value: 'USD' } });
+        fireEvent.change(toSelect, { target: { value: 'USD' } });
+
+        const addBtn = screen.getByText('Add');
+        fireEvent.click(addBtn);
+
+        // Should not call API
+        expect(configApi.createOrUpdateExchangeRate).not.toHaveBeenCalled();
     });
 });

@@ -435,7 +435,9 @@
       "orderTotal": "Order Total",
       "items": "{{count}} item",
       "items_other": "{{count}} items",
-      "updateBoxTo": "Update box to {{status}}"
+      "updateBoxTo": "Update box to {{status}}",
+      "confirmOrderAction": "Confirm Order",
+      "confirmOrderInfo": "Confirming this order will automatically check warehouse stock for all items. Missing parts will be marked as 'To Order'."
     },
     "userManagement": {
       "title": "User Management",
@@ -664,8 +666,8 @@
       "percentage": "Percentage (%)",
       "fixed": "Fixed Sum",
       "value": "Value",
-      "markupPercentage": "Default Markup for New Users",
-      "markupDesc": "Applied to product base price for new accounts",
+      "markupPercentage": "System-wide Fallback Markup",
+      "markupDesc": "System-wide fallback markup percentage used when no user-specific markup is defined.",
       "systemCurrency": "Default System Currency",
       "currencyDesc": "Primary currency for the system",
       "deliveryCurrency": "Delivery Currency",
@@ -702,7 +704,8 @@
       "deleteFailed": "Failed to delete rate",
       "minSumNegative": "Minimum sum must be 0 or greater.",
       "valueNegative": "Value must be 0 or greater.",
-      "duplicateMinSum": "A rule with this minimum sum already exists."
+      "duplicateMinSum": "A rule with this minimum sum already exists.",
+      "sameCurrency": "From and To currencies must be different."
     },
     "success": {
       "configSaved": "Configuration saved successfully",
