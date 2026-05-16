@@ -22,7 +22,8 @@
     "edit": "Edit",
     "delete": "Delete",
     "refresh": "Refresh",
-    "inherited": "Inherited"
+    "inherited": "Inherited",
+    "done": "Done"
   },
   "nav": {
     "brandFull": "Baykul Auto Parts",
@@ -499,8 +500,14 @@
       "invalidFileType": "Please select a .csv or .txt file",
       "fileTooLarge": "File size must be less than 100 MB",
       "successTitle": "Upload Successful",
-      "successDescription": "All parts from the file have been parsed and added to the catalog.",
-      "errorsTitle": "Upload Failed"
+      "successDescription": "Parts from the file have been processed.",
+      "errorsTitle": "Upload Failed",
+      "saved": "Saved",
+      "updated": "Updated",
+      "skipped": "Skipped",
+      "skippedDetails": "Skipped Rows Details",
+      "errorsFound": "errors found",
+      "partialSuccess": "Some rows had validation errors and were skipped"
     },
     "boxTracking": {
       "title": "Box Tracking",
