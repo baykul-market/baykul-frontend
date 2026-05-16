@@ -715,6 +715,11 @@ function UserFormModal({
     e.preventDefault();
     setErrors({});
 
+    if (!email) {
+      setErrors({ error_email: t('profile.edit.validation.emailRequired') });
+      return;
+    }
+
     if (phoneNumber) {
       const phoneError = validatePhone(phoneNumber);
       if (phoneError) {
@@ -732,7 +737,7 @@ function UserFormModal({
     if (isEdit) {
       const data: UserUpdateInput = {};
       if (login !== user.login) data.login = login;
-      if (email !== (user.email ?? '')) data.email = email || undefined;
+      if (email !== (user.email ?? '')) data.email = email;
       if (phoneNumber !== (user.phoneNumber ?? ''))
         data.phoneNumber = phoneNumber || undefined;
       if (blocked !== user.blocked) data.blocked = blocked;
@@ -753,7 +758,7 @@ function UserFormModal({
       createMutation.mutate({
         login,
         password,
-        email: email || undefined,
+        email,
         phoneNumber: phoneNumber || undefined,
         role,
         blocked,
@@ -788,7 +793,7 @@ function UserFormModal({
         </div>
 
         {/* Modal Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto flex-1">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto flex-1" noValidate>
           {/* Profile */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
@@ -852,7 +857,7 @@ function UserFormModal({
           {/* Email */}
           <div>
             <label className="block text-sm font-medium mb-1.5">
-              {t('dashboard.userManagement.emailLabel')}
+              {t('dashboard.userManagement.emailLabel')} *
             </label>
             <input
               type="email"

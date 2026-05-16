@@ -37,7 +37,7 @@ import PhoneInput, { validatePhone } from '../../components/PhoneInput';
 
 const profileUpdateSchema = z.object({
   login: z.string().min(3, 'profile.edit.validation.loginMin').max(50, 'profile.edit.validation.loginMax').optional().or(z.literal('')),
-  email: z.string().email('profile.edit.validation.emailInvalid').optional().or(z.literal('')),
+  email: z.string().min(1, 'profile.edit.validation.emailRequired').email('profile.edit.validation.emailInvalid'),
   phoneNumber: z.string().optional().or(z.literal('')).refine(
     (val) => !val || validatePhone(val) === null,
     { message: 'phone.validation.invalid' }
@@ -311,9 +311,9 @@ function EditTab({ onSuccess }: { onSuccess: () => void }) {
 
   const changedFields = useMemo(() => {
     const changed = new Set<string>();
-    if (watched.login && watched.login !== defaults.login) changed.add('login');
-    if (watched.email && watched.email !== defaults.email) changed.add('email');
-    if (watched.phoneNumber && watched.phoneNumber !== defaults.phoneNumber) changed.add('phoneNumber');
+    if (watched.login !== defaults.login) changed.add('login');
+    if (watched.email !== defaults.email) changed.add('email');
+    if (watched.phoneNumber !== defaults.phoneNumber) changed.add('phoneNumber');
     if (watched.name !== defaults.name) changed.add('name');
     if (watched.surname !== defaults.surname) changed.add('surname');
     if (watched.patronymic !== defaults.patronymic) changed.add('patronymic');
@@ -386,7 +386,7 @@ function EditTab({ onSuccess }: { onSuccess: () => void }) {
   };
 
   return (
-    <form onSubmit={form.handleSubmit((d) => mutation.mutate(d))} className="space-y-6">
+    <form onSubmit={form.handleSubmit((d) => mutation.mutate(d))} className="space-y-6" noValidate>
       {/* Unsaved changes banner */}
       {hasChanges && (
         <div className="flex items-center gap-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 animate-slide-up">

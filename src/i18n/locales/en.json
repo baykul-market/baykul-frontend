@@ -77,7 +77,15 @@
       "haveAccount": "Already have an account?",
       "signIn": "Sign in",
       "success": "Registration successful! Your account is waiting for approval.",
-      "error": "Registration failed."
+      "error": "Registration failed.",
+      "validation": {
+        "emailRequired": "Email is required",
+        "loginMin": "Login must be at least 3 characters",
+        "nameMin": "Name must be at least 2 characters",
+        "surnameMin": "Surname must be at least 2 characters",
+        "passwordMin": "Password must be at least 8 characters",
+        "passwordMismatch": "Passwords do not match"
+      }
     },
     "forgotPassword": {
       "title": "Forgot Password?",
@@ -265,6 +273,7 @@
       "validation": {
         "loginMin": "Login must be at least 3 characters",
         "loginMax": "Login must be at most 50 characters",
+        "emailRequired": "Email is required",
         "emailInvalid": "Invalid email address",
         "passwordMin": "Password must be at least 6 characters",
         "passwordMismatch": "Passwords do not match"

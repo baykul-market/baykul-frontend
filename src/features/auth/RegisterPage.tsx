@@ -55,7 +55,7 @@ export default function RegisterPage() {
 
         {/* Form Card */}
         <div className="card p-6 sm:p-8">
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5" noValidate>
             
             {/* Login */}
             <div>
@@ -71,7 +71,7 @@ export default function RegisterPage() {
                 />
               </div>
               {form.formState.errors.login && (
-                <p className="text-destructive text-sm mt-1.5">{form.formState.errors.login.message}</p>
+                <p className="text-destructive text-sm mt-1.5">{t(form.formState.errors.login.message!)}</p>
               )}
             </div>
 
@@ -90,7 +90,7 @@ export default function RegisterPage() {
                 />
               </div>
               {form.formState.errors.email && (
-                <p className="text-destructive text-sm mt-1.5">{form.formState.errors.email.message}</p>
+                <p className="text-destructive text-sm mt-1.5">{t(form.formState.errors.email.message!)}</p>
               )}
             </div>
 
@@ -103,7 +103,7 @@ export default function RegisterPage() {
                 hasError={!!form.formState.errors.phoneNumber}
               />
               {form.formState.errors.phoneNumber && (
-                <p className="text-destructive text-sm mt-1.5">{form.formState.errors.phoneNumber.message}</p>
+                <p className="text-destructive text-sm mt-1.5">{t(form.formState.errors.phoneNumber.message!)}</p>
               )}
             </div>
 
@@ -117,7 +117,7 @@ export default function RegisterPage() {
                   placeholder={t('auth.register.surnamePlaceholder')}
                 />
                 {form.formState.errors.surname && (
-                  <p className="text-destructive text-xs mt-1">{form.formState.errors.surname.message}</p>
+                  <p className="text-destructive text-xs mt-1">{t(form.formState.errors.surname.message!)}</p>
                 )}
               </div>
               <div>
@@ -128,7 +128,7 @@ export default function RegisterPage() {
                   placeholder={t('auth.register.namePlaceholder')}
                 />
                 {form.formState.errors.name && (
-                  <p className="text-destructive text-xs mt-1">{form.formState.errors.name.message}</p>
+                  <p className="text-destructive text-xs mt-1">{t(form.formState.errors.name.message!)}</p>
                 )}
               </div>
               <div>
@@ -156,7 +156,7 @@ export default function RegisterPage() {
                 />
               </div>
               {form.formState.errors.password && (
-                <p className="text-destructive text-sm mt-1.5">{form.formState.errors.password.message}</p>
+                <p className="text-destructive text-sm mt-1.5">{t(form.formState.errors.password.message!)}</p>
               )}
             </div>
 
@@ -175,7 +175,7 @@ export default function RegisterPage() {
                 />
               </div>
               {form.formState.errors.confirmPassword && (
-                <p className="text-destructive text-sm mt-1.5">{form.formState.errors.confirmPassword.message}</p>
+                <p className="text-destructive text-sm mt-1.5">{t(form.formState.errors.confirmPassword.message!)}</p>
               )}
             </div>
 
