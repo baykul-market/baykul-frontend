@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { configApi, PriceConfigDto, CurrencyExchangeDto, DeliveryCostConfigDto } from '../../api/config';
 import { Currency } from '../../api/types';
 import toast from 'react-hot-toast';
-import { Save, Plus, Trash2, ArrowRight, Settings, Repeat, Pencil, Check, X, RefreshCw, Percent, DollarSign, ListOrdered } from 'lucide-react';
+import { Save, Plus, Minus, Trash2, ArrowRight, Settings, Repeat, Pencil, Check, X, RefreshCw, Percent, DollarSign, ListOrdered } from 'lucide-react';
 import { ConfirmModal } from '../../components/ConfirmModal';
 import { getCurrencySymbol } from '../../lib/currency';
 
@@ -36,7 +36,8 @@ export default function PricingConfigPage() {
     const [newRateFrom, setNewRateFrom] = useState<Currency>('EUR');
     const [newRateTo, setNewRateTo] = useState<Currency>('RUB');
     const [newRateValue, setNewRateValue] = useState<string>('1');
-    const [newRateBothDir, setNewRateBothDir] = useState(false);
+    const [newRateBothDir, setNewRateBothDir] = useState(true);
+    const [isAddRateExpanded, setIsAddRateExpanded] = useState(false);
 
     // Delete confirmation
     const [deleteTarget, setDeleteTarget] = useState<CurrencyExchangeDto | null>(null);
@@ -145,6 +146,11 @@ export default function PricingConfigPage() {
     };
 
     const handleAddRate = async () => {
+        if (newRateFrom === newRateTo) {
+            toast.error(t('pricing.errors.sameCurrency', 'From and To currencies must be different'));
+            return;
+        }
+
         setAddingRate(true);
         try {
             await configApi.createOrUpdateExchangeRate({
@@ -164,9 +170,9 @@ export default function PricingConfigPage() {
     };
 
     const handleDeleteRate = async () => {
-        if (!deleteTarget) return;
+        if (!deleteTarget?.id) return;
         try {
-            await configApi.deleteExchangeRate(`${deleteTarget.currencyFrom}_${deleteTarget.currencyTo}`, { customErrorToast: t('pricing.errors.deleteFailed', 'Failed to delete rate') });
+            await configApi.deleteExchangeRate(deleteTarget.id, { customErrorToast: t('pricing.errors.deleteFailed', 'Failed to delete rate') });
             toast.success(t('pricing.success.rateDeleted', 'Rate deleted'));
             setDeleteTarget(null);
             fetchData();
@@ -579,92 +585,102 @@ export default function PricingConfigPage() {
                     )}
                 </div>
 
-                {/* Add New Rate Form */}
                 <div className="px-6 py-5 border-t bg-secondary/10">
-                    <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                        <Plus size={14} className="text-primary" />
-                        {t('pricing.rates.addNew', 'Add New Rate')}
-                    </h3>
-
-                    <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
-                        {/* From currency */}
-                        <div className="flex-1 min-w-0">
-                            <label className="text-xs text-muted-foreground mb-1 block">{t('pricing.rates.from', 'From')}</label>
-                            <select
-                                value={newRateFrom}
-                                onChange={(e) => setNewRateFrom(e.target.value as Currency)}
-                                className="w-full bg-background border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                                data-testid="rate-from"
-                            >
-                                {currencyOptions.map((c) => (
-                                    <option key={c} value={c}>{getCurrencySymbol(c)} {c}</option>
-                                ))}
-                            </select>
+                    <button
+                        onClick={() => setIsAddRateExpanded(!isAddRateExpanded)}
+                        className="flex items-center gap-2 hover:opacity-80 transition-opacity w-full text-left"
+                    >
+                        <div className="w-5 h-5 rounded bg-primary/10 flex items-center justify-center shrink-0">
+                            {isAddRateExpanded ? <Minus size={12} className="text-primary" /> : <Plus size={12} className="text-primary" />}
                         </div>
+                        <h3 className="text-sm font-semibold">
+                            {t('pricing.rates.addNew', 'Add New Rate')}
+                        </h3>
+                    </button>
 
-                        <ArrowRight size={16} className="text-muted-foreground shrink-0 hidden sm:block mb-2.5" />
+                    {isAddRateExpanded && (
+                        <div className="mt-4 animate-slide-down">
+                            <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
+                                {/* From currency */}
+                                <div className="flex-1 min-w-0">
+                                    <label className="text-xs text-muted-foreground mb-1 block">{t('pricing.rates.from', 'From')}</label>
+                                    <select
+                                        value={newRateFrom}
+                                        onChange={(e) => setNewRateFrom(e.target.value as Currency)}
+                                        className="w-full bg-background border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                        data-testid="rate-from"
+                                    >
+                                        {currencyOptions.map((c) => (
+                                            <option key={c} value={c}>{getCurrencySymbol(c)} {c}</option>
+                                        ))}
+                                    </select>
+                                </div>
 
-                        {/* To currency */}
-                        <div className="flex-1 min-w-0">
-                            <label className="text-xs text-muted-foreground mb-1 block">{t('pricing.rates.to', 'To')}</label>
-                            <select
-                                value={newRateTo}
-                                onChange={(e) => setNewRateTo(e.target.value as Currency)}
-                                className="w-full bg-background border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                                data-testid="rate-to"
-                            >
-                                {currencyOptions.map((c) => (
-                                    <option key={c} value={c}>{getCurrencySymbol(c)} {c}</option>
-                                ))}
-                            </select>
-                        </div>
+                                <ArrowRight size={16} className="text-muted-foreground shrink-0 hidden sm:block mb-2.5" />
 
-                        {/* Rate value */}
-                        <div className="flex-1 min-w-0">
-                            <label className="text-xs text-muted-foreground mb-1 block">{t('pricing.rates.rateValue', 'Rate')}</label>
-                            <input
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                value={newRateValue}
-                                onChange={(e) => setNewRateValue(e.target.value)}
-                                placeholder={t('pricing.rates.ratePlaceholder', 'e.g. 105')}
-                                className="w-full bg-background border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                            />
-                        </div>
+                                {/* To currency */}
+                                <div className="flex-1 min-w-0">
+                                    <label className="text-xs text-muted-foreground mb-1 block">{t('pricing.rates.to', 'To')}</label>
+                                    <select
+                                        value={newRateTo}
+                                        onChange={(e) => setNewRateTo(e.target.value as Currency)}
+                                        className="w-full bg-background border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                        data-testid="rate-to"
+                                    >
+                                        {currencyOptions.map((c) => (
+                                            <option key={c} value={c}>{getCurrencySymbol(c)} {c}</option>
+                                        ))}
+                                    </select>
+                                </div>
 
-                        {/* Add button */}
-                        <button
-                            onClick={handleAddRate}
-                            disabled={addingRate}
-                            className="btn-primary shrink-0"
-                        >
-                            {addingRate ? (
-                                <RefreshCw size={16} className="animate-spin" />
-                            ) : (
-                                <Plus size={16} />
-                            )}
-                            {t('common.add', 'Add')}
-                        </button>
-                    </div>
+                                {/* Rate value */}
+                                <div className="flex-1 min-w-0">
+                                    <label className="text-xs text-muted-foreground mb-1 block">{t('pricing.rates.rateValue', 'Rate')}</label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        value={newRateValue}
+                                        onChange={(e) => setNewRateValue(e.target.value)}
+                                        placeholder={t('pricing.rates.ratePlaceholder', 'e.g. 105')}
+                                        className="w-full bg-background border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                    />
+                                </div>
 
-                    {/* Both directions checkbox */}
-                    <label className="flex items-center gap-2 mt-3 text-xs text-muted-foreground cursor-pointer select-none group/check">
-                        <div className="relative">
-                            <input
-                                type="checkbox"
-                                checked={newRateBothDir}
-                                onChange={e => setNewRateBothDir(e.target.checked)}
-                                className="peer sr-only"
-                            />
-                            <div className="w-4 h-4 border rounded bg-background peer-checked:bg-primary peer-checked:border-primary transition-colors flex items-center justify-center">
-                                {newRateBothDir && <Check size={10} className="text-primary-foreground" />}
+                                {/* Add button */}
+                                <button
+                                    onClick={handleAddRate}
+                                    disabled={addingRate}
+                                    className="btn-primary shrink-0"
+                                >
+                                    {addingRate ? (
+                                        <RefreshCw size={16} className="animate-spin" />
+                                    ) : (
+                                        <Plus size={16} />
+                                    )}
+                                    {t('common.add', 'Add')}
+                                </button>
                             </div>
+
+                            {/* Both directions checkbox */}
+                            <label className="flex items-center gap-2 mt-3 text-xs text-muted-foreground cursor-pointer select-none group/check">
+                                <div className="relative">
+                                    <input
+                                        type="checkbox"
+                                        checked={newRateBothDir}
+                                        onChange={e => setNewRateBothDir(e.target.checked)}
+                                        className="peer sr-only"
+                                    />
+                                    <div className="w-4 h-4 border rounded bg-background peer-checked:bg-primary peer-checked:border-primary transition-colors flex items-center justify-center">
+                                        {newRateBothDir && <Check size={10} className="text-primary-foreground" />}
+                                    </div>
+                                </div>
+                                <span className="group-hover/check:text-foreground transition-colors">
+                                    {t('pricing.rates.bothDirections', 'Create reverse rate automatically (1/x)')}
+                                </span>
+                            </label>
                         </div>
-                        <span className="group-hover/check:text-foreground transition-colors">
-                            {t('pricing.rates.bothDirections', 'Create reverse rate automatically (1/x)')}
-                        </span>
-                    </label>
+                    )}
                 </div>
             </div>
 

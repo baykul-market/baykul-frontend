@@ -20,6 +20,7 @@ export interface PriceConfigDto {
 }
 
 export interface CurrencyExchangeDto {
+    id?: string;
     currencyFrom: Currency;
     currencyTo: Currency;
     rate: number;
@@ -56,7 +57,7 @@ export const configApi = {
         api.post('/currency-exchange', data, config).then(res => res.data),
 
     deleteExchangeRate: (id: string, config?: AxiosRequestConfig) =>
-        api.delete(`/currency-exchange/${id}`, config).then(res => res.data),
+        api.delete('/currency-exchange', { ...config, params: { id, ...config?.params } }).then(res => res.data),
 
     getAvailableCurrencies: (config?: AxiosRequestConfig) =>
         api.get<Currency[]>('/currency-exchange/currency', config).then(res => res.data),
