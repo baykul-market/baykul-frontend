@@ -1,17 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { ShoppingCart, User, LogOut, Package, Wrench, Menu, X, Shield, Globe, Wallet } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { cartApi } from '../../api/cart';
 import { authApi } from '../../api/auth';
+import { userProfileApi } from '../../api/user';
 import { cn } from '../../lib/utils';
 import { useTranslation } from 'react-i18next';
 import { formatPrice } from '../../lib/currency';
 
 export default function Layout() {
   const { t, i18n } = useTranslation();
-  const { user, logout } = useAuthStore();
+  const { user, logout, setUser } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -25,6 +26,18 @@ export default function Layout() {
       return failureCount < 3;
     },
   });
+
+  const { data: profile } = useQuery({
+    queryKey: ['profile'],
+    queryFn: userProfileApi.getProfile,
+    enabled: !!user,
+  });
+
+  useEffect(() => {
+    if (profile) {
+      setUser(profile);
+    }
+  }, [profile, setUser]);
 
   const cartItemCount = cart?.cartProducts?.reduce((sum, item) => sum + item.partsCount, 0) ?? 0;
 
@@ -148,11 +161,21 @@ export default function Layout() {
                         title={t('nav.balance')}
                       >
                         <Wallet className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span className={cn(
-                          'font-semibold tabular-nums whitespace-nowrap',
-                          user.balance.account >= 0 ? 'text-success' : 'text-destructive'
-                        )}>
-                          {formatPrice(user.balance.account, user.balance.currency)}
+                        <span className="flex items-center gap-1">
+                          <span className={cn(
+                            'font-semibold tabular-nums whitespace-nowrap',
+                            user.balance.account >= 0 ? 'text-success' : 'text-destructive'
+                          )}>
+                            {formatPrice(user.balance.account, user.balance.currency)}
+                          </span>
+                          {user.balance.projectedAccount !== undefined && (
+                            <span className={cn(
+                              'text-xs font-medium tabular-nums whitespace-nowrap',
+                              user.balance.projectedAccount >= 0 ? 'text-success/80' : 'text-destructive/80'
+                            )}>
+                              ({formatPrice(user.balance.projectedAccount, user.balance.currency)})
+                            </span>
+                          )}
                         </span>
                       </Link>
                     )}
@@ -281,11 +304,21 @@ export default function Layout() {
                       >
                         <Wallet className="w-4 h-4" />
                         <span>{t('nav.balance')}:</span>
-                        <span className={cn(
-                          'font-semibold tabular-nums whitespace-nowrap',
-                          user.balance.account >= 0 ? 'text-success' : 'text-destructive'
-                        )}>
-                          {formatPrice(user.balance.account, user.balance.currency)}
+                        <span className="flex items-center gap-1">
+                          <span className={cn(
+                            'font-semibold tabular-nums whitespace-nowrap',
+                            user.balance.account >= 0 ? 'text-success' : 'text-destructive'
+                          )}>
+                            {formatPrice(user.balance.account, user.balance.currency)}
+                          </span>
+                          {user.balance.projectedAccount !== undefined && (
+                            <span className={cn(
+                              'text-xs font-medium tabular-nums whitespace-nowrap',
+                              user.balance.projectedAccount >= 0 ? 'text-success/80' : 'text-destructive/80'
+                            )}>
+                              ({formatPrice(user.balance.projectedAccount, user.balance.currency)})
+                            </span>
+                          )}
                         </span>
                       </Link>
                     )}

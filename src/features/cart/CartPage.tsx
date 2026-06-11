@@ -76,6 +76,7 @@ export default function CartPage() {
         toast.success(t('cart.orderSuccess'));
         queryClient.invalidateQueries({ queryKey: ['cart'] });
         queryClient.invalidateQueries({ queryKey: ['orders'] });
+        queryClient.invalidateQueries({ queryKey: ['profile'] });
         navigate('/orders');
       } else {
         // Handle unavailable products (409 case)

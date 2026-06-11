@@ -296,7 +296,8 @@
       "replenishment": "Replenishment",
       "writeOff": "Withdrawal",
       "payment": "Payment",
-      "balanceAfter": "Balance after: {{amount}}"
+      "balanceAfter": "Balance after: {{amount}}",
+      "projectedFunds": "Projected Balance (including unpaid spendings)"
     },
     "sessions": {
       "loadingSessions": "Loading sessions...",

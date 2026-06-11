@@ -23,18 +23,21 @@ vi.mock('react-i18next', async (importOriginal) => {
   };
 });
 
+const mockUser = {
+  id: '1',
+  login: 'testuser',
+  email: 'test@example.com',
+  role: 'USER',
+  createdTs: new Date().toISOString(),
+  profile: { name: 'Test', surname: 'User' },
+  balance: null as any,
+};
+
 // Mock AuthStore
 vi.mock('../../../store/useAuthStore', () => ({
   useAuthStore: (selector?: (state: any) => any) => {
     const state = {
-      user: {
-        id: '1',
-        login: 'testuser',
-        email: 'test@example.com',
-        role: 'USER',
-        createdTs: new Date().toISOString(),
-        profile: { name: 'Test', surname: 'User' },
-      },
+      user: mockUser,
       isAuthenticated: true,
       setUser: vi.fn(),
     };
@@ -48,6 +51,7 @@ const queryClient = new QueryClient({
 
 describe('ProfilePage', () => {
   beforeEach(() => {
+    mockUser.balance = null;
     vi.clearAllMocks();
   });
 
@@ -79,5 +83,27 @@ describe('ProfilePage', () => {
       const errorMsg = screen.queryByText(/invalid email address|emailinvalid/i);
       expect(errorMsg).toBeInTheDocument();
     });
+  });
+
+  it('renders two-component balance in overview tab when user has balance', async () => {
+    mockUser.balance = {
+      id: 'b1',
+      account: 120.50,
+      currency: 'RUB',
+      projectedAccount: 45.20,
+    };
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={['/profile?tab=overview']}>
+          <Routes>
+            <Route path="/profile" element={<ProfilePage />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+
+    expect(screen.getByText(/120\.50/)).toBeInTheDocument();
+    expect(screen.getByText(/\(45\.20/)).toBeInTheDocument();
   });
 });

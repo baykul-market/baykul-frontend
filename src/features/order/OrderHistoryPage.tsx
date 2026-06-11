@@ -19,6 +19,7 @@ export default function OrderHistoryPage() {
     mutationFn: (id: string) => orderApi.payOrder(id, { customErrorToast: t('orders.payError', 'Payment failed') }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
     },
   });
 

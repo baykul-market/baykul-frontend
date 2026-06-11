@@ -319,7 +319,8 @@
       "replenishment": "Пополнение",
       "writeOff": "Списание",
       "payment": "Оплата",
-      "balanceAfter": "Баланс после: {{amount}}"
+      "balanceAfter": "Баланс после: {{amount}}",
+      "projectedFunds": "Прогнозируемый баланс (с учетом неоплаченных расходов)"
     },
     "sessions": {
       "loadingSessions": "Загрузка сессий...",

@@ -670,7 +670,7 @@ function UserFormModal({
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<'USER' | 'MANAGER' | 'ADMIN'>(user?.role ?? 'USER');
   const [blocked, setBlocked] = useState(user?.blocked ?? false);
-  const [canPayLater, setCanPayLater] = useState(user?.canPayLater ?? false);
+  const [canPayLater, setCanPayLater] = useState(user?.canPayLater ?? true);
   const [markupPercentage, setMarkupPercentage] = useState(user?.markupPercentage != null ? String(user.markupPercentage * 100) : '');
   const [name, setName] = useState(user?.profile?.name ?? '');
   const [surname, setSurname] = useState(user?.profile?.surname ?? '');
@@ -741,7 +741,7 @@ function UserFormModal({
       if (phoneNumber !== (user.phoneNumber ?? ''))
         data.phoneNumber = phoneNumber || undefined;
       if (blocked !== user.blocked) data.blocked = blocked;
-      if (canPayLater !== (user.canPayLater ?? false)) data.canPayLater = canPayLater;
+      if (canPayLater !== (user.canPayLater ?? true)) data.canPayLater = canPayLater;
       const numMarkup = markupPercentage === '' ? null : parseFloat(markupPercentage) / 100;
       if (numMarkup !== (user.markupPercentage ?? null)) data.markupPercentage = numMarkup;
 
