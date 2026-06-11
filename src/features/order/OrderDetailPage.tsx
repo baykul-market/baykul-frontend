@@ -1,6 +1,7 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import toast from 'react-hot-toast';
 import { orderApi, Order, OrderStatus } from '../../api/order';
 import { Loader2, ArrowLeft, Package, Clock, CheckCircle2, XCircle, RotateCw, CreditCard, Box, MapPin, AlertCircle } from 'lucide-react';
 import i18n from '../../i18n/i18n';
@@ -15,6 +16,7 @@ export default function OrderDetailPage() {
   const payMutation = useMutation({
     mutationFn: (id: string) => orderApi.payOrder(id, { customErrorToast: t('orders.payError', 'Payment failed') }),
     onSuccess: () => {
+      toast.success(t('orders.paySuccess', 'Payment successful'));
       queryClient.invalidateQueries({ queryKey: ['order', orderId] });
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['profile'] });

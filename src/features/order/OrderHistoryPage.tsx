@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import { orderApi, Order, OrderStatus } from '../../api/order';
 import { Loader2, Package, Clock, CheckCircle2, XCircle, ArrowRight, RotateCw, CreditCard, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -18,6 +19,7 @@ export default function OrderHistoryPage() {
   const payMutation = useMutation({
     mutationFn: (id: string) => orderApi.payOrder(id, { customErrorToast: t('orders.payError', 'Payment failed') }),
     onSuccess: () => {
+      toast.success(t('orders.paySuccess', 'Payment successful'));
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['profile'] });
     },

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { cartApi } from '../../api/cart';
 import { orderApi } from '../../api/order';
+import { getLocalizedError } from '../../api/client';
 import { Trash2, Loader2, ArrowRight, ShoppingCart, ArrowLeft, Package, Tag, Plus, Minus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
@@ -85,7 +86,13 @@ export default function CartPage() {
       }
     },
     onError: (error: any) => {
-      const message = error?.response?.data?.error || t('cart.checkoutError');
+      const data = error?.response?.data;
+      const serverMessage = data?.error || data?.message;
+      const code = data?.code;
+      const message = getLocalizedError(
+        serverMessage || error.message || t('cart.checkoutError'),
+        code
+      );
       toast.error(message);
     },
   });
