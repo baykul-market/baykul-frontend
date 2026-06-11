@@ -436,7 +436,7 @@
       "noBills": "No bills associated with this order.",
       "boxNumber": "Box #",
       "boxNumberPlaceholder": "≥100000",
-      "boxPrice": "Price",
+      "boxPrice": "Price per piece",
       "boxPriceValidation": "Price must be a positive number",
       "cancelBox": "Cancel Box",
       "markReturned": "Mark Returned",

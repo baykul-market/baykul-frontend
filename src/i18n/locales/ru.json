@@ -465,7 +465,7 @@
       "noBills": "С этим заказом не связано ни одного счета.",
       "boxNumber": "Коробка №",
       "boxNumberPlaceholder": "≥100000",
-      "boxPrice": "Цена",
+      "boxPrice": "Цена за шт.",
       "boxPriceValidation": "Цена должна быть положительным числом",
       "cancelBox": "Отменить коробку",
       "markReturned": "Пометить как возвращенный",
