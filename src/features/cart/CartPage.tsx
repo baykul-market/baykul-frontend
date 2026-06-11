@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { cartApi } from '../../api/cart';
 import { orderApi } from '../../api/order';
 import { getLocalizedError } from '../../api/client';
-import { Trash2, Loader2, ArrowRight, ShoppingCart, ArrowLeft, Package, Tag, Plus, Minus } from 'lucide-react';
+import { Trash2, Loader2, ArrowRight, ShoppingCart, ArrowLeft, Package, Tag, Plus, Minus, Info } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -228,6 +228,16 @@ export default function CartPage() {
         <div className="lg:col-span-1">
           <div className="card p-6 sticky top-24">
             <h3 className="text-lg font-semibold mb-5">{t('cart.orderSummary')}</h3>
+
+            <div className="bg-amber-500/10 text-amber-500 dark:bg-amber-500/5 dark:text-amber-400 border border-amber-500/25 rounded-xl p-4 text-sm mb-6 flex items-start gap-3 shadow-sm transition-all duration-300 hover:shadow-md">
+              <Info className="h-5 w-5 shrink-0 mt-0.5 text-amber-600 dark:text-amber-500" />
+              <div>
+                <p className="font-semibold text-amber-700 dark:text-amber-300 text-xs">{t('cart.priceNoticeTitle')}</p>
+                <p className="text-muted-foreground dark:text-muted-foreground/85 mt-0.5 text-[11px] leading-relaxed">
+                  {t('cart.priceSubjectToChange')}
+                </p>
+              </div>
+            </div>
 
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">

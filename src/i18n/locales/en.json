@@ -174,11 +174,14 @@
     "checkoutError": "Checkout failed",
     "undo": "Undo",
     "itemRestored": "Item restored",
-    "restoreError": "Failed to restore item"
+    "restoreError": "Failed to restore item",
+    "priceNoticeTitle": "Price Adjustment Notice",
+    "priceSubjectToChange": "Please note: Box prices are subject to manager or admin review and may be changed before payment."
   },
   "orders": {
     "title": "Order History",
     "payNow": "Pay Now",
+    "payBox": "Pay Box",
     "orderCount": "{{count}} order placed",
     "orderCount_other": "{{count}} orders placed",
     "loadingOrders": "Loading your orders...",
@@ -432,6 +435,8 @@
       "noBills": "No bills associated with this order.",
       "boxNumber": "Box #",
       "boxNumberPlaceholder": "≥100000",
+      "boxPrice": "Price",
+      "boxPriceValidation": "Price must be a positive number",
       "cancelBox": "Cancel Box",
       "markReturned": "Mark Returned",
       "orderTotal": "Order Total",
@@ -732,6 +737,7 @@
     "order_completing_not_ready": "Cannot complete order: it is not ready. All boxes must be shipped before completion.",
     "order_completing_not_paid": "Cannot complete order: it is not paid. Please pay for the order first.",
     "order_box_number_invalid": "Invalid box number. Enter a number greater than or equal to 100,000.",
-    "order_box_number_exists": "Box number already exists. Please assign a unique number to this box."
+    "order_box_number_exists": "Box number already exists. Please assign a unique number to this box.",
+    "order_paid": "Cannot change box price of a paid order"
   }
 }
