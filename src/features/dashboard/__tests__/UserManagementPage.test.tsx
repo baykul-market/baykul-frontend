@@ -86,4 +86,22 @@ describe('UserManagementPage', () => {
       expect(screen.getByText('Email is required')).toBeInTheDocument();
     });
   });
+
+  it('defaults canPayLater toggle to true when creating user', async () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={['/dashboard/users']}>
+          <Routes>
+            <Route path="/dashboard/users" element={<UserManagementPage />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+
+    const openModalBtn = screen.getByRole('button', { name: /Create User/i });
+    fireEvent.click(openModalBtn);
+
+    const toggleBtn = screen.getByTitle('dashboard.userManagement.canPayLaterLabel');
+    expect(toggleBtn).toHaveClass('bg-primary');
+  });
 });

@@ -40,6 +40,7 @@ export interface OrderProduct {
   partsCount: number;
   price: number;
   currency: string;
+  paid: boolean;
   order?: {
     id: string;
     number: number;
@@ -116,6 +117,13 @@ export const orderApi = {
     });
   },
 
+  payOrderProduct: async (id: string, config?: AxiosRequestConfig): Promise<void> => {
+    await api.post('/order/user/product/pay', null, {
+      ...config,
+      params: { id, ...config?.params },
+    });
+  },
+
   // Admin endpoints
   getAllOrders: async (params?: Pageable): Promise<Order[]> => {
     const response = await api.get<Order[]>('/order', { params });
@@ -183,6 +191,13 @@ export const orderApi = {
 
   payOrderAdmin: async (id: string, config?: AxiosRequestConfig): Promise<void> => {
     await api.post('/order/pay', null, {
+      ...config,
+      params: { id, ...config?.params },
+    });
+  },
+
+  payOrderProductAdmin: async (id: string, config?: AxiosRequestConfig): Promise<void> => {
+    await api.post('/order/product/pay', null, {
       ...config,
       params: { id, ...config?.params },
     });

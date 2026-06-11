@@ -121,8 +121,8 @@ export default function AdminOrderDetailPage() {
     });
 
     const updateProductDataMutation = useMutation({
-        mutationFn: ({ id, number }: { id: string, number: number }) =>
-            orderApi.updateOrderProduct(id, { number }, { customErrorToast: t('dashboard.orderManagement.productUpdateError') }),
+        mutationFn: ({ id, number, price }: { id: string, number?: number, price?: number }) =>
+            orderApi.updateOrderProduct(id, { number, price }, { customErrorToast: t('dashboard.orderManagement.productUpdateError') }),
         onSuccess: () => {
             toast.success(t('dashboard.orderManagement.productUpdateSuccess'));
             queryClient.invalidateQueries({ queryKey: ['admin-order-details', orderId] });
@@ -130,8 +130,18 @@ export default function AdminOrderDetailPage() {
         },
     });
 
+    const payProductAdminMutation = useMutation({
+        mutationFn: (productId: string) => orderApi.payOrderProductAdmin(productId, { customErrorToast: t('dashboard.orderManagement.payError') }),
+        onSuccess: () => {
+            toast.success(t('dashboard.orderManagement.paySuccess'));
+            queryClient.invalidateQueries({ queryKey: ['admin-order-details', orderId] });
+        },
+    });
+
     const [editingBoxId, setEditingBoxId] = useState<string | null>(null);
     const [editingBoxNumber, setEditingBoxNumber] = useState<string>('');
+    const [editingBoxPrice, setEditingBoxPrice] = useState<string>('');
+
 
     if (isLoading) {
         return (
@@ -332,55 +342,105 @@ export default function AdminOrderDetailPage() {
                                                 {product.partsCount} x {product.price.toFixed(2)} {getCurrencySymbol(product.currency)}
                                             </p>
                                             {editingBoxId === product.id ? (
-                                                <div className="flex items-center gap-2 mt-2 justify-end">
-                                                    <input
-                                                        type="number"
-                                                        value={editingBoxNumber}
-                                                        onChange={e => setEditingBoxNumber(e.target.value)}
-                                                        className="border rounded px-2 py-1 w-24 text-sm bg-background text-foreground"
-                                                        placeholder={t('dashboard.orderManagement.boxNumberPlaceholder', '≥100000')}
-                                                    />
-                                                    <button
-                                                        onClick={() => {
-                                                            const num = parseInt(editingBoxNumber, 10);
-                                                            if (isNaN(num) || num < 100000) {
-                                                                toast.error(t('dashboard.orderManagement.boxNumberValidation'));
-                                                                return;
-                                                            }
-                                                            updateProductDataMutation.mutate({ id: product.id, number: num });
-                                                        }}
-                                                        disabled={updateProductDataMutation.isPending}
-                                                        className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded hover:bg-primary/90 transition-colors"
-                                                    >
-                                                        {t('dashboard.orderManagement.boxSave', 'Save')}
-                                                    </button>
-                                                    <button
-                                                        onClick={() => setEditingBoxId(null)}
-                                                        className="text-xs text-muted-foreground hover:underline"
-                                                    >
-                                                        {t('common.cancel', 'Cancel')}
-                                                    </button>
+                                                <div className="flex flex-col gap-2 mt-2 items-end">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-xs text-muted-foreground">{t('dashboard.orderManagement.boxNumber')}:</span>
+                                                        <input
+                                                            type="number"
+                                                            value={editingBoxNumber}
+                                                            onChange={e => setEditingBoxNumber(e.target.value)}
+                                                            className="border rounded px-2 py-1 w-24 text-sm bg-background text-foreground"
+                                                            placeholder={t('dashboard.orderManagement.boxNumberPlaceholder', '≥100000')}
+                                                        />
+                                                    </div>
+                                                    {!product.paid && (
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-xs text-muted-foreground">{t('dashboard.orderManagement.boxPrice')}:</span>
+                                                            <input
+                                                                type="number"
+                                                                step="0.01"
+                                                                value={editingBoxPrice}
+                                                                onChange={e => setEditingBoxPrice(e.target.value)}
+                                                                className="border rounded px-2 py-1 w-24 text-sm bg-background text-foreground"
+                                                                placeholder="0.00"
+                                                            />
+                                                            <span className="text-sm">{getCurrencySymbol(product.currency)}</span>
+                                                        </div>
+                                                    )}
+                                                    <div className="flex items-center gap-2 mt-1">
+                                                        <button
+                                                            onClick={() => {
+                                                                const num = editingBoxNumber ? parseInt(editingBoxNumber, 10) : undefined;
+                                                                if (num !== undefined && (isNaN(num) || num < 100000)) {
+                                                                    toast.error(t('dashboard.orderManagement.boxNumberValidation'));
+                                                                    return;
+                                                                }
+                                                                let priceVal: number | undefined = undefined;
+                                                                if (!product.paid) {
+                                                                    priceVal = parseFloat(editingBoxPrice);
+                                                                    if (isNaN(priceVal) || priceVal < 0) {
+                                                                        toast.error(t('dashboard.orderManagement.boxPriceValidation'));
+                                                                        return;
+                                                                    }
+                                                                }
+                                                                updateProductDataMutation.mutate({
+                                                                    id: product.id,
+                                                                    number: num,
+                                                                    price: priceVal
+                                                                });
+                                                            }}
+                                                            disabled={updateProductDataMutation.isPending}
+                                                            className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded hover:bg-primary/90 transition-colors"
+                                                        >
+                                                            {t('dashboard.orderManagement.boxSave', 'Save')}
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setEditingBoxId(null)}
+                                                            className="text-xs text-muted-foreground hover:underline"
+                                                        >
+                                                            {t('common.cancel', 'Cancel')}
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             ) : (
-                                                <div className="flex items-center justify-end gap-2 mt-1">
-                                                    <p className="text-sm text-muted-foreground flex items-center gap-1">
-                                                        <span>{t('dashboard.orderManagement.boxNumber')}</span>
-                                                        <span className={cn(product.number ? "font-medium text-foreground" : "italic")}>
-                                                            {product.number ? product.number : t('dashboard.orderManagement.boxNotSet')}
+                                                <div className="flex flex-col items-end gap-1.5 mt-1">
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <p className="text-sm text-muted-foreground flex items-center gap-1">
+                                                            <span>{t('dashboard.orderManagement.boxNumber')}</span>
+                                                            <span className={cn(product.number ? "font-medium text-foreground" : "italic")}>
+                                                                {product.number ? product.number : t('dashboard.orderManagement.boxNotSet')}
+                                                            </span>
+                                                        </p>
+                                                        <button
+                                                            onClick={() => {
+                                                                setEditingBoxId(product.id);
+                                                                setEditingBoxNumber(product.number ? String(product.number) : '');
+                                                                setEditingBoxPrice(String(product.price));
+                                                            }}
+                                                            className="text-muted-foreground hover:text-primary transition-colors hover:bg-primary/10 p-1.5 rounded-md"
+                                                            title={t('common.edit')}
+                                                        >
+                                                            <Pencil className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className={`badge ${product.paid ? "bg-success/10 text-success border-success/20" : "bg-warning/10 text-warning border-warning/20"} font-medium text-xs`}>
+                                                            {product.paid ? t('orders.boxPaid') : t('orders.paymentRequiredTitle')}
                                                         </span>
-                                                    </p>
-                                                    <button
-                                                        onClick={() => {
-                                                            setEditingBoxId(product.id);
-                                                            setEditingBoxNumber(product.number ? String(product.number) : '');
-                                                        }}
-                                                        className="text-muted-foreground hover:text-primary transition-colors hover:bg-primary/10 p-1.5 rounded-md"
-                                                        title={t('common.edit')}
-                                                    >
-                                                        <Pencil className="w-4 h-4" />
-                                                    </button>
+                                                        {!product.paid && (
+                                                            <button
+                                                                onClick={() => payProductAdminMutation.mutate(product.id)}
+                                                                disabled={payProductAdminMutation.isPending}
+                                                                className="text-xs text-primary hover:underline font-semibold flex items-center gap-1 hover:bg-primary/5 px-2 py-1 rounded-md"
+                                                            >
+                                                                <CreditCard className="w-3 h-3" />
+                                                                {t('dashboard.orderManagement.markPaid')}
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             )}
+
                                         </div>
                                     </div>
 

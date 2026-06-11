@@ -1,6 +1,7 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import toast from 'react-hot-toast';
 import { orderApi, Order, OrderStatus } from '../../api/order';
 import { Loader2, ArrowLeft, Package, Clock, CheckCircle2, XCircle, RotateCw, CreditCard, Box, MapPin, AlertCircle } from 'lucide-react';
 import i18n from '../../i18n/i18n';
@@ -15,8 +16,20 @@ export default function OrderDetailPage() {
   const payMutation = useMutation({
     mutationFn: (id: string) => orderApi.payOrder(id, { customErrorToast: t('orders.payError', 'Payment failed') }),
     onSuccess: () => {
+      toast.success(t('orders.paySuccess', 'Payment successful'));
       queryClient.invalidateQueries({ queryKey: ['order', orderId] });
       queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+    },
+  });
+
+  const payProductMutation = useMutation({
+    mutationFn: (productId: string) => orderApi.payOrderProduct(productId, { customErrorToast: t('orders.payError', 'Payment failed') }),
+    onSuccess: () => {
+      toast.success(t('orders.paySuccess', 'Payment successful'));
+      queryClient.invalidateQueries({ queryKey: ['order', orderId] });
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
     },
   });
 
@@ -137,24 +150,43 @@ export default function OrderDetailPage() {
                   <div className="flex-1 min-w-0">
                     <h3 className="font-medium truncate">{op.part.name}</h3>
                     <p className="text-sm text-muted-foreground font-mono">{op.part.article}</p>
-                    <div className="mt-1 flex items-center gap-2 text-sm">
+                    <div className="mt-1.5 flex flex-wrap items-center gap-2 text-sm">
                       <span className="badge bg-muted text-muted-foreground">
-                        {/* Using order status as product status logic might be more complex in real app */}
                         {t(`status.product.${op.status}`)}
+                      </span>
+                      <span className={`badge ${op.paid ? "bg-success/10 text-success border-success/20" : "bg-warning/10 text-warning border-warning/20"} font-medium`}>
+                        {op.paid ? t('orders.boxPaid') : t('orders.paymentRequiredTitle')}
                       </span>
                     </div>
                   </div>
 
-                  <div className="text-right">
-                    <p className="font-medium">
-                      {currencySymbol}{(op.price * op.partsCount).toFixed(2)}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {op.partsCount} x {currencySymbol}{op.price.toFixed(2)}
-                    </p>
+                  <div className="text-right flex flex-col items-end justify-between">
+                    <div>
+                      <p className="font-medium">
+                        {currencySymbol}{(op.price * op.partsCount).toFixed(2)}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {op.partsCount} x {currencySymbol}{op.price.toFixed(2)}
+                      </p>
+                    </div>
+                    {!op.paid && order.status !== OrderStatus.COMPLETED && order.status !== OrderStatus.CANCELLED && (
+                      <button
+                        onClick={() => payProductMutation.mutate(op.id)}
+                        disabled={payProductMutation.isPending || payMutation.isPending}
+                        className="btn-primary py-1 px-3 text-xs flex items-center gap-1.5 mt-2 transition-all duration-300 hover:shadow-md shrink-0"
+                      >
+                        {payProductMutation.isPending && payProductMutation.variables === op.id ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <CreditCard className="w-3 h-3" />
+                        )}
+                        {t('orders.payBox')}
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
+
             </div>
           </div>
         </div>

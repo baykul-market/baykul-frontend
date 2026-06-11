@@ -56,16 +56,43 @@ api.interceptors.response.use(
     // Show toast for other errors
     const config = error.config;
     if (!config?.skipErrorToast) {
+      const data = error.response?.data;
+      const serverMessage = typeof data === 'string' ? data : (data?.message || data?.error);
+      const code = data?.code;
+      const localizedMessage = getLocalizedError(
+        serverMessage || error.message || i18n.t('common.error', 'An error occurred'),
+        code
+      );
+
       if (config?.customErrorToast) {
-        toast.error(config.customErrorToast);
+        toast.error(`${config.customErrorToast}: ${localizedMessage}`);
       } else {
-        const data = error.response?.data;
-        const serverMessage = typeof data === 'string' ? data : (data?.message || data?.error);
-        const message = serverMessage || error.message || i18n.t('common.error', 'An error occurred');
-        toast.error(message);
+        toast.error(localizedMessage);
       }
     }
     
     return Promise.reject(error);
   }
 );
+
+export const getLocalizedError = (message: string, code?: string): string => {
+  if (code) {
+    const key = `apiErrors.${code.toLowerCase()}`;
+    const translated = i18n.t(key);
+    if (translated !== key) {
+      return translated;
+    }
+  }
+  if (message) {
+    const slug = message
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/(^_+|_+$)/g, '');
+    const key = `apiErrors.${slug}`;
+    const translated = i18n.t(key);
+    if (translated !== key) {
+      return translated;
+    }
+  }
+  return message || '';
+};

@@ -174,11 +174,14 @@
     "checkoutError": "Checkout failed",
     "undo": "Undo",
     "itemRestored": "Item restored",
-    "restoreError": "Failed to restore item"
+    "restoreError": "Failed to restore item",
+    "priceNoticeTitle": "Price Adjustment Notice",
+    "priceSubjectToChange": "Please note: Box prices are subject to manager or admin review and may be changed before payment."
   },
   "orders": {
     "title": "Order History",
     "payNow": "Pay Now",
+    "payBox": "Pay Box",
     "orderCount": "{{count}} order placed",
     "orderCount_other": "{{count}} orders placed",
     "loadingOrders": "Loading your orders...",
@@ -204,7 +207,9 @@
     "paymentRequiredTitle": "Payment Required",
     "paymentRequiredSubtitle": "This order has not been paid yet. Please complete the payment to proceed.",
     "orderPaidTitle": "Order Paid",
-    "orderPaidSubtitle": "Thank you! Your payment has been received and is being processed."
+    "orderPaidSubtitle": "Thank you! Your payment has been received and is being processed.",
+    "paySuccess": "Payment completed successfully",
+    "boxPaid": "Paid"
   },
   "profile": {
     "blocked": "Blocked",
@@ -296,7 +301,8 @@
       "replenishment": "Replenishment",
       "writeOff": "Withdrawal",
       "payment": "Payment",
-      "balanceAfter": "Balance after: {{amount}}"
+      "balanceAfter": "Balance after: {{amount}}",
+      "projectedFunds": "Projected Balance (including unpaid spendings)"
     },
     "sessions": {
       "loadingSessions": "Loading sessions...",
@@ -430,6 +436,8 @@
       "noBills": "No bills associated with this order.",
       "boxNumber": "Box #",
       "boxNumberPlaceholder": "≥100000",
+      "boxPrice": "Price per piece",
+      "boxPriceValidation": "Price must be a positive number",
       "cancelBox": "Cancel Box",
       "markReturned": "Mark Returned",
       "orderTotal": "Order Total",
@@ -721,5 +729,16 @@
       "deleteRuleTitle": "Delete Delivery Rule",
       "deleteRuleMessage": "Are you sure you want to delete this delivery rule?"
     }
+  },
+  "apiErrors": {
+    "insufficient_funds": "Insufficient funds. Please top up your balance in your profile before trying again.",
+    "order_not_paid": "This order is not paid. Please complete payment before shipping or delivering.",
+    "transition_not_allowed": "This status transition is not allowed. Check the allowed flow: TO_ORDER -> ON_WAY, ARRIVED/IN_WAREHOUSE -> SHIPPED, or DELIVERED -> RETURNED.",
+    "order_already_paid": "This order has already been paid. Duplicate payment is not required.",
+    "order_completing_not_ready": "Cannot complete order: it is not ready. All boxes must be shipped before completion.",
+    "order_completing_not_paid": "Cannot complete order: it is not paid. Please pay for the order first.",
+    "order_box_number_invalid": "Invalid box number. Enter a number greater than or equal to 100,000.",
+    "order_box_number_exists": "Box number already exists. Please assign a unique number to this box.",
+    "order_paid": "Cannot change box price of a paid order"
   }
 }

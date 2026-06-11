@@ -215,8 +215,20 @@ function OverviewTab() {
             <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
               {t('profile.overview.balance')}
             </p>
-            <p className="text-lg font-bold whitespace-nowrap">
-              {user.balance ? formatPrice(user.balance.account, user.balance.currency) : '0.00'}
+            <p className="text-lg font-bold whitespace-nowrap flex items-center gap-1.5 flex-wrap">
+              <span className={cn(
+                user.balance ? (user.balance.account >= 0 ? 'text-success' : 'text-destructive') : ''
+              )}>
+                {user.balance ? formatPrice(user.balance.account, user.balance.currency) : '0.00'}
+              </span>
+              {user.balance && user.balance.projectedAccount !== undefined && (
+                <span className={cn(
+                  'text-xs font-medium tabular-nums',
+                  user.balance.projectedAccount >= 0 ? 'text-success/80' : 'text-destructive/80'
+                )}>
+                  ({formatPrice(user.balance.projectedAccount, user.balance.currency)})
+                </span>
+              )}
             </p>
           </div>
         </div>
@@ -767,14 +779,52 @@ function BalanceTab() {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">{t('profile.balance.currentBalance')}</h2>
         </div>
-        <div className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-success/10 to-success/5 border border-success/20">
-          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-success/20 text-success">
-            <Wallet className="h-7 w-7" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className={cn(
+            "flex items-center gap-4 p-4 rounded-xl border transition-colors",
+            balance.account >= 0 
+              ? "bg-success/5 border-success/20" 
+              : "bg-destructive/5 border-destructive/20"
+          )}>
+            <div className={cn(
+              "flex h-14 w-14 items-center justify-center rounded-xl shrink-0",
+              balance.account >= 0 ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive"
+            )}>
+              <Wallet className="h-7 w-7" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground font-medium">{t('profile.balance.availableFunds')}</p>
+              <p className={cn(
+                "text-3xl font-bold whitespace-nowrap tabular-nums",
+                balance.account >= 0 ? "text-success" : "text-destructive"
+              )}>{formatPrice(balance.account, balance.currency)}</p>
+            </div>
           </div>
-          <div>
-            <p className="text-sm text-muted-foreground font-medium">{t('profile.balance.availableFunds')}</p>
-            <p className="text-3xl font-bold text-success whitespace-nowrap">{formatPrice(balance.account, balance.currency)}</p>
-          </div>
+
+          {balance.projectedAccount !== undefined && (
+            <div className={cn(
+              "flex items-center gap-4 p-4 rounded-xl border transition-colors",
+              balance.projectedAccount >= 0 
+                ? "bg-success/5 border-success/20" 
+                : "bg-destructive/5 border-destructive/20"
+            )}>
+              <div className={cn(
+                "flex h-14 w-14 items-center justify-center rounded-xl shrink-0",
+                balance.projectedAccount >= 0 ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive"
+              )}>
+                <Wallet className="h-7 w-7 opacity-85" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground font-medium">
+                  {t('profile.balance.projectedFunds', 'Projected Balance (including unpaid spendings)')}
+                </p>
+                <p className={cn(
+                  "text-3xl font-bold whitespace-nowrap tabular-nums",
+                  balance.projectedAccount >= 0 ? "text-success" : "text-destructive"
+                )}>{formatPrice(balance.projectedAccount, balance.currency)}</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
