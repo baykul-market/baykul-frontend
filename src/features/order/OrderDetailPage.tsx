@@ -155,7 +155,7 @@ export default function OrderDetailPage() {
                         {t(`status.product.${op.status}`)}
                       </span>
                       <span className={`badge ${op.paid ? "bg-success/10 text-success border-success/20" : "bg-warning/10 text-warning border-warning/20"} font-medium`}>
-                        {op.paid ? t('common.done') : t('orders.paymentRequiredTitle')}
+                        {op.paid ? t('orders.boxPaid') : t('orders.paymentRequiredTitle')}
                       </span>
                     </div>
                   </div>

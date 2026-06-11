@@ -160,11 +160,16 @@ export default function OrderHistoryPage() {
                 <div className="border-t mt-4 pt-4">
                   <div className="space-y-2">
                     {order.orderProducts.slice(0, 3).map((op) => (
-                      <div key={op.id} className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground truncate max-w-[60%]">
-                          {op.part.name} <span className="font-mono text-xs">({op.part.article})</span>
-                        </span>
-                        <span className="text-muted-foreground">
+                      <div key={op.id} className="flex items-center justify-between text-sm gap-2">
+                        <div className="flex items-center gap-2 truncate max-w-[70%]">
+                          <span className="text-muted-foreground truncate">
+                            {op.part.name} <span className="font-mono text-xs">({op.part.article})</span>
+                          </span>
+                          <span className={`badge py-0 px-1.5 text-[9px] ${op.paid ? "bg-success/15 text-success border-success/20" : "bg-warning/15 text-warning border-warning/20"} font-medium shrink-0`}>
+                            {op.paid ? t('orders.boxPaid') : t('orders.paymentRequiredTitle')}
+                          </span>
+                        </div>
+                        <span className="text-muted-foreground shrink-0">
                           x{op.partsCount} &middot; {currencySymbol}{(op.price * op.partsCount).toFixed(2)}
                         </span>
                       </div>

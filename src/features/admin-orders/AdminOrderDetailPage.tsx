@@ -425,7 +425,7 @@ export default function AdminOrderDetailPage() {
                                                     </div>
                                                     <div className="flex items-center gap-2">
                                                         <span className={`badge ${product.paid ? "bg-success/10 text-success border-success/20" : "bg-warning/10 text-warning border-warning/20"} font-medium text-xs`}>
-                                                            {product.paid ? t('common.done') : t('orders.paymentRequiredTitle')}
+                                                            {product.paid ? t('orders.boxPaid') : t('orders.paymentRequiredTitle')}
                                                         </span>
                                                         {!product.paid && (
                                                             <button
