@@ -8,15 +8,19 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { getCurrencySymbol } from '../../lib/currency';
+import { useDebounce } from '../../hooks/useDebounce';
 
 export default function ProductListPage() {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 1200);
   const queryClient = useQueryClient();
 
+  const isDebouncing = searchTerm !== debouncedSearchTerm;
+
   const { data: products, isLoading } = useQuery({
-    queryKey: ['products', searchTerm],
-    queryFn: () => productApi.search(searchTerm),
+    queryKey: ['products', debouncedSearchTerm],
+    queryFn: () => productApi.search(debouncedSearchTerm),
   });
 
   const addToCartMutation = useMutation({
@@ -69,21 +73,21 @@ export default function ProductListPage() {
       </div>
 
       {/* Results Header */}
-      {!isLoading && products && (
+      {!isLoading && !isDebouncing && products && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
             {products.length === 0
               ? t('products.noResults')
               : t('products.showingProducts', { count: products.length })}
-            {searchTerm && (
-              <span> {t('products.forQuery', { query: searchTerm })}</span>
+            {debouncedSearchTerm && (
+              <span> {t('products.forQuery', { query: debouncedSearchTerm })}</span>
             )}
           </p>
         </div>
       )}
 
       {/* Loading State */}
-      {isLoading ? (
+      {isLoading || isDebouncing ? (
         <div className="flex flex-col items-center justify-center py-16 gap-3">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
           <p className="text-sm text-muted-foreground">{t('products.loadingProducts')}</p>
