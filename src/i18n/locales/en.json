@@ -1,5 +1,6 @@
 {
   "common": {
+    "clear": "Clear",
     "loading": "Loading...",
     "login": "Login",
     "email": "Email",
@@ -730,6 +731,14 @@
     }
   },
   "apiErrors": {
+    "ambiguous_part": "Multiple offers match this article. Select the manufacturer you need from the results.",
+    "part_unavailable": "The part is no longer available. Refresh your cart and remove unavailable items.",
+    "source_archived": "This source has been removed from sale and no longer accepts changes.",
+    "source_changed": "The source has changed. Refresh the preview and confirm the replacement again.",
+    "import_pending": "This source already has an unfinished import. Confirm or cancel it first.",
+    "import_state": "The import status has changed. Refresh the page and check the result.",
+    "skipped_rows_confirmation": "Confirm applying valid rows and removing missing offers from sale.",
+    "file_too_large": "The file exceeds the 200 MiB limit.",
     "insufficient_funds": "Insufficient funds. Please top up your balance in your profile before trying again.",
     "order_not_paid": "This order is not paid. Please complete payment before shipping or delivering.",
     "transition_not_allowed": "This status transition is not allowed. Check the allowed flow: TO_ORDER -> ON_WAY, ARRIVED/IN_WAREHOUSE -> SHIPPED, or DELIVERED -> RETURNED.",
