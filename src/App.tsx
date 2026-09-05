@@ -18,6 +18,8 @@ import AdminOrderDetailPage from './features/admin-orders/AdminOrderDetailPage';
 import PricingConfigPage from './features/dashboard/PricingConfigPage';
 import PartDetailPage from './features/dashboard/PartDetailPage';
 import PartsManagementPage from './features/dashboard/PartsManagementPage';
+import PartSourcesPage from './features/dashboard/PartSourcesPage';
+import PartSourceDetailPage from './features/dashboard/PartSourceDetailPage';
 import BoxTrackingPage from './features/dashboard/BoxTrackingPage';
 import BillManagementPage from './features/dashboard/BillManagementPage';
 import CreateBillPage from './features/dashboard/CreateBillPage';
@@ -50,6 +52,8 @@ function App() {
           <Route path="dashboard/orders/:orderId" element={<ProtectedRoute><AdminOrderDetailPage /></ProtectedRoute>} />
           <Route path="dashboard/pricing-config" element={<ProtectedRoute><PricingConfigPage /></ProtectedRoute>} />
           <Route path="dashboard/boxes" element={<ProtectedRoute><BoxTrackingPage /></ProtectedRoute>} />
+          <Route path="dashboard/part-sources" element={<ProtectedRoute><PartSourcesPage /></ProtectedRoute>} />
+          <Route path="dashboard/part-sources/:sourceId" element={<ProtectedRoute><PartSourceDetailPage /></ProtectedRoute>} />
           <Route path="dashboard/parts" element={<ProtectedRoute><PartsManagementPage /></ProtectedRoute>} />
           <Route path="dashboard/parts/:partId" element={<ProtectedRoute><PartDetailPage /></ProtectedRoute>} />
           <Route path="dashboard/bills" element={<ProtectedRoute><BillManagementPage /></ProtectedRoute>} />
