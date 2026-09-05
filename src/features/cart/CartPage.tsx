@@ -130,6 +130,7 @@ export default function CartPage() {
     );
   }
 
+  const hasUnavailableParts = cartProducts.some(item => item.part.available === false);
   const totalPrice = cartProducts.reduce(
     (sum, cp) => sum + cp.part.price * cp.partsCount,
     0
@@ -169,6 +170,7 @@ export default function CartPage() {
               {/* Product Info */}
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-sm sm:text-base leading-snug">{item.part.name}</h3>
+                {item.part.available === false && <p className="text-destructive text-sm mt-1">{t('sources.unavailable')}</p>}
                 <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
                   <Tag className="h-3 w-3" />
                   <span>{item.part.brand}</span>
@@ -186,7 +188,7 @@ export default function CartPage() {
                           ? updateMutation.mutate({ cartProductId: item.id, partsCount: item.partsCount - 1 })
                           : removeMutation.mutate({ id: item.id, partId: item.part.id, count: item.partsCount })
                       }
-                      disabled={updateMutation.isPending}
+                      disabled={updateMutation.isPending || item.part.available === false}
                       className="p-1 text-muted-foreground hover:text-foreground transition-colors"
                       aria-label={t('cart.decreaseQuantity')}
                     >
@@ -195,7 +197,7 @@ export default function CartPage() {
                     <span className="text-sm font-medium min-w-[1.25rem] text-center">{item.partsCount}</span>
                     <button
                       onClick={() => updateMutation.mutate({ cartProductId: item.id, partsCount: item.partsCount + 1 })}
-                      disabled={updateMutation.isPending}
+                      disabled={updateMutation.isPending || item.part.available === false}
                       className="p-1 text-muted-foreground hover:text-foreground transition-colors"
                       aria-label={t('cart.increaseQuantity')}
                     >
@@ -257,9 +259,10 @@ export default function CartPage() {
               <span className="text-2xl font-bold">{formatPrice(totalPrice, currency)}</span>
             </div>
 
+            {hasUnavailableParts && <p role="alert" className="text-destructive text-sm mb-4">{t('sources.cartUnavailable')}</p>}
             <button
               onClick={() => checkoutMutation.mutate()}
-              disabled={checkoutMutation.isPending}
+              disabled={checkoutMutation.isPending || hasUnavailableParts}
               className="btn-primary w-full py-3"
             >
               {checkoutMutation.isPending ? (

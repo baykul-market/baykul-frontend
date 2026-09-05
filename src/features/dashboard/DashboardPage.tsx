@@ -44,6 +44,7 @@ export default function DashboardPage() {
       status: t('dashboard.main.available'),
       link: '/dashboard/parts',
     },
+    { title: t('sources.title'), description: t('sources.subtitle'), icon: Database, status: t('dashboard.main.available'), link: '/dashboard/part-sources' },
     ...(isAdmin
       ? [
         {
