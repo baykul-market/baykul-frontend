@@ -9,7 +9,7 @@ import type { PageResponse } from '../../../api/types';
 
 const auth = vi.hoisted(() => ({ role: 'MANAGER' }));
 vi.mock('../../../store/useAuthStore', () => ({ useAuthStore: () => ({ user: { role: auth.role } }) }));
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'ru' } }) }));
 vi.mock('../../../api/client', () => ({ api: {} }));
 vi.mock('../../../api/partSources', async importOriginal => ({
   ...await importOriginal<typeof import('../../../api/partSources')>(),

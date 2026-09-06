@@ -7,6 +7,7 @@ import { useAuthStore } from '../../store/useAuthStore';
 import { partSourcesApi, invalidateCatalog, type SourceStatus } from '../../api/partSources';
 import { useDebounce } from '../../hooks/useDebounce';
 import { Modal } from '../../components/Modal';
+import { ImportStatusBadge, SourceStatusBadge } from './SourceStatusUI';
 
 export default function PartSourcesPage() {
   const { user } = useAuthStore();
@@ -14,7 +15,7 @@ export default function PartSourcesPage() {
 }
 
 function SourcesContent() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const client = useQueryClient();
   const [text, setText] = useState('');
@@ -49,11 +50,11 @@ function SourcesContent() {
       <p role="alert">{t('sources.loadError')} <button className="btn-secondary" onClick={() => query.refetch()}>{t('sources.retry')}</button></p> :
       <div className="card overflow-x-auto"><table className="w-full text-sm"><thead className="bg-secondary/40"><tr>
         {['name', 'status', 'partsCount', 'lastImport'].map(key => <th className="p-4 text-left" key={key}>{t(`sources.${key}`)}</th>)}
-      </tr></thead><tbody>{query.data.content.map(source => <tr key={source.id} className="border-t">
+      </tr></thead><tbody>{query.data.content.map(source => <tr key={source.id} className="border-t hover:bg-secondary/30">
         <td className="p-4"><Link className="font-semibold text-primary" to={`/dashboard/part-sources/${source.id}`}>{source.name}</Link></td>
-        <td className="p-4">{t(`sources.statuses.${source.status}`)}</td><td className="p-4">{source.partsCount.toLocaleString()}</td>
+        <td className="p-4"><SourceStatusBadge status={source.status} /></td><td className="p-4 tabular-nums">{source.partsCount.toLocaleString(i18n.language)}</td>
         <td className="p-4">{source.lastImport ? <><div>{source.lastImport.filename}</div><div className="text-muted-foreground">
-          {new Date(source.lastImport.createdTs).toLocaleString()} · {t(`sources.importStatuses.${source.lastImport.status}`)}</div></> : t('sources.noImports')}</td>
+          {new Date(source.lastImport.createdTs).toLocaleString(i18n.language)}</div><div className="mt-2"><ImportStatusBadge status={source.lastImport.status} /></div></> : t('sources.noImports')}</td>
       </tr>)}</tbody></table>{query.data.content.length === 0 && <p className="p-8 text-center text-muted-foreground">{t('sources.empty')}</p>}</div>}
     <SourcePagination page={page} totalPages={query.data?.totalPages ?? 0} onChange={setPage} />
     <Modal isOpen={creating} onClose={() => setCreating(false)} title={t('sources.create')}>
