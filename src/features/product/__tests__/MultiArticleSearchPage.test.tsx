@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import MultiArticleSearchPage from '../MultiArticleSearchPage';
 import { productApi } from '../../../api/product';
+import { cartApi } from '../../../api/cart';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -81,5 +82,21 @@ describe('MultiArticleSearchPage', () => {
     await waitFor(() => {
       expect(screen.getByText('products.noResults')).toBeInTheDocument();
     });
+  });
+
+  it('displays all manufacturers and adds the selected UUID for a repeated article', async () => {
+    vi.mocked(productApi.searchByArticles).mockResolvedValue([
+      { id: 'offer-bmw', name: 'BMW offer', article: 'A', brand: 'BMW', price: 10, currency: 'EUR' },
+      { id: 'offer-bosch', name: 'Bosch offer', article: 'A', brand: 'BOSCH', price: 12, currency: 'EUR' },
+    ] as any);
+    renderPage();
+    fireEvent.change(screen.getByPlaceholderText('products.multiSearch.inputPlaceholder'), { target: { value: 'A\nA' } });
+    fireEvent.click(screen.getByText('products.multiSearch.searchButton'));
+    expect(await screen.findByText('BMW offer')).toBeInTheDocument();
+    expect(screen.getByText('Bosch offer')).toBeInTheDocument();
+    expect(productApi.searchByArticles).toHaveBeenCalledWith(['A']);
+    const row = screen.getByText('Bosch offer').closest('tr')!;
+    fireEvent.click(row.querySelector('button')!);
+    await waitFor(() => expect(cartApi.addToCart).toHaveBeenCalledWith('offer-bosch', expect.anything()));
   });
 });

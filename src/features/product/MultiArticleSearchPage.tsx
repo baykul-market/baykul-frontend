@@ -34,7 +34,7 @@ export default function MultiArticleSearchPage() {
         .filter(a => a.length > 0);
       
       if (articles.length === 0) return Promise.resolve([]);
-      return productApi.searchByArticles(articles);
+      return productApi.searchByArticles([...new Set(articles)]);
     },
     enabled: false,
   });

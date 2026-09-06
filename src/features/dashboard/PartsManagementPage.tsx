@@ -1,25 +1,22 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { invalidateCatalog } from '../../api/catalogCache';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
 import {
   productApi,
   type Part,
   type PartCreateInput,
   type PartUpdateInput,
-  type CsvUploadResult,
 } from '../../api/product';
 import {
-  Package, Plus, Pencil, Trash2, CheckCircle, AlertCircle, X, Search,
-  Loader2, Upload, FileText, Download, Info, Database, RefreshCw, AlertTriangle
+  Package, Plus, Pencil, Trash2, X, Search, Loader2, Database, AlertCircle
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 
 
 
-const CSV_HEADERS = 'article;name;weight;min_count;storage_count;return_part;price;brand';
-const CSV_EXAMPLE = '2405947;Engine Oil LL01 5W30;150.4;3;5;3.01;7862.43;rolls royce';
 
 export default function PartsManagementPage() {
   const { t } = useTranslation();
@@ -29,7 +26,6 @@ export default function PartsManagementPage() {
 
 
   const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [editPart, setEditPart] = useState<Part | null>(null);
   const [deletePart, setDeletePart] = useState<Part | null>(null);
 
@@ -69,7 +65,7 @@ export default function PartsManagementPage() {
     mutationFn: (id: string) => productApi.delete(id, { customErrorToast: t('dashboard.partsManagement.deleteError', 'Failed to delete part') }),
     onSuccess: () => {
       toast.success(t('dashboard.partsManagement.deleteSuccess', 'Part deleted successfully'));
-      queryClient.invalidateQueries({ queryKey: ['admin-parts-search'] });
+      invalidateCatalog(queryClient);
       setDeletePart(null);
     },
   });
@@ -92,13 +88,7 @@ export default function PartsManagementPage() {
           </p>
         </div>
         <div className="flex items-center gap-3 self-start">
-          <button
-            onClick={() => setUploadModalOpen(true)}
-            className="btn-secondary"
-          >
-            <Upload className="w-4 h-4 mr-2" />
-            {t('dashboard.partsManagement.uploadCsv', 'Upload CSV/TXT')}
-          </button>
+          <Link to="/dashboard/part-sources" className="btn-secondary">{t('sources.title')}</Link>
           <button
             onClick={() => setCreateModalOpen(true)}
             className="btn-primary"
@@ -280,8 +270,7 @@ export default function PartsManagementPage() {
           onClose={() => setCreateModalOpen(false)}
           onSuccess={() => {
             setCreateModalOpen(false);
-            queryClient.invalidateQueries({ queryKey: ['admin-parts'] });
-            queryClient.invalidateQueries({ queryKey: ['admin-parts-search'] });
+            invalidateCatalog(queryClient);
           }}
           t={t}
         />
@@ -293,8 +282,7 @@ export default function PartsManagementPage() {
           onClose={() => setEditPart(null)}
           onSuccess={() => {
             setEditPart(null);
-            queryClient.invalidateQueries({ queryKey: ['admin-parts'] });
-            queryClient.invalidateQueries({ queryKey: ['admin-parts-search'] });
+            invalidateCatalog(queryClient);
           }}
           t={t}
         />
@@ -310,16 +298,7 @@ export default function PartsManagementPage() {
         />
       )}
 
-      {uploadModalOpen && (
-        <CsvUploadModal
-          onClose={() => setUploadModalOpen(false)}
-          onSuccess={() => {
-            queryClient.invalidateQueries({ queryKey: ['admin-parts'] });
-            queryClient.invalidateQueries({ queryKey: ['admin-parts-search'] });
-          }}
-          t={t}
-        />
-      )}
+
     </div>
   );
 }
@@ -507,323 +486,6 @@ function DeleteConfirmModal({
           <button onClick={onConfirm} className="btn-primary bg-destructive text-destructive-foreground hover:bg-destructive/90 flex-1" disabled={isDeleting}>
             {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : t('common.delete')}
           </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function CsvUploadModal({ onClose, onSuccess, t }: { onClose: () => void; onSuccess: () => void; t: (key: string, _opts?: any) => string }) {
-  const [file, setFile] = useState<File | null>(null);
-  const [dragActive, setDragActive] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string> | null>(null);
-  const [uploadResult, setUploadResult] = useState<CsvUploadResult | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const uploadMutation = useMutation({
-    mutationFn: (csvFile: File) => productApi.uploadCsv(csvFile, { skipErrorToast: true }),
-    onSuccess: (result) => {
-      setUploadResult(result);
-      if (result.skipped > 0) {
-        toast.error(t('dashboard.partsUpload.partialSuccess'), { duration: 5000 });
-      } else {
-        toast.success(t('dashboard.partsUpload.uploadSuccess'));
-      }
-      setFile(null);
-      setErrors(null);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    },
-    onError: (error: any) => {
-      const data = error?.response?.data;
-      if (error?.response?.status === 400 && data) {
-        setErrors(data);
-        toast.error(t('dashboard.partsUpload.validationError'));
-      } else if (error?.response?.status === 403) {
-        toast.error(t('dashboard.partsUpload.forbidden'));
-      } else {
-        toast.error(t('dashboard.partsUpload.uploadError'));
-      }
-    },
-  });
-
-  const handleDrag = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === 'dragenter' || e.type === 'dragover') {
-      setDragActive(true);
-    } else if (e.type === 'dragleave') {
-      setDragActive(false);
-    }
-  }, []);
-
-  const validateFile = (f: File): boolean => {
-    const isCsv = f.name.toLowerCase().endsWith('.csv');
-    const isTxt = f.name.toLowerCase().endsWith('.txt');
-    if (!isCsv && !isTxt) {
-      toast.error(t('dashboard.partsUpload.invalidFileType'));
-      return false;
-    }
-    if (f.size > 100 * 1024 * 1024) {
-      toast.error(t('dashboard.partsUpload.fileTooLarge'));
-      return false;
-    }
-    return true;
-  };
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    const droppedFile = e.dataTransfer.files?.[0];
-    if (droppedFile && validateFile(droppedFile)) {
-      setFile(droppedFile);
-      setErrors(null);
-      setUploadResult(null);
-    }
-  }, [t]);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile && validateFile(selectedFile)) {
-      setFile(selectedFile);
-      setErrors(null);
-      setUploadResult(null);
-    }
-  };
-
-  const handleUpload = () => {
-    if (!file) return;
-    setErrors(null);
-    setUploadResult(null);
-    uploadMutation.mutate(file);
-  };
-
-  const downloadTemplate = () => {
-    const content = CSV_HEADERS + '\n' + CSV_EXAMPLE + '\n';
-    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'parts_template.csv';
-    link.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const formatFileSize = (bytes: number): string => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  };
-
-  const handleClose = () => {
-    onClose();
-    if (uploadResult) {
-      onSuccess();
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleClose} />
-      <div className="relative w-full max-w-2xl card p-0 animate-slide-up max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between px-6 py-4 border-b">
-          <div className="flex items-center gap-2 text-lg font-semibold">
-            <Upload className="w-5 h-5 text-primary" />
-            {t('dashboard.partsUpload.title')}
-          </div>
-          <button onClick={handleClose} className="p-1.5 rounded-lg text-muted-foreground hover:bg-secondary transition-colors" title={t('common.cancel')}>
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="p-6">
-          {!uploadResult && (
-            <>
-              <div className="mb-6">
-                <p className="text-muted-foreground text-sm mb-4">
-                  {t('dashboard.partsUpload.subtitle')}
-                </p>
-                <div className="flex items-start gap-3 bg-secondary/30 p-4 rounded-xl">
-                  <Info className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-sm mb-2">{t('dashboard.partsUpload.formatTitle')}</h3>
-                    <ul className="text-sm text-muted-foreground space-y-1 mb-3">
-                      <li>{t('dashboard.partsUpload.formatUtf8')}</li>
-                      <li>{t('dashboard.partsUpload.formatSemicolon')}</li>
-                      <li>{t('dashboard.partsUpload.formatMaxSize')}</li>
-                    </ul>
-                    <div className="rounded-lg bg-background p-3 overflow-x-auto border">
-                      <p className="text-xs font-medium text-muted-foreground mb-1">{t('dashboard.partsUpload.headerLabel')}</p>
-                      <code className="text-xs text-foreground break-all">{CSV_HEADERS}</code>
-                      <p className="text-xs font-medium text-muted-foreground mt-2 mb-1">{t('dashboard.partsUpload.exampleLabel')}</p>
-                      <code className="text-xs text-foreground break-all">{CSV_EXAMPLE}</code>
-                    </div>
-                    <button onClick={downloadTemplate} className="btn-ghost text-sm mt-3 text-primary hover:text-primary/80">
-                      <Download className="h-4 w-4 mr-1.5" />
-                      {t('dashboard.partsUpload.downloadTemplate')}
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div
-                onDragEnter={handleDrag}
-                onDragLeave={handleDrag}
-                onDragOver={handleDrag}
-                onDrop={handleDrop}
-                onClick={() => !file && fileInputRef.current?.click()}
-                className={`relative rounded-xl border-2 border-dashed p-8 text-center transition-all cursor-pointer ${dragActive ? 'border-primary bg-primary/5' : file ? 'border-border bg-secondary/20' : 'border-border hover:border-primary/50 hover:bg-secondary/30'
-                  }`}
-              >
-                <input ref={fileInputRef} type="file" accept=".csv,.txt" onChange={handleFileChange} className="hidden" />
-                {!file ? (
-                  <div className="space-y-3">
-                    <div className="flex justify-center">
-                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-background border">
-                        <Upload className="h-6 w-6 text-muted-foreground" />
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">{t('dashboard.partsUpload.dropzone')}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{t('dashboard.partsUpload.dropzoneHint')}</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-4 bg-background p-4 rounded-lg border">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 flex-shrink-0">
-                      <FileText className="h-6 w-6 text-primary" />
-                    </div>
-                    <div className="flex-1 text-left min-w-0">
-                      <p className="text-sm font-medium truncate">{file.name}</p>
-                      <p className="text-xs text-muted-foreground">{formatFileSize(file.size)}</p>
-                    </div>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setFile(null); setErrors(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors flex-shrink-0"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              <div className="mt-6 flex justify-end">
-                <button onClick={handleUpload} disabled={!file || uploadMutation.isPending} className="btn-primary">
-                  {uploadMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
-                  {t('dashboard.partsUpload.uploadButton')}
-                </button>
-              </div>
-            </>
-          )}
-
-          {uploadResult && (
-            <div className="space-y-6 animate-fade-in">
-              <div className="grid grid-cols-3 gap-4">
-                <div className={`card p-4 text-center ${uploadResult.saved > 0 ? 'bg-success/5 border-success/20' : 'bg-secondary/20 border-border/50'}`}>
-                  <div className="flex justify-center mb-2">
-                    <div className={`h-10 w-10 rounded-full flex items-center justify-center ${uploadResult.saved > 0 ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}>
-                      <CheckCircle className="h-5 w-5" />
-                    </div>
-                  </div>
-                  <p className={`text-2xl font-bold ${uploadResult.saved > 0 ? 'text-success' : 'text-muted-foreground'}`}>
-                    {uploadResult.saved}
-                  </p>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
-                    {t('dashboard.partsUpload.saved', 'Saved')}
-                  </p>
-                </div>
-                <div className={`card p-4 text-center ${uploadResult.updated > 0 ? 'bg-info/5 border-info/20' : 'bg-secondary/20 border-border/50'}`}>
-                  <div className="flex justify-center mb-2">
-                    <div className={`h-10 w-10 rounded-full flex items-center justify-center ${uploadResult.updated > 0 ? 'bg-info/10 text-info' : 'bg-muted text-muted-foreground'}`}>
-                      <RefreshCw className="h-5 w-5" />
-                    </div>
-                  </div>
-                  <p className={`text-2xl font-bold ${uploadResult.updated > 0 ? 'text-info' : 'text-muted-foreground'}`}>
-                    {uploadResult.updated}
-                  </p>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
-                    {t('dashboard.partsUpload.updated', 'Updated')}
-                  </p>
-                </div>
-                <div className={`card p-4 text-center ${uploadResult.skipped > 0 ? 'bg-destructive/5 border-destructive/20' : 'bg-secondary/20 border-border/50'}`}>
-                  <div className="flex justify-center mb-2">
-                    <div className={`h-10 w-10 rounded-full flex items-center justify-center ${uploadResult.skipped > 0 ? 'bg-destructive/10 text-destructive' : 'bg-muted text-muted-foreground'}`}>
-                      <AlertTriangle className="h-5 w-5" />
-                    </div>
-                  </div>
-                  <p className={`text-2xl font-bold ${uploadResult.skipped > 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
-                    {uploadResult.skipped}
-                  </p>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
-                    {t('dashboard.partsUpload.skipped', 'Skipped')}
-                  </p>
-                </div>
-              </div>
-
-              {uploadResult.skipped > 0 && (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold flex items-center gap-2">
-                      <AlertCircle className="w-4 h-4 text-destructive" />
-                      {t('dashboard.partsUpload.skippedDetails', 'Skipped Rows Details')}
-                    </h3>
-                    <span className="text-xs text-muted-foreground">
-                      {uploadResult.skipped} {t('dashboard.partsUpload.errorsFound', 'errors found')}
-                    </span>
-                  </div>
-                  <div className="rounded-xl border overflow-hidden">
-                    <div className="max-h-[300px] overflow-y-auto">
-                      <table className="w-full text-sm">
-                        <thead className="bg-secondary/50 sticky top-0">
-                          <tr className="border-b">
-                            <th className="px-4 py-2 text-left font-medium text-muted-foreground w-16">Row</th>
-                            <th className="px-4 py-2 text-left font-medium text-muted-foreground">Error</th>
-                            <th className="px-4 py-2 text-left font-medium text-muted-foreground">Raw Data</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y bg-background">
-                          {uploadResult.skippedDetails.map((detail, idx) => (
-                            <tr key={idx} className="hover:bg-secondary/20 transition-colors">
-                              <td className="px-4 py-2 font-mono text-xs text-muted-foreground">{detail.rowNumber}</td>
-                              <td className="px-4 py-2 text-destructive font-medium">{detail.errorMessage}</td>
-                              <td className="px-4 py-2">
-                                <code className="text-[10px] bg-secondary/50 px-1.5 py-0.5 rounded break-all block max-w-[200px]">
-                                  {detail.rawData}
-                                </code>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex justify-end pt-4">
-                <button onClick={handleClose} className="btn-primary px-8">
-                  {t('common.done', 'Done')}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {errors && (
-            <div className="mt-4 rounded-xl border border-destructive/20 bg-destructive/10 p-4 animate-fade-in">
-              <div className="flex items-start gap-3 mb-3">
-                <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
-                <p className="text-sm font-medium text-destructive">{errors.error || t('dashboard.partsUpload.errorsTitle')}</p>
-              </div>
-              <div className="ml-8 space-y-1">
-                {Object.entries(errors).filter(([k]) => k !== 'error').map(([k, v]) => (
-                  <div key={k} className="flex items-start gap-2 text-xs">
-                    <span className="font-mono text-destructive/80 flex-shrink-0">{k.replace('error_', '')}:</span>
-                    <span className="text-destructive text-wrap overflow-hidden">{v as string}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>

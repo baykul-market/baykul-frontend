@@ -1,5 +1,6 @@
 {
   "common": {
+    "clear": "Clear",
     "loading": "Loading...",
     "login": "Login",
     "email": "Email",
@@ -102,7 +103,6 @@
       },
       "error": "Failed to request password reset. Please try again."
     }
-
   },
   "products": {
     "heroTitle": "Find the Right Parts",
@@ -731,6 +731,14 @@
     }
   },
   "apiErrors": {
+    "ambiguous_part": "Multiple offers match this article. Select the manufacturer you need from the results.",
+    "part_unavailable": "The part is no longer available. Refresh your cart and remove unavailable items.",
+    "source_archived": "This source has been removed from sale and no longer accepts changes.",
+    "source_changed": "The source has changed. Refresh the preview and confirm the replacement again.",
+    "import_pending": "This source already has an unfinished import. Confirm or cancel it first.",
+    "import_state": "The import status has changed. Refresh the page and check the result.",
+    "skipped_rows_confirmation": "Confirm applying valid rows and removing missing offers from sale.",
+    "file_too_large": "The file exceeds the 200 MB limit.",
     "insufficient_funds": "Insufficient funds. Please top up your balance in your profile before trying again.",
     "order_not_paid": "This order is not paid. Please complete payment before shipping or delivering.",
     "transition_not_allowed": "This status transition is not allowed. Check the allowed flow: TO_ORDER -> ON_WAY, ARRIVED/IN_WAREHOUSE -> SHIPPED, or DELIVERED -> RETURNED.",
@@ -740,5 +748,135 @@
     "order_box_number_invalid": "Invalid box number. Enter a number greater than or equal to 100,000.",
     "order_box_number_exists": "Box number already exists. Please assign a unique number to this box.",
     "order_paid": "Cannot change box price of a paid order"
+  },
+  "sources": {
+    "title": "Part sources",
+    "subtitle": "Manage inventory through files and their sources.",
+    "create": "Create source",
+    "search": "Search sources",
+    "status": "Status",
+    "currentSources": "All current sources",
+    "name": "Name",
+    "partsCount": "Offers",
+    "lastImport": "Latest upload",
+    "noImports": "No uploads yet",
+    "empty": "No sources found",
+    "startsHidden": "New sources are hidden. Upload and review a file, then activate the source.",
+    "loadError": "Could not load data.",
+    "retry": "Retry",
+    "previous": "Previous",
+    "next": "Next",
+    "back": "All sources",
+    "partCount": "Offers: {{count}}",
+    "rename": "Rename",
+    "hide": "Hide",
+    "activate": "Activate for sale",
+    "archive": "Remove from sale",
+    "uploadTitle": "Replace inventory",
+    "uploadHelp": "Choose a file, upload it for validation, then confirm the changes in the report. Current inventory stays unchanged until you apply it.",
+    "attachTitle": "Attach your inventory file",
+    "attachFile": "Attach file",
+    "changeFile": "Choose another file",
+    "fileFormats": "CSV or TXT · up to 200 MB · UTF-8 · 8 semicolon-separated columns",
+    "fileSelected": "File selected. Click “Upload and validate” to get a report.",
+    "pendingImport": "An import is unfinished. Apply or cancel it before uploading another file.",
+    "file": "CSV/TXT file",
+    "upload": "Upload and validate",
+    "fileTypeError": "Select a CSV or TXT file.",
+    "fileSizeError": "Select a nonempty file no larger than 200 MB.",
+    "uploadProgress": "Transferring file. Processing starts after upload.",
+    "assortment": "Source inventory",
+    "searchParts": "Search by article, manufacturer or name",
+    "article": "Article",
+    "brand": "Manufacturer",
+    "price": "Price",
+    "available": "Available",
+    "unavailable": "Unavailable for ordering",
+    "availableHelp": "This offer is available to order in the catalog.",
+    "unavailableHelp": "This offer cannot currently be ordered. Check the source status and whether the offer is in the latest applied file.",
+    "noParts": "This source has no parts yet.",
+    "history": "Upload history",
+    "lifecycleConfirm": "Source “{{name}}” and its {{count}} offers will be removed from sale. Existing orders are retained; unavailable items stay in carts.",
+    "importResult": "Upload result",
+    "viewingImport": "Viewing this report",
+    "appliedAt": "Applied: {{date}}",
+    "explainCount": "What does “{{label}}” mean?",
+    "countsLegend": "Green: valid data and new offers. Yellow: updates and duplicates. Red: errors and removals. Zero values use a neutral color.",
+    "rowErrorsHelp": "These rows were skipped due to errors. Their file row numbers, reasons and original data are listed below. Fix the file before uploading again, or confirm applying only valid rows when the report is ready.",
+    "rowErrorsAppliedHelp": "The rows below were skipped due to errors when this file was applied. To include this data, fix the errors and upload the complete inventory file again.",
+    "statusHelp": {
+      "ACTIVE": "This source is active. Its available offers are visible to customers.",
+      "HIDDEN": "This source is hidden from customers. Uploading a file does not activate it. Use “Activate for sale” to make it visible.",
+      "ARCHIVED": "This source has been removed from sale. Inventory and history remain available to view. New files cannot be uploaded."
+    },
+    "importNotices": {
+      "QUEUED": "File uploaded, validation has not started yet",
+      "PROCESSING": "Validating file rows",
+      "READY": "Validation complete — changes have not been applied",
+      "APPLYING": "Applying inventory changes",
+      "COMPLETED": "Changes from this file have been applied",
+      "FAILED": "The import failed",
+      "CANCELLED": "Import cancelled — changes were not applied"
+    },
+    "importHelp": {
+      "QUEUED": "The file is waiting to be processed. Current inventory is unchanged. The status will update automatically.",
+      "PROCESSING": "Validating data and calculating changes. Counts may still change. Wait for the completed report; inventory is unchanged so far.",
+      "READY": "Review the counts and errors below, then click “Apply replacement”. Uploading and validating a file do not change inventory on their own.",
+      "APPLYING": "Inventory replacement is in progress. Wait for the “Applied” status; it will update automatically.",
+      "COMPLETED": "This file was successfully applied to the source. Customer availability depends on the source status. Later imports and manual edits may change this data.",
+      "FAILED": "This file was not applied. Read the error details and correct the file if needed before uploading again.",
+      "CANCELLED": "This import did not change inventory. You can select and upload a new file."
+    },
+    "appliedCounts": {
+      "added": "Added",
+      "updated": "Updated",
+      "removed": "Removed from sale"
+    },
+    "countHelp": {
+      "totalRows": "Processed file rows excluding the header, including both valid and invalid rows.",
+      "validRows": "Rows that passed validation, including duplicates. This can exceed the number of unique offers.",
+      "added": "New offers for this source, identified by article and manufacturer. A preview before applying; the import result afterwards.",
+      "updated": "File offers matching existing articles and manufacturers, even if their values are unchanged. A preview before applying; the result afterwards.",
+      "removed": "Current source offers absent from the valid offers in the new file. Applying removes them from sale in this source.",
+      "skipped": "Invalid rows excluded from inventory. Applying the remaining rows requires separate consent. Error details appear below.",
+      "duplicates": "Repeated valid rows with the same article and manufacturer. The last such row in the file is used; duplicates do not create separate offers."
+    },
+    "replaceNotice": "Applying this file will remove {{count}} missing offers from sale.",
+    "acceptSkipped": "I confirm applying valid rows: {{skipped}} rows are skipped and {{removed}} offers will be removed from sale.",
+    "apply": "Apply replacement",
+    "recheck": "Refresh change preview",
+    "cancelImport": "Cancel import",
+    "rowErrors": "Row errors",
+    "row": "Row",
+    "error": "Error",
+    "errorsExpired": "Detailed errors are no longer retained. Retention is 30 days.",
+    "confirmReplace": "Confirm inventory replacement",
+    "confirmReplaceText": "Add: {{added}}, update: {{updated}}, remove from sale: {{removed}}, skip invalid rows: {{skipped}}. Inventory changes together after successful publication.",
+    "source": "Source",
+    "manualEditNotice": "Manual changes to imported fields last until the next file replacement.",
+    "cartUnavailable": "Remove unavailable items from your cart before checking out.",
+    "statuses": {
+      "ACTIVE": "Active",
+      "HIDDEN": "Hidden",
+      "ARCHIVED": "Removed from sale"
+    },
+    "importStatuses": {
+      "QUEUED": "Queued",
+      "PROCESSING": "Processing",
+      "READY": "Awaiting confirmation",
+      "APPLYING": "Applying",
+      "COMPLETED": "Applied",
+      "FAILED": "Failed",
+      "CANCELLED": "Cancelled"
+    },
+    "counts": {
+      "totalRows": "Total rows",
+      "validRows": "Valid rows",
+      "added": "To add",
+      "updated": "To update",
+      "removed": "To remove",
+      "skipped": "Invalid rows",
+      "duplicates": "Duplicate rows"
+    }
   }
 }
