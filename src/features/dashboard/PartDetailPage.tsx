@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { invalidateCatalog } from '../../api/catalogCache';
 import { useAuthStore } from '../../store/useAuthStore';
 import { productApi, type PartUpdateInput } from '../../api/product';
 import {
@@ -52,9 +53,7 @@ export default function PartDetailPage() {
     mutationFn: (data: PartUpdateInput) => productApi.update(partId!, data, { skipErrorToast: true }),
     onSuccess: () => {
       toast.success(t('dashboard.partsManagement.updateSuccess', 'Part updated successfully'));
-      queryClient.invalidateQueries({ queryKey: ['part-detail', partId] });
-      queryClient.invalidateQueries({ queryKey: ['admin-parts'] });
-      queryClient.invalidateQueries({ queryKey: ['admin-parts-search'] });
+      invalidateCatalog(queryClient);
       // Reset local state so it re-syncs with fetched data
       setRealPrice(null);
       setRealCurrency(null);
@@ -127,6 +126,11 @@ export default function PartDetailPage() {
         </button>
       </div>
 
+      {part.sourceId && <div className="card p-4 text-sm space-y-2">
+        <p>{t('sources.source')}: <Link className="text-primary" to={`/dashboard/part-sources/${part.sourceId}`}>{part.sourceName}</Link></p>
+        {part.available === false && <p className="text-muted-foreground">{t('sources.unavailable')}</p>}
+        <p className="text-muted-foreground">{t('sources.manualEditNotice')}</p>
+      </div>}
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="flex items-center gap-3">

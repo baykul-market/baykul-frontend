@@ -3,6 +3,9 @@ import type { AxiosRequestConfig } from 'axios';
 import { PageResponse } from './types';
 
 export interface Part {
+  available?: boolean;
+  sourceId?: string | null;
+  sourceName?: string | null;
   id: string;
   createdTs: string;
   updatedTs: string;
